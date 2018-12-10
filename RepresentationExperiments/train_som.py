@@ -1,7 +1,7 @@
 from models.som.SOM import SOM
 from models.som.HebbianModel import HebbianModel
 from utils.constants import Constants
-from utils.utils import from_csv_with_filenames, from_csv_visual_100classes, from_csv, to_csv
+from utils.utils import from_csv_with_filenames, coco_visual_data, from_csv, to_csv
 from sklearn.utils import shuffle
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
@@ -25,21 +25,21 @@ visual_data_path = os.path.join(Constants.DATA_FOLDER,
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Train a Hebbian model.')
     parser.add_argument('--sigma', metavar='sigma', type=float, default=10, help='The model neighborhood value')
-    parser.add_argument('--alpha', metavar='alpha', type=float, default=0.0001, help='The SOM initial learning rate')
+    parser.add_argument('--alpha', metavar='alpha', type=float, default=0.1, help='The SOM initial learning rate')
     parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Random generator seed')
-    parser.add_argument('--neurons1', type=int, default=50,
+    parser.add_argument('--neurons1', type=int, default=20,
                         help='Number of neurons for audio SOM, first dimension')
-    parser.add_argument('--neurons2', type=int, default=50,
+    parser.add_argument('--neurons2', type=int, default=30,
                         help='Number of neurons for audio SOM, second dimension')
-    parser.add_argument('--epochs', type=int, default=10000,
+    parser.add_argument('--epochs', type=int, default=60,
                         help='Number of epochs the SOM will be trained for')
-    parser.add_argument('--classes', type=int, default=100,
+    parser.add_argument('--classes', type=int, default=10,
                         help='Number of classes the model will be trained on')
     parser.add_argument('--subsample', action='store_true', default=False)
-    parser.add_argument('--data', metavar='data', type=str, default='audio')
+    parser.add_argument('--data', metavar='data', type=str, default='video')
     parser.add_argument('--rotation', action='store_true', default=False)
-    parser.add_argument('--logging', action='store_true', default=False)
-    parser.add_argument('--batch', type=int, default=128)
+    parser.add_argument('--logging', action='store_true', default=True)
+    parser.add_argument('--batch', type=int, default=100)
 
     args = parser.parse_args()
 
@@ -47,7 +47,7 @@ if __name__ == '__main__':
     if args.data == 'audio':
         xs, ys, _ = from_csv_with_filenames(audio_data_path)
     elif args.data == 'video':
-        xs, ys = from_csv_visual_100classes(visual_data_path)
+        xs, ys = coco_visual_data(visual_data_path)
     else:
         raise ValueError('--data argument not recognized')
 
@@ -73,4 +73,4 @@ if __name__ == '__main__':
     xs_train, xs_test = transform_data(xs_train, xs_val, rotation=args.rotation)
 
     som.train(xs_train, input_classes=ys_train, test_vects=xs_val, test_classes=ys_val,
-              logging=args.logging)
+              logging=args.logging, save_every=10)

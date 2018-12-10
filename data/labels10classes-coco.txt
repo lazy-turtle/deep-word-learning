@@ -1,0 +1,11 @@
+bird
+book
+cat
+dog
+cup
+dining table
+apple
+banana
+umbrella
+sports ball
+

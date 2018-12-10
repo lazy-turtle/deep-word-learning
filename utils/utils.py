@@ -148,9 +148,9 @@ def infer_label_10classes(label_string, labels_dict):
     label_string = label_string.split('/')[5]
     return int(labels_dict[label_string])
 
-def from_csv_visual_10classes(path):
+def from_csv_visual_10classes(path, labels='imagenet-labels.json'):
     f = open(path,'r')
-    labels_dict_path = os.path.join(Constants.DATA_FOLDER, 'imagenet-labels.json')
+    labels_dict_path = os.path.join(Constants.DATA_FOLDER, labels)
     labels_dict = json.load(open(labels_dict_path))
     labels_dict = {v: k for k, v in labels_dict.items()}
     xs = []
@@ -160,6 +160,13 @@ def from_csv_visual_10classes(path):
         xs.append(np.array(lSplit[1:]).astype(float))
         ys.append(infer_label_10classes(lSplit[0], labels_dict))
     f.close()
+    return xs, ys
+
+def coco_visual_data(path, classes=10):
+    data = np.load(path)
+    xs = data[:,:-1]
+    ys = data[:,-1]
+    assert np.unique(ys).size == classes
     return xs, ys
 
 def synsets_txt_to_dict(txt_path):
