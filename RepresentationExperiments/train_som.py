@@ -15,10 +15,10 @@ import matplotlib.pyplot as plt
 
 soma_path = os.path.join(Constants.DATA_FOLDER, '100classes', 'audio_model_new', '')
 audio_data_path = os.path.join(Constants.DATA_FOLDER,
-                               '100classes',
+                               '10classes',
                                'audio100classes.csv')
 visual_data_path = os.path.join(Constants.DATA_FOLDER,
-                                '100classes',
+                                '10classes',
                                 'VisualInputTrainingSet.csv')
 
 
