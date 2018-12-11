@@ -164,13 +164,9 @@ def from_csv_visual_10classes(path, labels='imagenet-labels.json'):
 
 def from_npy_visual_data(path, classes=10):
     data = np.load(path)
-    #iterate rows and convert numpy array to list of np arrays
-    xs = []
-    ys = []
-    for i in range(data.shape[0]):
-        xs.append(data[i,:-1])
-        ys.append(int(data[i,-1]))
-    assert np.unique(np.array(ys)).size == classes
+    xs = data[:,:-1]
+    ys = data[:,-1].astype(np.int)
+    assert np.unique(ys).size == classes
     return xs, ys
 
 def synsets_txt_to_dict(txt_path):

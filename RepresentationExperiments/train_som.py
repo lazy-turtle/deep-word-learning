@@ -47,18 +47,21 @@ if __name__ == '__main__':
     if args.data == 'audio':
         xs, ys, _ = from_csv_with_filenames(audio_data_path)
     elif args.data == 'video':
+        print('Loading visual data...', end='')
         xs, ys = from_npy_visual_data(visual_data_path)
+        print('done. data: {} - labels: {}'.format(xs.shape, ys.shape))
     else:
         raise ValueError('--data argument not recognized')
 
-    dim = len(xs[0])
+    dim = xs.shape[1]
 
     som = SOM(args.neurons1, args.neurons2, dim, n_iterations=args.epochs, alpha=args.alpha,
                  tau=0.1, threshold=0.6, batch_size=args.batch, data=args.data, sigma=args.sigma,
                  num_classes=args.classes, sigma_decay='constant')
 
-    ys = np.array(ys)
-    xs = np.array(xs)
+    # not necessary, already loading numpy arrays
+    # ys = np.array(ys)
+    # xs = np.array(xs)
 
     if args.subsample:
         xs, _, ys, _ = train_test_split(xs, ys, test_size=0.6, stratify=ys, random_state=args.seed)
