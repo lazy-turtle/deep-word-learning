@@ -15,7 +15,7 @@ dim = 2048
 
 if __name__ == '__main__':
     v_xs, v_ys, label_dict = from_npy_visual_data(visual_data_path)
-    v_xs = MinMaxScaler().fit_transform(v_xs)
+    #v_xs = MinMaxScaler().fit_transform(v_xs)
 
     som = SOM(20, 30, dim, n_iterations=60, alpha=0.1, sigma=10.0, tau=0.1, batch_size=100, num_classes=10,
               checkpoint_loc=model_path,data='video')

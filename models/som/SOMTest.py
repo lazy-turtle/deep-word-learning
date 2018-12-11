@@ -64,20 +64,22 @@ def printToFileCSV(prototipi,file):
 
   f.close()
 
-def showSom(som,inputs,nameInputs,count,title, filenames=None):
+def showSom(som,inputs,nameInputs,count,title, filenames=None, show=False):
   """
     build of the map with the color associated to the different classes
   """
-  print('costruzione mappa '+title)
+  print('Building SOM "{}"...'.format(title))
   mapped = som.map_vects(inputs)
   image_grid = np.zeros(shape=(20,30,3))
+  print('Done mapping inputs, preparing canvas...')
+
   plt.figure(count)
-  plt.imshow(image_grid)
+  if show:
+    plt.imshow(image_grid)
   plt.title(title)
   inputClass = nameInputs[0]
 
   # color generation
-  classColor = list()
   ## for 100 classes
   # for i in range(100):
   #   print(i)
@@ -88,6 +90,7 @@ def showSom(som,inputs,nameInputs,count,title, filenames=None):
   color_dict = create_color_dict(nameInputs, classColor)
 
   if filenames == None:
+    print('Adding labels for each mapped input...', end='')
     for i, m in enumerate(mapped):
       plt.text(m[1], m[0], str('____'), ha='center', va='center', color=color_dict[nameInputs[i]], alpha=0.5,
           bbox=dict(facecolor=color_dict[nameInputs[i]], alpha=0.6, lw=0, boxstyle='round4'))
@@ -103,10 +106,12 @@ def showSom(som,inputs,nameInputs,count,title, filenames=None):
   #     [BMUi, BMUpos] = som.get_BMU(prototipi[k])
   #     plt.text(BMUpos[1], BMUpos[0], str(k), ha='center', va='center',
   #             bbox=dict(facecolor='white', alpha=0.9, lw=0))
+  print('Drawing prototypes...')
   plt.draw()
 
 
   # draw a legend
+  print('Drawing legend...')
   plt.figure()
   reverse_color_dict = {v: k for k, v in color_dict.items()}
   patch_list = []
