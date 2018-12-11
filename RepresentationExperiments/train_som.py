@@ -19,7 +19,7 @@ audio_data_path = os.path.join(Constants.DATA_FOLDER,
                                'audio100classes.csv')
 visual_data_path = os.path.join(Constants.DATA_FOLDER,
                                 '10classes',
-                                'VisualInputTrainingSet.csv')
+                                'visual_10classes_train.npy')
 
 
 if __name__ == '__main__':
@@ -47,7 +47,7 @@ if __name__ == '__main__':
     if args.data == 'audio':
         xs, ys, _ = from_csv_with_filenames(audio_data_path)
     elif args.data == 'video':
-        xs, ys = coco_visual_data(visual_data_path)
+        xs, ys = from_npy_visual_data(visual_data_path)
     else:
         raise ValueError('--data argument not recognized')
 

@@ -162,10 +162,10 @@ def from_csv_visual_10classes(path, labels='imagenet-labels.json'):
     f.close()
     return xs, ys
 
-def coco_visual_data(path, classes=10):
+def from_npy_visual_data(path, classes=10):
     data = np.load(path)
     xs = data[:,:-1]
-    ys = data[:,-1]
+    ys = data[:,-1].astype(np.int)
     assert np.unique(ys).size == classes
     return xs, ys
 
