@@ -26,12 +26,12 @@ def main():
     parser.add_argument('--dest', type=str, default=cfg.DEST_PATH, help='Destination folder.')
     parser.add_argument('--name', type=str, default=cfg.RESULT_NAME, help='Name of the resulting file.')
     parser.add_argument('--seed', type=int, default=42, help='Seed for deterministic results.')
-    parser.parse_args()
+    args = parser.parse_args()
 
-    cfg.DATA_PATH = parser.data
-    cfg.DEST_PATH = parser.dest
-    cfg.RESULT_NAME = parser.name
-    np.random.seed(parser.seed)
+    cfg.DATA_PATH = args.data
+    cfg.DEST_PATH = args.dest
+    cfg.RESULT_NAME = args.name
+    np.random.seed(args.seed)
 
     print("Loading data...")
     raw_data = np.load(cfg.DATA_PATH)
@@ -58,7 +58,7 @@ def main():
         sampled_indices = np.random.choice(indices, size=cfg.SAMPLES, replace=False)
 
         j = i * cfg.SAMPLES
-        result[j:j + cfg.SAMPLES-1] = raw_data[sampled_indices]
+        result[j:j + cfg.SAMPLES] = raw_data[sampled_indices]
 
     print("Data selected, shape: {}".format(result.shape))
     print("Saving result to {}...".format(cfg.DEST_PATH))
