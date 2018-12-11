@@ -165,9 +165,15 @@ def from_csv_visual_10classes(path, labels='imagenet-labels.json'):
 def from_npy_visual_data(path, classes=10):
     data = np.load(path)
     xs = data[:,:-1]
-    ys = data[:,-1].astype(np.int)
-    assert np.unique(ys).size == classes
-    return xs, ys
+    labels = data[:,-1].astype(np.int)
+
+    uniques = np.unique(labels).tolist()
+    assert np.unique(uniques).size == classes
+
+    id_to_index = {label: index for index, label in enumerate(uniques)}
+    index_to_id = {v: k for k, v in id_to_index.items()}
+    ys = np.array([id_to_index[l] for l in labels])
+    return xs, ys, index_to_id
 
 def synsets_txt_to_dict(txt_path):
     """

@@ -48,11 +48,7 @@ if __name__ == '__main__':
         xs, ys, _ = from_csv_with_filenames(audio_data_path)
     elif args.data == 'video':
         print('Loading visual data...', end='')
-        xs, labels = from_npy_visual_data(visual_data_path)
-        #convert from IDs in range[0,79] to [0,9]
-        uniques = np.unique(labels).tolist()
-        id_to_index = {label: index for index, label in enumerate(uniques)}
-        ys = np.array([id_to_index[l] for l in labels])
+        xs, ys, _ = from_npy_visual_data(visual_data_path)
         print('done. data: {} - labels: {}'.format(xs.shape, ys.shape))
     else:
         raise ValueError('--data argument not recognized')
