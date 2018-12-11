@@ -1,7 +1,7 @@
 from models.som.SOM import SOM
 from models.som.HebbianModel import HebbianModel
 from utils.constants import Constants
-from utils.utils import from_csv_with_filenames, coco_visual_data, from_csv, to_csv
+from utils.utils import from_csv_with_filenames, from_npy_visual_data, from_csv, to_csv
 from sklearn.utils import shuffle
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
