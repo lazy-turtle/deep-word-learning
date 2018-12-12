@@ -8,7 +8,7 @@
 import numpy as np
 import argparse
 from models.som.SOM import SOM
-from utils.utils import from_csv_with_filenames, from_csv_visual_10classes, from_csv_visual_100classes
+from utils.utils import from_csv_with_filenames, from_npy_visual_data, from_csv_visual_100classes
 
 
 
@@ -48,7 +48,7 @@ if __name__ == '__main__':
     if not args.classes100:
         num_classes = 10
         if not args.is_audio:
-            xs, ys = from_csv_visual_10classes(args.csv_path)
+            xs, ys = from_npy_visual_data(args.csv_path)
         else:
             xs, ys, _ = from_csv_with_filenames(args.csv_path)
         ys = [int(y)-1000 for y in ys] # see comment in average_prototype_distance_matrix
@@ -60,7 +60,7 @@ if __name__ == '__main__':
             xs, ys, _ =  from_csv_with_filenames(args.csv_path)
 
     som = SOM(20, 30, len(xs[0]), checkpoint_loc=args.model_path)
-    som.restore_trained()
+    som.restore_trained(args.model_path)
     measure = class_compactness(som, xs, ys)
     print('Class Compactness: {}.'.format(measure))
     print('Avg Compactness: {}\n Variance: {}'.format(np.mean(measure), np.var(measure)))
