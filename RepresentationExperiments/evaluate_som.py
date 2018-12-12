@@ -51,7 +51,7 @@ if __name__ == '__main__':
             xs, ys, _ = from_npy_visual_data(args.csv_path)
         else:
             xs, ys, _ = from_csv_with_filenames(args.csv_path)
-        ys = [int(y)-1000 for y in ys] # see comment in average_prototype_distance_matrix
+        #ys = [int(y)-1000 for y in ys] # see comment in average_prototype_distance_matrix
     else:
         num_classes = 100
         if not args.is_audio:
