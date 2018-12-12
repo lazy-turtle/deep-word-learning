@@ -59,7 +59,7 @@ if __name__ == '__main__':
         else:
             xs, ys, _ =  from_csv_with_filenames(args.csv_path)
 
-    som = SOM(20, 30, len(xs[0]), checkpoint_dir=args.model_path)
+    som = SOM(20, 30, len(xs[0]), checkpoint_loc=args.model_path)
     som.restore_trained()
     measure = class_compactness(som, xs, ys)
     print('Class Compactness: {}.'.format(measure))

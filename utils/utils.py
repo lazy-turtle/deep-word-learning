@@ -283,3 +283,8 @@ def transform_data(xs, test_xs, rotation=True):
     if rotation:
         test_xs = np.dot(eig_vecs.T, xs.T).T
     return xs, test_xs
+
+def labels_dictionary(filename):
+    labels_dict = json.load(open(filename))
+    labels_dict = {int(k): v for k, v in labels_dict.items()}
+    return labels_dict
