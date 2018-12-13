@@ -5,16 +5,19 @@ from utils.constants import Constants
 from utils.utils import from_npy_visual_data, transform_data
 from sklearn.preprocessing import MinMaxScaler
 import os
+import json
 import logging
 
 visual_data_path = os.path.join(Constants.DATA_FOLDER, '10classes', 'visual_10classes_train_a.npy')
 model_path = os.path.join(Constants.DATA_FOLDER, 'saved_models', 'video_20x30_tau0.1_thrsh0.6_sigma10.0_batch100_alpha0.1_final')
+label_path = os.path.join(Constants.DATA_FOLDER, 'coco-labels.json')
 
 N = 1000
 dim = 2048
 
 if __name__ == '__main__':
-    v_xs, v_ys, label_dict = from_npy_visual_data(visual_data_path)
+    id_to_label = json.load(open(label_path))
+    v_xs, v_ys, ids_dict = from_npy_visual_data(visual_data_path)
     np.random.seed(42)
 
     xs = []
@@ -35,5 +38,5 @@ if __name__ == '__main__':
               checkpoint_loc=model_path,data='video')
 
     som.restore_trained(model_path)
-
-    showSom(som, v_xs, v_ys, 1, 'Visual map')
+    labels = np.array([id_to_label[ids_dict[x]] for x in ys])
+    showSom(som, xs, labels, 1, 'Visual map')

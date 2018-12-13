@@ -64,7 +64,7 @@ def printToFileCSV(prototipi,file):
 
   f.close()
 
-def showSom(som,inputs,nameInputs,count,title, filenames=None, show=False):
+def showSom(som, inputs, labels, title, filenames=None, show=False):
   """
     build of the map with the color associated to the different classes
   """
@@ -73,11 +73,10 @@ def showSom(som,inputs,nameInputs,count,title, filenames=None, show=False):
   image_grid = np.zeros(shape=(20,30,3))
   print('Done mapping inputs, preparing canvas...')
 
-  plt.figure(count)
+  plt.figure()
   if show:
     plt.imshow(image_grid)
   plt.title(title)
-  inputClass = nameInputs[0]
 
   # color generation
   ## for 100 classes
@@ -87,19 +86,19 @@ def showSom(som,inputs,nameInputs,count,title, filenames=None, show=False):
   #   classColor.append(str(c))
   ## for 10 classes:
   classColor = ['white','red','blue','cyan','yellow','green','gray','brown','orange','magenta']
-  color_dict = create_color_dict(nameInputs, classColor)
+  color_dict = {col: label for col, label in zip(classColor, np.unique(labels))}
 
   print('Adding labels for each mapped input...', end='')
   if filenames == None:
     for i, m in enumerate(mapped):
-      plt.text(m[1], m[0], str('____'), ha='center', va='center', color=color_dict[nameInputs[i]], alpha=0.5,
-          bbox=dict(facecolor=color_dict[nameInputs[i]], alpha=0.6, lw=0, boxstyle='round4'))
+      plt.text(m[1], m[0], str('____'), ha='center', va='center', color=color_dict[labels[i]], alpha=0.5,
+               bbox=dict(facecolor=color_dict[labels[i]], alpha=0.6, lw=0, boxstyle='round4'))
   else:
     for i, m in enumerate(mapped):
-      plt.text(m[1], m[0], str('_{:03d}_'.format(i)), ha='center', va='center', color=color_dict[nameInputs[i]], alpha=0.5,
-          bbox=dict(facecolor=color_dict[nameInputs[i]], alpha=0.6, lw=0, boxstyle='round4'))
+      plt.text(m[1], m[0], str('_{:03d}_'.format(i)), ha='center', va='center', color=color_dict[labels[i]], alpha=0.5,
+               bbox=dict(facecolor=color_dict[labels[i]], alpha=0.6, lw=0, boxstyle='round4'))
       print('{}: {}'.format(i, filenames[i]))
-
+  print('done.')
 
   ## draw of the prototypes on the map
   # for k in prototipi.keys():
