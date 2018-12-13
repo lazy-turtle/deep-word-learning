@@ -377,7 +377,8 @@ class SOM(object):
                         os.makedirs(self.checkpoint_loc)
                     path = dirpath + 'model'
                     print('Saving in {}'.format(path))
-                    saver.save(self._sess, path, global_step=iter_no)
+                    # TODO remove this comment to save models
+                    #saver.save(self._sess, path, global_step=iter_no)
             for i, loc in enumerate(self._locations):
                 centroid_grid[loc[0]].append(self._weightages[i])
             self._centroid_grid = centroid_grid
