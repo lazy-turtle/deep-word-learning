@@ -1,6 +1,6 @@
 import numpy as np
 import os
-from utils.utils import from_csv_with_filenames, from_npy_visual_data, from_csv_visual_100classes, labels_dictionary
+from utils.utils import from_csv_with_filenames, from_npy_visual_data, from_csv_visual_100classes, labels_dictionary, transform_data
 from utils.constants import Constants
 import matplotlib
 import matplotlib.pyplot as plt
@@ -8,7 +8,7 @@ from collections import OrderedDict
 import argparse
 from sklearn.cluster import KMeans, MiniBatchKMeans
 
-random_seed = 3
+random_seed = 42
 
 
 def get_prototypes(xs, ys):
@@ -91,7 +91,7 @@ def cluster_compactness(xs, ys, num_classes):
 
 def show_clustering(xs, ys, num_classes, labels, show_classes=True):
     print('Fitting clustering model...')
-    model = KMeans(num_classes, max_iter=1000, tol=1e-7)#random_state=random_seed)
+    model = KMeans(num_classes, max_iter=400, tol=1e-6, random_state=random_seed)
     cluster_ys = model.fit_predict(xs)
     print('Done. Computing occurrences...')
 
@@ -146,7 +146,7 @@ if __name__ == '__main__':
         num_classes = 10
         if not args.is_audio:
             print("Clustering visual data for 10 classes...")
-            xs, ys, label_to_id = from_npy_visual_data("../data/10classes/visual_10classes_train.npy")
+            xs, ys, label_to_id = from_npy_visual_data("../data/10classes/visual_10classes_train_b.npy")
 
         else:
             xs, ys, _ = from_csv_with_filenames(args.csv_path)
@@ -160,4 +160,5 @@ if __name__ == '__main__':
     id_names_dict = labels_dictionary('../data/coco-labels.json')
     vals = np.unique(ys)
     labels = {v: id_names_dict[label_to_id[v]] for v in vals}
-    show_clustering(xs, ys, num_classes, labels, show_classes=False)
+    #xs, _ = transform_data(xs)
+    show_clustering(xs, ys, num_classes, labels, show_classes=True)

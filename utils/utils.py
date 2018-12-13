@@ -263,7 +263,7 @@ def create_folds(a_xs, v_xs, a_ys, v_ys, n_folds=1, n_classes=100):
             del v_ys_[v_idx]
     return a_xs_fold, v_xs_fold, a_ys_fold, v_ys_fold
 
-def transform_data(xs, test_xs, rotation=True):
+def transform_data(xs, test_xs=None, rotation=True):
     '''
     Makes the column-wise mean of the input matrix xs 0; renders the variance 1;
     uses the eigenvector matrix $U^T$ to center the data around the direction
@@ -278,8 +278,10 @@ def transform_data(xs, test_xs, rotation=True):
         eig_vecs = eig_vecs[idx]
         xs = np.dot(eig_vecs.T, xs.T).T
 
-    test_xs -= np.mean(xs, axis=0)
-    test_xs /= np.std(xs, axis=0)
+    if test_xs is not None:
+        test_xs -= np.mean(xs, axis=0)
+        test_xs /= np.std(xs, axis=0)
+
     if rotation:
         test_xs = np.dot(eig_vecs.T, xs.T).T
     return xs, test_xs
