@@ -89,8 +89,8 @@ def showSom(som,inputs,nameInputs,count,title, filenames=None, show=False):
   classColor = ['white','red','blue','cyan','yellow','green','gray','brown','orange','magenta']
   color_dict = create_color_dict(nameInputs, classColor)
 
+  print('Adding labels for each mapped input...', end='')
   if filenames == None:
-    print('Adding labels for each mapped input...', end='')
     for i, m in enumerate(mapped):
       plt.text(m[1], m[0], str('____'), ha='center', va='center', color=color_dict[nameInputs[i]], alpha=0.5,
           bbox=dict(facecolor=color_dict[nameInputs[i]], alpha=0.6, lw=0, boxstyle='round4'))
