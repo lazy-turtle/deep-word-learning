@@ -8,8 +8,8 @@ import os
 import json
 import logging
 
-visual_data_path = os.path.join(Constants.DATA_FOLDER, '10classes', 'visual_10classes_train_a.npy')
-model_path = os.path.join(Constants.DATA_FOLDER, 'saved_models', 'video_20x30_tau0.1_thrsh0.6_sigma10.0_batch100_alpha0.1_final')
+visual_data_path = os.path.join(Constants.DATA_FOLDER, '10classes', 'visual_10classes_train_b.npy')
+model_path = os.path.join(Constants.DATA_FOLDER, 'saved_models', 'video_20x30_tau0.1_thrsh0.6_sigma20.0_batch100_alpha0.1_final_b')
 label_path = os.path.join(Constants.DATA_FOLDER, 'coco-labels.json')
 
 N = 1000
@@ -35,7 +35,7 @@ if __name__ == '__main__':
     ys = np.array(ys).reshape(100)
     xs, _ = transform_data(xs)
 
-    som = SOM(20, 30, dim, n_iterations=60, alpha=0.1, sigma=10.0, tau=0.1, batch_size=100, num_classes=10,
+    som = SOM(20, 30, dim, n_iterations=60, alpha=0.1, sigma=20.0, tau=0.1, batch_size=100, num_classes=10,
               checkpoint_loc=model_path,data='video')
 
     som.restore_trained(model_path)
