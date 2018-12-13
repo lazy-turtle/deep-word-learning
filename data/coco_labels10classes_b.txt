@@ -1,0 +1,10 @@
+bird
+book
+cat
+zebra
+cup
+potted plant
+apple
+banana
+umbrella
+sports ball
