@@ -19,7 +19,7 @@ audio_data_path = os.path.join(Constants.DATA_FOLDER,
                                'audio100classes.csv')
 visual_data_path = os.path.join(Constants.DATA_FOLDER,
                                 '10classes',
-                                'visual_10classes_train_a.npy')
+                                'visual_10classes_train_b.npy')
 
 
 def normalize(xs, xs_test=None):
@@ -35,14 +35,14 @@ def normalize(xs, xs_test=None):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Train a Hebbian model.')
-    parser.add_argument('--sigma', metavar='sigma', type=float, default=20, help='The model neighborhood value')
-    parser.add_argument('--alpha', metavar='alpha', type=float, default=1e-3, help='The SOM initial learning rate')
+    parser.add_argument('--sigma', metavar='sigma', type=float, default=30, help='The model neighborhood value')
+    parser.add_argument('--alpha', metavar='alpha', type=float, default=0.3, help='The SOM initial learning rate')
     parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Random generator seed')
     parser.add_argument('--neurons1', type=int, default=20,
                         help='Number of neurons for audio SOM, first dimension')
     parser.add_argument('--neurons2', type=int, default=30,
                         help='Number of neurons for audio SOM, second dimension')
-    parser.add_argument('--epochs', type=int, default=1000,
+    parser.add_argument('--epochs', type=int, default=100,
                         help='Number of epochs the SOM will be trained for')
     parser.add_argument('--classes', type=int, default=10,
                         help='Number of classes the model will be trained on')
@@ -83,4 +83,4 @@ if __name__ == '__main__':
     xs_train, xs_test = transform_data(xs_train, xs_val, rotation=args.rotation)
 
     som.train(xs_train, input_classes=ys_train, test_vects=xs_val, test_classes=ys_val,
-              logging=args.logging, save_every=20)
+              logging=args.logging, save_every=10)
