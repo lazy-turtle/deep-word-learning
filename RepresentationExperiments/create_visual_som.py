@@ -17,6 +17,7 @@ dim = 2048
 
 if __name__ == '__main__':
     id_to_label = json.load(open(label_path))
+    id_to_label = {int(k): v for k,v in id_to_label.items()}
     v_xs, v_ys, ids_dict = from_npy_visual_data(visual_data_path)
     np.random.seed(42)
 
@@ -39,4 +40,4 @@ if __name__ == '__main__':
 
     som.restore_trained(model_path)
     labels = np.array([id_to_label[ids_dict[x]] for x in ys])
-    showSom(som, xs, labels, 1, 'Visual map')
+    showSom(som, xs, labels, 'Visual map')
