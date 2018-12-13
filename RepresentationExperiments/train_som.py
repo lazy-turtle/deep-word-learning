@@ -22,6 +22,17 @@ visual_data_path = os.path.join(Constants.DATA_FOLDER,
                                 'visual_10classes_train_a.npy')
 
 
+def normalize(xs, xs_test=None):
+    m = xs.min()
+    M = xs.max()
+    z = ((xs - m)/(M - m)) * 2 - 1
+    z_test = None
+    if xs_test is not None:
+        z_test = ((xs_test - m) / (M - m)) * 2 - 1
+    return z, z_test
+
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Train a Hebbian model.')
     parser.add_argument('--sigma', metavar='sigma', type=float, default=10, help='The model neighborhood value')
@@ -31,7 +42,7 @@ if __name__ == '__main__':
                         help='Number of neurons for audio SOM, first dimension')
     parser.add_argument('--neurons2', type=int, default=30,
                         help='Number of neurons for audio SOM, second dimension')
-    parser.add_argument('--epochs', type=int, default=100,
+    parser.add_argument('--epochs', type=int, default=1000,
                         help='Number of epochs the SOM will be trained for')
     parser.add_argument('--classes', type=int, default=10,
                         help='Number of classes the model will be trained on')
@@ -50,6 +61,7 @@ if __name__ == '__main__':
         print('Loading visual data...', end='')
         xs, ys, _ = from_npy_visual_data(visual_data_path)
         print('done. data: {} - labels: {}'.format(xs.shape, ys.shape))
+        print("done")
     else:
         raise ValueError('--data argument not recognized')
 
@@ -67,7 +79,7 @@ if __name__ == '__main__':
 
     xs_train, xs_test, ys_train, ys_test = train_test_split(xs, ys, test_size=0.2, stratify=ys, random_state=args.seed)
     xs_train, xs_val, ys_train, ys_val = train_test_split(xs_train, ys_train, test_size=0.1, stratify=ys_train, random_state=args.seed)
-    xs_train, xs_test = transform_data(xs_train, test_xs=xs_val, rotation=args.rotation)
+    xs_train, xs_test = normalize(xs_train, xs_val)
 
     som.train(xs_train, input_classes=ys_train, test_vects=xs_val, test_classes=ys_val,
               logging=args.logging, save_every=20)
