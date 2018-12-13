@@ -86,7 +86,7 @@ def showSom(som, inputs, labels, title, filenames=None, show=False):
   #   classColor.append(str(c))
   ## for 10 classes:
   classColor = ['white','red','blue','cyan','yellow','green','gray','brown','orange','magenta']
-  color_dict = {col: label for col, label in zip(classColor, np.unique(labels))}
+  color_dict = {label: col for label, col in zip(np.unique(labels), classColor)}
 
   print('Adding labels for each mapped input...', end='')
   if filenames == None:
