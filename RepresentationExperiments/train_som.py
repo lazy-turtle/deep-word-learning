@@ -83,4 +83,4 @@ if __name__ == '__main__':
     xs_train, xs_test = transform_data(xs_train, xs_val, rotation=args.rotation)
 
     som.train(xs_train, input_classes=ys_train, test_vects=xs_val, test_classes=ys_val,
-              logging=args.logging, save_every=10)
+              logging=args.logging, save_every=1)
