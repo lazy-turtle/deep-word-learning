@@ -9,7 +9,7 @@ import json
 import logging
 
 visual_data_path = os.path.join(Constants.DATA_FOLDER, '10classes', 'visual_10classes_train_b.npy')
-model_path = os.path.join(Constants.DATA_FOLDER, 'saved_models', 'video_20x30_tau0.1_thrsh0.6_sigma20.0_batch100_alpha0.1_final_b')
+model_path = os.path.join(Constants.DATA_FOLDER, 'saved_models', 'video_20x30_tau0.1_thrsh0.6_sigma20.0_batch100_alpha0.1_final')
 label_path = os.path.join(Constants.DATA_FOLDER, 'coco-labels.json')
 
 N = 1000
