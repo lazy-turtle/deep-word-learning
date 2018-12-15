@@ -2,5 +2,5 @@ __*__*
 *.pkl
 *.pyc
 .idea/*
-data/saved_models/*
+#data/saved_models/*
 nohup.out
