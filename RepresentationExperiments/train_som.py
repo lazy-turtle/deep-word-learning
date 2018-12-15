@@ -22,17 +22,6 @@ visual_data_path = os.path.join(Constants.DATA_FOLDER,
                                 'visual_10classes_train_a.npy')
 
 
-def normalize(xs, xs_test=None):
-    m = xs.min()
-    M = xs.max()
-    z = ((xs - m)/(M - m)) * 2 - 1
-    z_test = None
-    if xs_test is not None:
-        z_test = ((xs_test - m) / (M - m)) * 2 - 1
-    return z, z_test
-
-
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Train a Hebbian model.')
     parser.add_argument('--sigma', metavar='sigma', type=float, default=10, help='The model neighborhood value')
@@ -80,9 +69,10 @@ if __name__ == '__main__':
     print('Training on {} examples.'.format(len(xs)))
 
     xs_train, xs_test, ys_train, ys_test = train_test_split(xs, ys, test_size=0.2, stratify=ys, random_state=args.seed)
+    xs_train, xs_test = transform_data(xs_train, xs_test, rotation=args.rotation)
+
     xs_train, xs_val, ys_train, ys_val = train_test_split(xs_train, ys_train, test_size=0.5, stratify=ys_train, random_state=args.seed)
 
-    #xs_train, xs_val = transform_data(xs_train, xs_val, rotation=args.rotation)
 
     som.init_toolbox(xs)
     som.train(xs_train, input_classes=ys_train, test_vects=xs_val, test_classes=ys_val,
