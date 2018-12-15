@@ -40,7 +40,7 @@ if __name__ == '__main__':
     parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Random generator seed')
     parser.add_argument('--neurons1', type=int, default=20,
                         help='Number of neurons for audio SOM, first dimension')
-    parser.add_argument('--neurons2', type=int, default=30,
+    parser.add_argument('--neurons2', type=int, default=20,
                         help='Number of neurons for audio SOM, second dimension')
     parser.add_argument('--epochs', type=int, default=100,
                         help='Number of epochs the SOM will be trained for')
@@ -76,9 +76,9 @@ if __name__ == '__main__':
                                                           random_state=args.seed)
 
 
-    # scaler = MinMaxScaler()
-    # xs_train = scaler.fit_transform(xs_train)
-    # xs_val = scaler.transform(xs_val)
+    #scaler = MinMaxScaler(feature_range=(0,100))
+    #xs_train = scaler.fit_transform(xs_train)
+    #xs_val = scaler.transform(xs_val)
 
     #som.init_toolbox(xs_train)
 
