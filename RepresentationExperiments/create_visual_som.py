@@ -41,7 +41,7 @@ if __name__ == '__main__':
     xs, _ = transform_data(xs)
     som_shape = (20, 30)
 
-    som = SOM(som_shape[0], som_shape[1], 30, dim, checkpoint_loc=args.model, data='video')
+    som = SOM(som_shape[0], som_shape[1], dim, checkpoint_loc=args.model, data='video')
     som.restore_trained(args.model)
 
     labels = np.array([id_to_label[ids_dict[x]] for x in ys])
