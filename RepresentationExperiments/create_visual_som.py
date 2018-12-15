@@ -18,30 +18,31 @@ dim = 2048
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Visualise a Self Organising Map.')
     parser.add_argument('--model', metavar='model', type=str, default=model_path, help='The model neighborhood value')
+    parser.add_argument('--subsample', action='store_true', default=False)
     args = parser.parse_args()
 
     id_to_label = json.load(open(label_path))
     id_to_label = {int(k): v for k,v in id_to_label.items()}
-    v_xs, v_ys, ids_dict = from_npy_visual_data(visual_data_path)
+    xs, ys, ids_dict = from_npy_visual_data(visual_data_path)
     np.random.seed(42)
 
-    xs = []
-    ys = []
-    classes = np.arange(10)
-    for i in classes:
-        idx = np.where(v_ys == i)[0]
-        idx = np.random.choice(idx, size=10)
-        xs.append(v_xs[idx])
-        ys.append(v_ys[idx])
-    #v_xs = MinMaxScaler().fit_transform(v_xs)
+    if args.subsample:
+        xs1 = []
+        ys1 = []
+        classes = np.arange(10)
+        for i in classes:
+            idx = np.where(ys == i)[0]
+            idx = np.random.choice(idx, size=10)
+            xs1.append(xs[idx])
+            ys1.append(ys[idx])
+        xs = np.array(xs1).reshape((100, 2048))
+        ys = np.array(ys1).reshape(100)
 
-    xs = np.array(xs).reshape((100, 2048))
-    ys = np.array(ys).reshape(100)
     xs, _ = transform_data(xs)
+    som_shape = (20, 30)
 
-    som = SOM(20, 30, dim, n_iterations=100, alpha=0.1, sigma=10.0, tau=0.1, batch_size=100, num_classes=10,
-              checkpoint_loc=args.model, data='video')
-
+    som = SOM(som_shape[0], som_shape[1], 30, dim, checkpoint_loc=args.model, data='video')
     som.restore_trained(args.model)
+
     labels = np.array([id_to_label[ids_dict[x]] for x in ys])
     showSom(som, xs, labels, 'Visual map')

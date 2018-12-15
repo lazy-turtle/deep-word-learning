@@ -73,7 +73,8 @@ def showSom(som, inputs, labels, title, filenames=None, show=False):
     """
     print('Building SOM "{}"...'.format(title))
     mapped = som.map_vects(inputs)
-    image_grid = np.zeros(shape=(20, 30, 3))
+    image_grid = np.zeros(shape=(som._m, som._n, 3))
+    mapped = [tuple(xy[0]/float(som._m), xy[1]/float(som._n)) for xy in mapped] #normalize for plot
     print('Done mapping inputs, preparing canvas...')
 
     plt.style.use('dark_background')
@@ -124,7 +125,9 @@ def showSom(som, inputs, labels, title, filenames=None, show=False):
         patch_list.append(patch)
     plt.legend(handles=patch_list)
 
-    plt.savefig(os.path.join(Constants.PLOT_FOLDER, 'viz_som.png'))
+    img_path = os.path.join(Constants.PLOT_FOLDER, 'viz_som.png')
+    print('Saving file: {} ...'.format(img_path))
+    plt.savefig(img_path)
     return plt
 
 
