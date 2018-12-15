@@ -8,8 +8,8 @@ import os
 import json
 import argparse
 
-visual_data_path = os.path.join(Constants.DATA_FOLDER, '10classes', 'visual_10classes_train_b.npy')
-model_path = os.path.join(Constants.DATA_FOLDER, 'saved_models', 'video_20x30_tau0.1_thrsh0.6_sigma20.0_batch100_alpha0.1_final')
+visual_data_path = os.path.join(Constants.DATA_FOLDER, '10classes', 'visual_10classes_train_a.npy')
+model_path = os.path.join(Constants.DATA_FOLDER, 'saved_models', 'video_20x30_tau0.1_thrsh0.6_sigma10.0_batch100_alpha0.1_final')
 label_path = os.path.join(Constants.DATA_FOLDER, 'coco-labels.json')
 
 N = 1000
@@ -45,4 +45,4 @@ if __name__ == '__main__':
     som.restore_trained(args.model)
 
     labels = np.array([id_to_label[ids_dict[x]] for x in ys])
-    showSom(som, xs, labels, 'Visual map')
+    showSom(som, xs, labels, 'Visual map', show=True)

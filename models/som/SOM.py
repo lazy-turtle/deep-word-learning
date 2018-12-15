@@ -286,7 +286,7 @@ class SOM(object):
         taken as starting conditions for training.
         """
         with self._sess:
-            saver = tf.train.Saver(max_to_keep=int(np.ceil(self._n_iterations/save_every)))
+            saver = tf.train.Saver(max_to_keep=int(np.ceil(self._n_iterations/save_every)), save_relative_paths=True)
             summary_writer = tf.summary.FileWriter(self.logs_path)
             old_train_comp = [0]
             old_test_comp = [0]
@@ -796,7 +796,7 @@ class SOM(object):
     def quantization_error(self, xs):
         weights = self._sess.run(self._weightage_vects)
         total_quant_error = [np.linalg.norm(weights - x) for x in xs]
-        diff = np.sum(total_quant_error)
+        diff = np.mean(total_quant_error)
         return total_quant_error, diff
 
 
