@@ -53,6 +53,9 @@ if __name__ == '__main__':
     elif args.data == 'old':
         print('Loading old visual data...', end='')
         xs, ys = from_csv_visual_10classes('../data/10classes/VisualInputTrainingSet.csv')
+        xs = np.array(xs)
+        ys = np.array(ys)
+        print('done. data: {} - labels: {}'.format(xs.shape, ys.shape))
     else:
         raise ValueError('--data argument not recognized')
 
