@@ -74,6 +74,6 @@ if __name__ == '__main__':
     xs_train, xs_val, ys_train, ys_val = train_test_split(xs_train, ys_train, test_size=0.5, stratify=ys_train, random_state=args.seed)
 
 
-    som.init_toolbox(xs)
+    #som.init_toolbox(xs)
     som.train(xs_train, input_classes=ys_train, test_vects=xs_val, test_classes=ys_val,
               logging=args.logging, save_every=10)
