@@ -47,42 +47,52 @@ if __name__ == '__main__':
     parser.add_argument('--classes', type=int, default=10,
                         help='Number of classes the model will be trained on')
     parser.add_argument('--subsample', action='store_true', default=False)
-    parser.add_argument('--data', metavar='data', type=str, default='video')
+    parser.add_argument('--data', metavar='data', type=str, default='audio')
     parser.add_argument('--rotation', action='store_true', default=False)
-    parser.add_argument('--logging', action='store_true', default=True)
+    parser.add_argument('--logging', action='store_true', default=False)
     parser.add_argument('--batch', type=int, default=100)
 
     args = parser.parse_args()
+    xs, ys, _ = from_npy_visual_data(visual_data_path)
 
-
-    if args.data == 'audio':
-        xs, ys, _ = from_csv_with_filenames(audio_data_path)
-    elif args.data == 'video':
-        print('Loading visual data...', end='')
-        xs, ys, _ = from_npy_visual_data(visual_data_path)
-        print('done. data: {} - labels: {}'.format(xs.shape, ys.shape))
-    else:
-        raise ValueError('--data argument not recognized')
-
-    min_val = np.min(xs)
-    max_val = np.max(xs)
-    dim = xs.shape[1]
+    dim = len(xs[0])
     som = SOM(args.neurons1, args.neurons2, dim, n_iterations=args.epochs, alpha=args.alpha,
-                 tau=0.1, threshold=0.6, batch_size=args.batch, data=args.data, sigma=args.sigma,
-                 num_classes=args.classes)
+              tau=0.1, threshold=0.6, batch_size=args.batch, data=args.data, sigma=args.sigma,
+              num_classes=args.classes, sigma_decay='constant')
 
-    # not necessary, already loading numpy arrays
-    # ys = np.array(ys)
-    # xs = np.array(xs)
+    ys = np.array(ys)
+    xs = np.array(xs)
 
     if args.subsample:
         xs, _, ys, _ = train_test_split(xs, ys, test_size=0.6, stratify=ys, random_state=args.seed)
     print('Training on {} examples.'.format(len(xs)))
 
-    xs_train, xs_test, ys_train, ys_test = train_test_split(xs, ys, test_size=0.2, stratify=ys, random_state=args.seed)
-    xs_train, xs_val, ys_train, ys_val = train_test_split(xs_train, ys_train, test_size=0.5, stratify=ys_train, random_state=args.seed)
+    xs_train, xs_test, ys_train, ys_test = train_test_split(xs, ys, test_size=0.2, stratify=ys,
+                                                            random_state=args.seed)
 
-    xs_train, xs_test = transform_data(xs_train, xs_val, rotation=args.rotation)
+    xs_train, xs_val, ys_train, ys_val = train_test_split(xs_train, ys_train, test_size=0.5, stratify=ys_train,
+                                                          random_state=args.seed)
 
-    som.train(xs_train, input_classes=ys_train, test_vects=xs_val, test_classes=ys_val,
-              logging=args.logging, save_every=10)
+    xs_train, xs_val = transform_data(xs_train, xs_val, rotation=args.rotation)
+
+    # scaler = MinMaxScaler()
+    # xs_train = scaler.fit_transform(xs_train)
+    # xs_val = scaler.transform(xs_val)
+
+    #som.init_toolbox(xs_train)
+
+    # b = som.quantization_error(xs_train)
+    np.set_printoptions(threshold=np.nan)
+    bmus = som._sess.run(som.bmu_indexes, feed_dict={som._vect_input: xs_train})
+    print(len(set(bmus)))
+    #weights = som._sess.run(som._weightage_vects)
+    # print(weights)
+    #a = np.linalg.norm(weights-xs_train[0], axis=1)
+    # print(xs_train[0])
+    #print(weights[np.argmin(a)])
+    # print(a)
+    # print(min(a))
+    # print(a)
+    # print(b)
+    # som.train(xs_train, input_classes=ys_train, test_vects=xs_val, test_classes=ys_val,
+#          logging=args.logging)
