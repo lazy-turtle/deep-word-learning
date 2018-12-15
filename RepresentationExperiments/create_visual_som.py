@@ -9,7 +9,7 @@ import json
 import argparse
 
 visual_data_path = os.path.join(Constants.DATA_FOLDER, '10classes', 'visual_10classes_train_a.npy')
-model_path = os.path.join(Constants.DATA_FOLDER, 'saved_models', 'video_20x30_tau0.1_thrsh0.6_sigma15.0_batch100_alpha0.01_final')
+model_path = os.path.join(Constants.DATA_FOLDER, 'saved_models', 'video_20x20_tau0.1_thrsh0.6_sigma5.0_batch128_alpha0.1_final')
 label_path = os.path.join(Constants.DATA_FOLDER, 'coco-labels.json')
 
 N = 1000
@@ -39,9 +39,9 @@ if __name__ == '__main__':
         ys = np.array(ys1).reshape(100)
 
     xs, _ = transform_data(xs)
-    som_shape = (20, 30)
+    som_shape = (20, 20)
 
-    som = SOM(som_shape[0], som_shape[1], dim, checkpoint_loc=args.model, data='video')
+    som = SOM(som_shape[0], som_shape[1], dim, batch_size=128, checkpoint_loc=args.model, data='video')
     som.restore_trained(args.model)
 
     labels = np.array([id_to_label[ids_dict[x]] for x in ys])
