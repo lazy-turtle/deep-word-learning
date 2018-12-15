@@ -20,6 +20,9 @@ audio_data_path = os.path.join(Constants.DATA_FOLDER,
 visual_data_path = os.path.join(Constants.DATA_FOLDER,
                                 '10classes',
                                 'visual_10classes_train_a.npy')
+old_visual_path = os.path.join(Constants.DATA_FOLDER,
+                                '10classes',
+                                'VisualInputTrainingSet.csv')
 
 
 if __name__ == '__main__':
@@ -52,7 +55,8 @@ if __name__ == '__main__':
         print('done. data: {} - labels: {}'.format(xs.shape, ys.shape))
     elif args.data == 'old':
         print('Loading old visual data...', end='')
-        xs, ys = from_csv_visual_10classes('../data/10classes/VisualInputTrainingSet.csv')
+        xs, ys = from_csv_visual_10classes(old_visual_path)
+        ys = [v - 1000 for v in ys]
         xs = np.array(xs)
         ys = np.array(ys)
         print('done. data: {} - labels: {}'.format(xs.shape, ys.shape))
@@ -82,4 +86,4 @@ if __name__ == '__main__':
 
     #som.init_toolbox(xs)
     som.train(xs_train, input_classes=ys_train, test_vects=xs_val, test_classes=ys_val,
-              logging=args.logging, save_every=100, log_every=50)
+              logging=args.logging, save_every=20, log_every=10)
