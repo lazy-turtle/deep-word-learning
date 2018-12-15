@@ -329,7 +329,7 @@ class SOM(object):
                             print('Train confusion: {}'.format(train_confusion))
                             old_train_comp = train_comp
                             train_mean_conv, train_var_conv, train_conv = self.population_based_convergence(input_vects)
-                            train_quant_error = self.quantization_error(input_vects)
+                            _, train_quant_error = self.quantization_error(input_vects)
                             #train_quant_error = [0]
                             #print(train_conv)
                         else:
@@ -342,7 +342,7 @@ class SOM(object):
                             print('Test confusion: {}'.format(test_confusion))
                             old_test_comp = test_comp
                             test_mean_conv, test_var_conv, test_conv = self.population_based_convergence(test_vects)
-                            test_quant_error = self.quantization_error(test_vects)
+                            _, test_quant_error = self.quantization_error(test_vects)
                             #test_quant_error = [0]
                             #print(test_conv)
                         else:
