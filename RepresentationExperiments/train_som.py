@@ -36,7 +36,7 @@ if __name__ == '__main__':
     parser.add_argument('--classes', type=int, default=10,
                         help='Number of classes the model will be trained on')
     parser.add_argument('--subsample', action='store_true', default=False)
-    parser.add_argument('--data', metavar='data', type=str, default='video')
+    parser.add_argument('--data', metavar='data', type=str, default='old')
     parser.add_argument('--rotation', action='store_true', default=False)
     parser.add_argument('--logging', action='store_true', default=True)
     parser.add_argument('--batch', type=int, default=128)
@@ -54,6 +54,7 @@ if __name__ == '__main__':
         print('Loading old visual data...', end='')
         xs, ys = from_csv_visual_10classes('../data/10classes/VisualInputTrainingSet.csv')
         xs = np.array(xs)
+        ys = [v - 1000 for v in ys]
         ys = np.array(ys)
         print('done. data: {} - labels: {}'.format(xs.shape, ys.shape))
     else:
