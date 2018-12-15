@@ -74,7 +74,7 @@ def showSom(som, inputs, labels, title, filenames=None, show=False):
     print('Building SOM "{}"...'.format(title))
     mapped = som.map_vects(inputs)
     image_grid = np.zeros(shape=(som._m, som._n, 3))
-    mapped = [tuple(xy[0]/float(som._m), xy[1]/float(som._n)) for xy in mapped] #normalize for plot
+    mapped = [tuple([xy[0]/float(som._m), xy[1]/float(som._n)]) for xy in mapped] #normalize for plot
     print('Done mapping inputs, preparing canvas...')
 
     plt.style.use('dark_background')
