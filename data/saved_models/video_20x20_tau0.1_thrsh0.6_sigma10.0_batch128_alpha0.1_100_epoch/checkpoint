@@ -1,0 +1,4 @@
+model_checkpoint_path: "model-100"
+all_model_checkpoint_paths: "../video_20x20_tau0.1_thrsh0.6_sigma10.0_batch128_alpha0.1_0_epoch/model-0"
+all_model_checkpoint_paths: "../video_20x20_tau0.1_thrsh0.6_sigma10.0_batch128_alpha0.1_50_epoch/model-50"
+all_model_checkpoint_paths: "model-100"
