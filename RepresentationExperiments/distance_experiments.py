@@ -1,6 +1,7 @@
 import numpy as np
 import os
-from utils.utils import from_csv_with_filenames, from_npy_visual_data, from_csv_visual_100classes, labels_dictionary, transform_data
+from utils.utils import from_csv_with_filenames, from_npy_visual_data, from_csv_visual_100classes, \
+    labels_dictionary, transform_data, from_csv_visual_10classes
 from utils.constants import Constants
 import matplotlib
 import matplotlib.pyplot as plt
@@ -52,7 +53,7 @@ def examples_distance(xs, i1, i2):
 
 def cluster_compactness(xs, ys, num_classes):
     print('Fitting clustering model...')
-    model = KMeans(num_classes, max_iter=10000, tol=1e-30, random_state=random_seed)
+    model = KMeans(num_classes, max_iter=10000, tol=1e-10, random_state=random_seed)
     #model = KMeans(n_clusters = num_classes,max_iter=100,n_init=50,algorithm='elkan') # giorgia
     cluster_ys = model.fit_predict(xs)
     print('Done. Computing occurrences...')
@@ -80,13 +81,17 @@ def cluster_compactness(xs, ys, num_classes):
         for x2 in xs[i+1:]:
             inter_cluster_distance += np.linalg.norm(x1-x2)
     inter_cluster_distance /= len(xs)
+    compactness = np.array(intra_cluster_distance)/inter_cluster_distance
     plt.ylim(0, 1)
-    plt.bar(range(num_classes), intra_cluster_distance/inter_cluster_distance)
+    plt.bar(range(num_classes), compactness)
     plt.show()
-    mean = np.mean(intra_cluster_distance/inter_cluster_distance)
-    var = np.var(intra_cluster_distance/inter_cluster_distance)
-    print(intra_cluster_distance/inter_cluster_distance)
-    print('Mean {}; variance {}'.format(mean, var))
+
+    mean = np.mean(compactness)
+    var = np.var(compactness)
+    print('Cluster compactness')
+    for c in compactness:
+        print(c)
+    print('Mean\n{};\nVariance\n{}'.format(mean, var))
 
 
 def show_clustering(xs, ys, num_classes, labels, show_classes=True):
@@ -141,12 +146,24 @@ if __name__ == '__main__':
     parser.add_argument('--cluster', action='store_true', default=False)
 
     args = parser.parse_args()
+    my_data = True
 
     if not args.classes100:
         num_classes = 10
         if not args.is_audio:
             print("Clustering visual data for 10 classes...")
-            xs, ys, label_to_id = from_npy_visual_data("../data/10classes/visual_10classes_train_b.npy")
+            if my_data:
+                xs, ys, label_to_id = from_npy_visual_data("../data/10classes/visual_10classes_train_a.npy")
+                id_names_dict = labels_dictionary('../data/coco-labels.json')
+                vals = np.unique(ys)
+                labels = {v: id_names_dict[label_to_id[v]] for v in vals}
+            else:
+                print("Reading old data...")
+                xs, ys = from_csv_visual_10classes("../data/10classes/VisualInputTrainingSet.csv")
+                ys = [val - 1000 for val in ys]
+                xs = np.array(xs)
+                ys = np.array(ys)
+                labels = np.unique(ys)
 
         else:
             xs, ys, _ = from_csv_with_filenames(args.csv_path)
@@ -157,8 +174,8 @@ if __name__ == '__main__':
         else:
             xs, ys, _ =  from_csv_with_filenames(args.csv_path)
 
-    id_names_dict = labels_dictionary('../data/coco-labels.json')
-    vals = np.unique(ys)
-    labels = {v: id_names_dict[label_to_id[v]] for v in vals}
-    #xs, _ = transform_data(xs)
-    show_clustering(xs, ys, num_classes, labels, show_classes=True)
+    print(xs.shape, ys.shape)
+
+    xs, _ = transform_data(xs)
+    cluster_compactness(xs, ys, num_classes)
+    #show_clustering(xs, ys, num_classes, labels, show_classes=False)

@@ -113,8 +113,7 @@ class SOM(object):
 
             #Randomly initialized weightage vectors for all neurons,
             #stored together as a matrix Variable of size [m*n, dim]
-            self._weightage_vects = tf.Variable(tf.random_normal(
-                [m*n, dim], mean=0, stddev=1))
+            self._weightage_vects = tf.Variable(tf.random_normal([m*n, dim], mean=0, stddev=1))
 
             #Matrix of size [m*n, 2] for SOM grid locations
             #of neurons
@@ -187,12 +186,12 @@ class SOM(object):
             #an attribute to self, since all the rest will be executed
             #automatically during training
 
-            bmu_indexes = self._get_bmu(self._vect_input)
+            self.bmu_indexes = self._get_bmu(self._vect_input)
 
             #This will extract the location of the BMU based on the BMU's
             #index. This has dimensionality [batch_size, 2] where 2 is (i, j),
             #the location of the BMU in the map
-            bmu_loc = tf.gather(self._location_vects, bmu_indexes)
+            bmu_loc = tf.gather(self._location_vects, self.bmu_indexes)
 
             #To compute the alpha and sigma values based on iteration
             #number
@@ -200,7 +199,7 @@ class SOM(object):
             if sigma_decay == 'constant':
                 _sigma_op = self.sigma
             else:
-                _sigma_op = self.alpha * learning_rate
+                _sigma_op = self.sigma * learning_rate
             if lr_decay == 'constant':
                 _alpha_op = self.alpha
             else:
@@ -377,8 +376,7 @@ class SOM(object):
                         os.makedirs(self.checkpoint_loc)
                     path = dirpath + 'model'
                     print('Saving in {}'.format(path))
-                    # TODO remove this comment to save models
-                    #saver.save(self._sess, path, global_step=iter_no)
+                    saver.save(self._sess, path, global_step=iter_no)
             for i, loc in enumerate(self._locations):
                 centroid_grid[loc[0]].append(self._weightages[i])
             self._centroid_grid = centroid_grid
@@ -424,6 +422,24 @@ class SOM(object):
                + str(self.threshold) + '_sigma' + str(self.sigma) + '_batch' + str(self.batch_size) \
                + '_alpha' + str(self.alpha)
 
+
+    def assign_weights(self, weights):
+        assign_op = tf.assign(self._weightage_vects, weights)
+        self._sess.run(assign_op)
+
+
+    def init_toolbox(self, xs):
+        '''
+        This probably only makes sense if the data in xs
+        has been scaled using min-max scaling.
+        '''
+        weights = np.random.uniform(size=(self._m * self._n, len(xs[0])))
+        col_wise_max = np.max(xs, axis=0)
+        col_wise_min = np.min(xs, axis=0)
+        weights = (col_wise_max - col_wise_min) * weights + col_wise_min
+        self.assign_weights(weights)
+
+
     def get_centroids(self):
         """
         Returns a list of 'm' lists, with each inner list containing
@@ -433,7 +449,6 @@ class SOM(object):
             raise ValueError("SOM not trained yet")
         return self._centroid_grid
 
-    @profile
     def map_vects(self, input_vects):
         """
         Maps each input vector to the relevant neuron in the SOM
@@ -453,20 +468,17 @@ class SOM(object):
             to_return.append(self._locations[min_index])
         return to_return
 
-    @profile
     def get_BMU(self, input_vect):
         min_index = min([i for i in range(len(self._weightages))],
                             key=lambda x: np.linalg.norm(input_vect-
                                                          self._weightages[x]))
         return [min_index,self._locations[min_index]]
 
-    @profile
     def get_BMU_mine(self, input_vect):
         diff = np.linalg.norm(self._weightages - input_vect, axis=1)
         min_index = np.argmin(diff)
         return [min_index, self._locations[min_index]]
 
-    @profile
     def map_vects_parallel(self, input_vects):
         input_vects = input_vects[:, np.newaxis, :]
         diff_tensor = self._weightages - input_vects
@@ -477,7 +489,6 @@ class SOM(object):
             result.append(self._locations[index])
         return result
 
-    @profile
     def map_vects_memory_aware(self, input_vects):
         result = []
         for x in input_vects:
@@ -683,7 +694,7 @@ class SOM(object):
                      bbox=dict(facecolor=color_names[y[i]], alpha=0.5, lw=0))
         plt.savefig(os.path.join(Constants.PLOT_FOLDER, plot_name))
 
-    @profile
+
     def compactness_stats(self, xs, ys, train=True, strategy='memory-aware'):
         confusion = [0]
         if strategy == 'memory-aware':
@@ -727,7 +738,7 @@ class SOM(object):
             class_comp = intra_class_distance/self.test_inter_class_distance
         return class_comp, confusion, worst_confusion, usage_rate
 
-    @profile
+
     def population_based_convergence(self, xs, alpha=0.05):
         '''
         Population based convergence is a feature-by-feature convergence criterion.
@@ -781,12 +792,12 @@ class SOM(object):
                len(var_pos_converged) / len(neuron_feature_mean), \
                len(np.intersect1d(mean_pos_converged, var_pos_converged, assume_unique=True)) / len(neuron_feature_mean)
 
-    @profile
+
     def quantization_error(self, xs):
         weights = self._sess.run(self._weightage_vects)
-        diff = np.sum([np.linalg.norm(weights - x) for x in xs])
-        return diff
-
+        total_quant_error = [np.linalg.norm(weights - x) for x in xs]
+        diff = np.sum(total_quant_error)
+        return total_quant_error, diff
 
 
 if __name__ == '__main__':
