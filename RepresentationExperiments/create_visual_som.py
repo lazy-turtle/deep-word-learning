@@ -35,7 +35,7 @@ if __name__ == '__main__':
     ys = np.array(ys).reshape(100)
     xs, _ = transform_data(xs)
 
-    som = SOM(20, 30, dim, n_iterations=60, alpha=0.1, sigma=20.0, tau=0.1, batch_size=100, num_classes=10,
+    som = SOM(20, 30, dim, n_iterations=100, alpha=0.1, sigma=10.0, tau=0.1, batch_size=100, num_classes=10,
               checkpoint_loc=model_path,data='video')
 
     som.restore_trained(model_path)
