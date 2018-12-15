@@ -58,8 +58,6 @@ if __name__ == '__main__':
         xs, ys = from_csv_visual_10classes(old_visual_path)
         ys = [v - 1000 for v in ys]
         xs = np.array(xs)
-        ys = [v - 1000 for v in ys]
-        ys = np.array(ys)
         print('done. data: {} - labels: {}'.format(xs.shape, ys.shape))
     else:
         raise ValueError('--data argument not recognized')
