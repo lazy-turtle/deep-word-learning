@@ -1,7 +1,7 @@
 from models.som.SOM import SOM
 from models.som.HebbianModel import HebbianModel
 from utils.constants import Constants
-from utils.utils import from_csv_with_filenames, from_npy_visual_data, from_csv, to_csv
+from utils.utils import from_csv_with_filenames, from_npy_visual_data, from_csv_visual_10classes
 from sklearn.utils import shuffle
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
@@ -50,6 +50,9 @@ if __name__ == '__main__':
         print('Loading visual data...', end='')
         xs, ys, _ = from_npy_visual_data(visual_data_path)
         print('done. data: {} - labels: {}'.format(xs.shape, ys.shape))
+    elif args.data == 'old':
+        print('Loading old visual data...', end='')
+        xs, ys = from_csv_visual_10classes('../data/10classes/VisualInputTrainingSet.csv')
     else:
         raise ValueError('--data argument not recognized')
 
@@ -76,4 +79,4 @@ if __name__ == '__main__':
 
     #som.init_toolbox(xs)
     som.train(xs_train, input_classes=ys_train, test_vects=xs_val, test_classes=ys_val,
-              logging=args.logging, save_every=50, log_every=10)
+              logging=args.logging, save_every=100, log_every=50)

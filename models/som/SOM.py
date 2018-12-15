@@ -327,6 +327,7 @@ class SOM(object):
                             train_comp, train_confusion, train_worst_confusion, train_usage_rate = self.compactness_stats(input_vects, input_classes)
                             print('Train compactness: {}'.format(np.mean(train_comp)))
                             print('Train confusion: {}'.format(train_confusion))
+                            print('Train BMU usage rate: {}'.format(train_usage_rate))
                             old_train_comp = train_comp
                             train_mean_conv, train_var_conv, train_conv = self.population_based_convergence(input_vects)
                             _, train_quant_error = self.quantization_error(input_vects)
@@ -419,9 +420,9 @@ class SOM(object):
             return False
 
     def get_experiment_name(self):
-        return str(self.data) + '_' + str(self._m) + 'x' + str(self._n) + '_tau' + str(self.tau) + '_thrsh' \
-               + str(self.threshold) + '_sigma' + str(self.sigma) + '_batch' + str(self.batch_size) \
-               + '_alpha' + str(self.alpha)
+        return str(self.data) + '_' + str(self._m) + 'x' + str(self._n) + '_ta' + str(self.tau) + '_th' \
+               + str(self.threshold) + '_s' + str(self.sigma) + '_b' + str(self.batch_size) \
+               + '_a' + str(self.alpha)
 
 
     def assign_weights(self, weights):
@@ -480,6 +481,7 @@ class SOM(object):
         min_index = np.argmin(diff)
         return [min_index, self._locations[min_index]]
 
+
     def map_vects_parallel(self, input_vects):
         input_vects = input_vects[:, np.newaxis, :]
         diff_tensor = self._weightages - input_vects
@@ -490,12 +492,14 @@ class SOM(object):
             result.append(self._locations[index])
         return result
 
+
     def map_vects_memory_aware(self, input_vects):
         result = []
         for x in input_vects:
             _, bmu_loc = self.get_BMU_mine(x)
             result.append(bmu_loc)
         return result
+
 
     def map_vects_confusion(self, input_vects, ys):
         result = []
@@ -514,6 +518,7 @@ class SOM(object):
         bmu_confusion /= real_bmu_counter
         bmu_confusion /= self.num_classes
         return result, bmu_confusion
+
 
     def map_vects_get_confusion_stats(self, input_vects, ys):
         result = []

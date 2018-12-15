@@ -79,6 +79,10 @@ def showSom(som, inputs, labels, title, filenames=None, show=False):
 
     print('Building SOM "{}"...'.format(title))
     mapped = som.map_vects(inputs)
+    #extra print
+    np.set_printoptions(threshold=np.nan)
+    print(np.array(mapped).reshape((200,10)))
+
     image_grid = np.zeros(shape=(som._m, som._n, 3))
     print('Done mapping inputs, preparing canvas...')
 
