@@ -277,7 +277,7 @@ class SOM(object):
                 yield np.array([i, j])
 
     def train(self, input_vects, input_classes=None, test_vects=None, test_classes=None,
-              logging=True, save_every=40):
+              logging=True, save_every=50, log_every=10):
         """
         Trains the SOM.
         'input_vects' should be an iterable of 1-D NumPy arrays with
@@ -319,7 +319,7 @@ class SOM(object):
                 self._weightages = list(self._sess.run(self._weightage_vects))
                 self._locations = list(self._sess.run(self._location_vects))
 
-                if iter_no % save_every == 0:
+                if iter_no % log_every == 0:
                     if logging == True:
                     #Run summaries
                         if input_classes is not None:
@@ -377,6 +377,7 @@ class SOM(object):
                     path = dirpath + 'model'
                     print('Saving in {}'.format(path))
                     saver.save(self._sess, path, global_step=iter_no)
+
             for i, loc in enumerate(self._locations):
                 centroid_grid[loc[0]].append(self._weightages[i])
             self._centroid_grid = centroid_grid

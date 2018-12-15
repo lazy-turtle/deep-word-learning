@@ -24,14 +24,14 @@ visual_data_path = os.path.join(Constants.DATA_FOLDER,
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Train a Hebbian model.')
-    parser.add_argument('--sigma', metavar='sigma', type=float, default=5, help='The model neighborhood value')
+    parser.add_argument('--sigma', metavar='sigma', type=float, default=10, help='The model neighborhood value')
     parser.add_argument('--alpha', metavar='alpha', type=float, default=0.1, help='The SOM initial learning rate')
     parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Random generator seed')
     parser.add_argument('--neurons1', type=int, default=20,
                         help='Number of neurons for audio SOM, first dimension')
     parser.add_argument('--neurons2', type=int, default=20,
                         help='Number of neurons for audio SOM, second dimension')
-    parser.add_argument('--epochs', type=int, default=100,
+    parser.add_argument('--epochs', type=int, default=1000,
                         help='Number of epochs the SOM will be trained for')
     parser.add_argument('--classes', type=int, default=10,
                         help='Number of classes the model will be trained on')
@@ -76,4 +76,4 @@ if __name__ == '__main__':
 
     #som.init_toolbox(xs)
     som.train(xs_train, input_classes=ys_train, test_vects=xs_val, test_classes=ys_val,
-              logging=args.logging, save_every=10)
+              logging=args.logging, save_every=50, log_every=10)
