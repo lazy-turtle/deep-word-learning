@@ -69,11 +69,11 @@ if __name__ == '__main__':
     print('Training on {} examples.'.format(len(xs)))
 
     xs_train, xs_test, ys_train, ys_test = train_test_split(xs, ys, test_size=0.2, stratify=ys, random_state=args.seed)
-    xs_train, xs_test = transform_data(xs_train, xs_test, rotation=args.rotation)
+    #xs_train, xs_test = transform_data(xs_train, xs_test, rotation=args.rotation)
 
     xs_train, xs_val, ys_train, ys_val = train_test_split(xs_train, ys_train, test_size=0.5, stratify=ys_train, random_state=args.seed)
 
 
-    #som.init_toolbox(xs)
+    som.init_toolbox(xs)
     som.train(xs_train, input_classes=ys_train, test_vects=xs_val, test_classes=ys_val,
               logging=args.logging, save_every=10)
