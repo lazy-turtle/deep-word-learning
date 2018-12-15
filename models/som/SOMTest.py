@@ -16,6 +16,7 @@
 # along with NNsTaxonomicResponding.  If not, see <http://www.gnu.org/licenses/>.
 
 from matplotlib import pyplot as plt
+import matplotlib
 import numpy as np
 from .SOM import SOM
 import os
@@ -71,10 +72,14 @@ def showSom(som, inputs, labels, title, filenames=None, show=False):
     """
       build of the map with the color associated to the different classes
     """
+    if show:
+        matplotlib.use('TkAgg')
+    else:
+        matplotlib.use('Agg')
+
     print('Building SOM "{}"...'.format(title))
     mapped = som.map_vects(inputs)
     image_grid = np.zeros(shape=(som._m, som._n, 3))
-    mapped = [tuple([xy[0]/float(som._m), xy[1]/float(som._n)]) for xy in mapped] #normalize for plot
     print('Done mapping inputs, preparing canvas...')
 
     plt.style.use('dark_background')
@@ -94,10 +99,12 @@ def showSom(som, inputs, labels, title, filenames=None, show=False):
     color_dict = {label: col for label, col in zip(np.unique(labels), classColor)}
 
     print('Adding labels for each mapped input...', end='')
+    xx = [t[0] for t in mapped]
+    yy = [t[1] for t in mapped]
+    plt.scatter(xx, yy, c='k', marker='.')
     if filenames == None:
         for i, m in enumerate(mapped):
-            print(m)
-            plt.text(m[1], m[0], str('____'), ha='center', va='center', color=color_dict[labels[i]], alpha=0.5,
+            plt.text(m[1], m[0], str('___'), ha='center', va='center', color=color_dict[labels[i]], alpha=0.5,
                  bbox=dict(facecolor=color_dict[labels[i]], alpha=0.6, lw=0, boxstyle='round4'))
     else:
         for i, m in enumerate(mapped):
@@ -112,12 +119,9 @@ def showSom(som, inputs, labels, title, filenames=None, show=False):
     #     [BMUi, BMUpos] = som.get_BMU(prototipi[k])
     #     plt.text(BMUpos[1], BMUpos[0], str(k), ha='center', va='center',
     #             bbox=dict(facecolor='white', alpha=0.9, lw=0))
-    print('Drawing prototypes...')
-    plt.draw()
 
     # draw a legend
     print('Drawing legend...')
-    plt.figure()
     reverse_color_dict = {v: k for k, v in color_dict.items()}
     patch_list = []
     for i in range(len(classColor)):
@@ -127,7 +131,10 @@ def showSom(som, inputs, labels, title, filenames=None, show=False):
 
     img_path = os.path.join(Constants.PLOT_FOLDER, 'viz_som.png')
     print('Saving file: {} ...'.format(img_path))
-    plt.savefig(img_path)
+    if show:
+        plt.show()
+    else:
+        plt.savefig(img_path)
     return plt
 
 
