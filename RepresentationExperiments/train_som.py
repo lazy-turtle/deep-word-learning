@@ -8,13 +8,13 @@ import numpy as np
 import argparse
 
 audio_data_path = os.path.join(Constants.DATA_FOLDER,
-                               '10classes',
+                               'audio',
                                'audio100classes.csv')
 visual_data_path = os.path.join(Constants.DATA_FOLDER,
-                                '10classes',
+                                'video',
                                 'visual_10classes_train_a.npy')
 old_visual_path = os.path.join(Constants.DATA_FOLDER,
-                                '10classes',
+                                'video',
                                 'VisualInputTrainingSet.csv')
 
 
