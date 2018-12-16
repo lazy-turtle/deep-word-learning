@@ -28,7 +28,6 @@ from utils.constants import Constants
 from matplotlib import colors
 from scipy.stats import f as fisher_f
 from scipy.stats import norm
-from profilehooks import profile
 import time
 import bisect
 
@@ -47,7 +46,7 @@ class SOM(object):
     def __init__(self, m, n, dim, n_iterations=50, alpha=None, sigma=None,
                  tau=0.5, threshold=0.6, batch_size=500, num_classes=100,
                  checkpoint_loc = None, data='audio', sigma_decay='time',
-                 lr_decay='time'):
+                 lr_decay='time', seed=42):
         """
         Initializes all necessary components of the TensorFlow
         Graph.
@@ -66,32 +65,18 @@ class SOM(object):
         #Assign required variables first
         self._m = m
         self._n = n
-        if alpha is None:
-            self.alpha = 0.3
-        else:
-            self.alpha = float(alpha)
-
-        if sigma is None:
-            self.sigma = max(m, n) / 2.0
-        else:
-            self.sigma = float(sigma)
-
+        self.alpha = 0.3 if alpha is None else float(alpha)
+        self.sigma = max(m,n) / 2.0 if sigma is None else float(sigma)
         self.tau = tau
         self.threshold = threshold
-
         self.batch_size = batch_size
-
         self._n_iterations = abs(int(n_iterations))
-
         self.data = data
-
         self.logs_path = Constants.DATA_FOLDER + '/tblogs/' + self.get_experiment_name()
-
         self.num_classes = num_classes
 
         # helper structure
         self.neuron_loc_list = list([tuple(loc) for loc in self._neuron_locations(self._m, self._n)])
-
         self.train_bmu_class_dict = None
         self.test_bmu_class_dict = None
 
@@ -113,7 +98,7 @@ class SOM(object):
 
             #Randomly initialized weightage vectors for all neurons,
             #stored together as a matrix Variable of size [m*n, dim]
-            self._weightage_vects = tf.Variable(tf.random_normal([m*n, dim], mean=0, stddev=1))
+            self._weightage_vects = tf.Variable(tf.random_normal([m*n, dim], mean=0, stddev=1, seed=42))
 
             #Matrix of size [m*n, 2] for SOM grid locations
             #of neurons
@@ -215,7 +200,6 @@ class SOM(object):
 
             neighbourhood_func = tf.exp(tf.negative(tf.div(tf.cast(
                 bmu_distance_squares, "float32"), tf.pow(_sigma_op, 2))))
-            learning_rate_op = _alpha_op * neighbourhood_func
 
             #Finally, the op that will use learning_rate_op to update
             #the weightage vectors of all neurons based on a particular
@@ -224,22 +208,18 @@ class SOM(object):
 
             self.weightage_delta = self._get_weight_delta(learning_rate_matrix)
 
-            new_weightages_op = tf.add(self._weightage_vects,
-                                       self.weightage_delta)
-            self._training_op = tf.assign(self._weightage_vects,
-                                          new_weightages_op)
+            new_weightages_op = tf.add(self._weightage_vects, self.weightage_delta)
+            self._training_op = tf.assign(self._weightage_vects, new_weightages_op)
 
             ##INITIALIZE SESSION
             #uncomment this to run on cpu
-            config = tf.ConfigProto(
-                device_count = {'GPU': 0}
-            )
+            config = tf.ConfigProto(device_count = {'GPU': 0})
             self._sess = tf.Session(config=config)
-
 
             ##INITIALIZE VARIABLES
             init_op = tf.global_variables_initializer()
             self._sess.run(init_op)
+
 
     def _get_weight_delta(self, learning_rate_matrix):
         """
@@ -249,11 +229,13 @@ class SOM(object):
         delta = tf.reduce_mean(mul, 0)
         return delta
 
+
     def _get_bmu_distances(self, bmu_loc):
         """
         """
         squared_distances = tf.reduce_sum((self._location_vects - tf.expand_dims(bmu_loc, 1)) ** 2, 2)
         return squared_distances
+
 
     def _get_bmu(self, vects):
         """
@@ -264,6 +246,7 @@ class SOM(object):
         squared_distances = tf.reduce_sum(squared_differences, 2)
         bmu_index = tf.argmin(squared_distances, 1)
         return bmu_index
+
 
     def _neuron_locations(self, m, n):
         """
@@ -276,17 +259,19 @@ class SOM(object):
             for j in range(n):
                 yield np.array([i, j])
 
+
     def train(self, input_vects, input_classes=None, test_vects=None, test_classes=None,
-              logging=True, save_every=50, log_every=10):
+              logging=True, save_every=40, log_every=10):
         """
         Trains the SOM.
         'input_vects' should be an iterable of 1-D NumPy arrays with
         dimensionality as provided during initialization of this SOM.
-        Current weightage vectors for all neurons(initially random) are
+        Current weight vectors for all neurons(initially random) are
         taken as starting conditions for training.
         """
         with self._sess:
-            saver = tf.train.Saver(max_to_keep=int(np.ceil(self._n_iterations/save_every)), save_relative_paths=True)
+            saver = tf.train.Saver(max_to_keep=int(np.ceil(self._n_iterations/save_every)),
+                                   save_relative_paths=True)
             summary_writer = tf.summary.FileWriter(self.logs_path)
             old_train_comp = [0]
             old_test_comp = [0]
@@ -327,10 +312,9 @@ class SOM(object):
                             train_comp, train_confusion, train_worst_confusion, train_usage_rate = self.compactness_stats(input_vects, input_classes)
                             print('Train compactness: {}'.format(np.mean(train_comp)))
                             print('Train confusion: {}'.format(train_confusion))
-                            print('Train BMU usage rate: {}'.format(train_usage_rate))
                             old_train_comp = train_comp
                             train_mean_conv, train_var_conv, train_conv = self.population_based_convergence(input_vects)
-                            _, train_quant_error = self.quantization_error(input_vects)
+                            train_quant_error = self.quantization_error(input_vects)
                             #train_quant_error = [0]
                             #print(train_conv)
                         else:
@@ -343,7 +327,7 @@ class SOM(object):
                             print('Test confusion: {}'.format(test_confusion))
                             old_test_comp = test_comp
                             test_mean_conv, test_var_conv, test_conv = self.population_based_convergence(test_vects)
-                            _, test_quant_error = self.quantization_error(test_vects)
+                            test_quant_error = self.quantization_error(test_vects)
                             #test_quant_error = [0]
                             #print(test_conv)
                         else:
@@ -378,7 +362,6 @@ class SOM(object):
                     path = dirpath + 'model'
                     print('Saving in {}'.format(path))
                     saver.save(self._sess, path, global_step=iter_no)
-
             for i, loc in enumerate(self._locations):
                 centroid_grid[loc[0]].append(self._weightages[i])
             self._centroid_grid = centroid_grid
@@ -420,22 +403,20 @@ class SOM(object):
             return False
 
     def get_experiment_name(self):
-        return str(self.data) + '_' + str(self._m) + 'x' + str(self._n) + '_ta' + str(self.tau) + '_th' \
-               + str(self.threshold) + '_s' + str(self.sigma) + '_b' + str(self.batch_size) \
-               + '_a' + str(self.alpha)
-
+        return str(self.data) + '_' + str(self._m) + 'x' + str(self._n) + '_tau' + str(self.tau) + '_thrsh' \
+               + str(self.threshold) + '_sigma' + str(self.sigma) + '_batch' + str(self.batch_size) \
+               + '_alpha' + str(self.alpha)
 
     def assign_weights(self, weights):
         assign_op = tf.assign(self._weightage_vects, weights)
         self._sess.run(assign_op)
 
-
     def init_toolbox(self, xs):
-        '''
-        This probably only makes sense if the data in xs
+        ''' 
+        This probably only makes sense if the data in xs 
         has been scaled using min-max scaling.
         '''
-        weights = np.random.uniform(size=(self._m * self._n, len(xs[0])))
+        weights = np.random.uniform(size=(self._m * self._n, len(xs[0])),)
         col_wise_max = np.max(xs, axis=0)
         col_wise_min = np.min(xs, axis=0)
         weights = (col_wise_max - col_wise_min) * weights + col_wise_min
@@ -481,7 +462,6 @@ class SOM(object):
         min_index = np.argmin(diff)
         return [min_index, self._locations[min_index]]
 
-
     def map_vects_parallel(self, input_vects):
         input_vects = input_vects[:, np.newaxis, :]
         diff_tensor = self._weightages - input_vects
@@ -492,14 +472,12 @@ class SOM(object):
             result.append(self._locations[index])
         return result
 
-
     def map_vects_memory_aware(self, input_vects):
         result = []
         for x in input_vects:
             _, bmu_loc = self.get_BMU_mine(x)
             result.append(bmu_loc)
         return result
-
 
     def map_vects_confusion(self, input_vects, ys):
         result = []
@@ -518,7 +496,6 @@ class SOM(object):
         bmu_confusion /= real_bmu_counter
         bmu_confusion /= self.num_classes
         return result, bmu_confusion
-
 
     def map_vects_get_confusion_stats(self, input_vects, ys):
         result = []
@@ -700,7 +677,6 @@ class SOM(object):
                      bbox=dict(facecolor=color_names[y[i]], alpha=0.5, lw=0))
         plt.savefig(os.path.join(Constants.PLOT_FOLDER, plot_name))
 
-
     def compactness_stats(self, xs, ys, train=True, strategy='memory-aware'):
         confusion = [0]
         if strategy == 'memory-aware':
@@ -743,7 +719,6 @@ class SOM(object):
         else:
             class_comp = intra_class_distance/self.test_inter_class_distance
         return class_comp, confusion, worst_confusion, usage_rate
-
 
     def population_based_convergence(self, xs, alpha=0.05):
         '''
@@ -798,12 +773,12 @@ class SOM(object):
                len(var_pos_converged) / len(neuron_feature_mean), \
                len(np.intersect1d(mean_pos_converged, var_pos_converged, assume_unique=True)) / len(neuron_feature_mean)
 
-
     def quantization_error(self, xs):
         weights = self._sess.run(self._weightage_vects)
         total_quant_error = [np.linalg.norm(weights - x) for x in xs]
-        diff = np.mean(total_quant_error)
+        diff = np.sum(total_quant_error)
         return total_quant_error, diff
+
 
 
 if __name__ == '__main__':

@@ -148,9 +148,9 @@ def infer_label_10classes(label_string, labels_dict):
     label_string = label_string.split('/')[5]
     return int(labels_dict[label_string])
 
-def from_csv_visual_10classes(path, labels='imagenet-labels.json'):
+def from_csv_visual_10classes(path):
     f = open(path,'r')
-    labels_dict_path = os.path.join(Constants.DATA_FOLDER, labels)
+    labels_dict_path = os.path.join(Constants.DATA_FOLDER, 'imagenet-labels.json')
     labels_dict = json.load(open(labels_dict_path))
     labels_dict = {v: k for k, v in labels_dict.items()}
     xs = []
@@ -161,19 +161,6 @@ def from_csv_visual_10classes(path, labels='imagenet-labels.json'):
         ys.append(infer_label_10classes(lSplit[0], labels_dict))
     f.close()
     return xs, ys
-
-def from_npy_visual_data(path, classes=10):
-    data = np.load(path)
-    xs = data[:,:-1]
-    labels = data[:,-1].astype(np.int)
-
-    uniques = np.unique(labels).tolist()
-    assert np.unique(uniques).size == classes
-
-    id_to_index = {label: index for index, label in enumerate(uniques)}
-    index_to_id = {v: k for k, v in id_to_index.items()}
-    ys = np.array([id_to_index[l] for l in labels])
-    return xs, ys, index_to_id
 
 def synsets_txt_to_dict(txt_path):
     """
@@ -263,14 +250,18 @@ def create_folds(a_xs, v_xs, a_ys, v_ys, n_folds=1, n_classes=100):
             del v_ys_[v_idx]
     return a_xs_fold, v_xs_fold, a_ys_fold, v_ys_fold
 
-def transform_data(xs, test_xs=None, rotation=True, eps=1e-7):
+def transform_data(xs, test_xs=None, rotation=True):
     '''
     Makes the column-wise mean of the input matrix xs 0; renders the variance 1;
     uses the eigenvector matrix $U^T$ to center the data around the direction
     of maximum variation in the data matrix xs.
+    :param ndarray xs:      numpy array (n1,_n_dims) with data to normalize
+    :param ndarray test_xs: numpy array (n2, n_dims) with extra data to transform. Not required
+    :param bool rotation:   rotate data to match eigenvectors when True
+    :return:    transformed data matrices
     '''
     xs -= np.mean(xs, axis=0)
-    xs /= (np.std(xs, axis=0) + eps)
+    xs /= np.std(xs, axis=0)
     if rotation:
         covariance_matrix = np.cov(xs, rowvar=False)
         eig_vals, eig_vecs = np.linalg.eigh(covariance_matrix)
@@ -280,13 +271,38 @@ def transform_data(xs, test_xs=None, rotation=True, eps=1e-7):
 
     if test_xs is not None:
         test_xs -= np.mean(xs, axis=0)
-        test_xs /= (np.std(xs, axis=0) + eps)
-
-    if rotation:
-        test_xs = np.dot(eig_vecs.T, xs.T).T
+        test_xs /= np.std(xs, axis=0)
+        if rotation:
+            test_xs = np.dot(eig_vecs.T, xs.T).T
     return xs, test_xs
 
+
+def from_npy_visual_data(path, classes=10):
+    """
+    Read a numpy array pickled as file .npy
+    :param str path:     file containing the numpy array
+    :param int classes:  number of classes in the data, useful for ID assignment
+    :return:   data examples, labels, and id conversion dictionary
+    """
+    data = np.load(path)
+    xs = data[:,:-1]
+    labels = data[:,-1].astype(np.int)
+
+    uniques = np.unique(labels).tolist()
+    assert np.unique(uniques).size == classes
+
+    id_to_index = {label: index for index, label in enumerate(uniques)}
+    index_to_id = {v: k for k, v in id_to_index.items()}
+    ys = np.array([id_to_index[l] for l in labels])
+    return xs, ys, index_to_id
+
+
 def labels_dictionary(filename):
+    """
+    Generates a python dictionary from the corresponding json file
+    :param str filename: string of the json dictionary
+    :return:   dict <int, string> with ids and labels
+    """
     labels_dict = json.load(open(filename))
     labels_dict = {int(k): v for k, v in labels_dict.items()}
     return labels_dict
