@@ -83,9 +83,9 @@ if __name__ == '__main__':
     v_xs = MinMaxScaler().fit_transform(v_xs)
     a_dim = len(a_xs[0])
     v_dim = len(v_xs[0])
-    som_a = SOM(20, 30, a_dim, n_iterations=10000,
+    som_a = SOM(20, 30, a_dim, checkpoint_dir=soma_path, n_iterations=10000,
                 tau=0.1, threshold=0.6)
-    som_v = SOM(20, 30, v_dim, n_iterations=10000,
+    som_v = SOM(20, 30, v_dim, checkpoint_dir=somv_path, n_iterations=10000,
                 tau=0.1, threshold=0.6)
 
     v_ys = np.array(v_ys)
@@ -101,8 +101,8 @@ if __name__ == '__main__':
         som_a.train(a_xs_train, input_classes=a_ys_train, test_vects=a_xs_dev, test_classes=a_ys_dev)
         som_v.train(v_xs_train, input_classes=v_ys_train, test_vects=v_xs_dev, test_classes=v_ys_dev)
     else:
-        som_a.restore_trained(soma_path)
-        som_v.restore_trained(somv_path)
+        som_a.restore_trained()
+        som_v.restore_trained()
 
     acc_a_list = []
     acc_v_list = []
@@ -127,7 +127,7 @@ if __name__ == '__main__':
         acc_a_list.append(accuracy_a)
         acc_v_list.append(accuracy_v)
         # make a plot - placeholder
-        #hebbian_model.make_plot(a_xs_test[0], v_xs_test[0], v_ys_test[0], v_xs_fold[0], source='a')
+        hebbian_model.make_plot(a_xs_test[0], v_xs_test[0], v_ys_test[0], v_xs_fold[0], source='a')
     plt.plot(acc_a_list, color='teal')
     plt.plot(acc_v_list, color='orange')
     plt.savefig('./plots/'+exp_description+'.pdf', transparent=True)

@@ -16,20 +16,18 @@
 # along with NNsTaxonomicResponding.  If not, see <http://www.gnu.org/licenses/>.
 
 from matplotlib import pyplot as plt
-import matplotlib
 import numpy as np
 from .SOM import SOM
 import os
-import math
-import random
-import matplotlib.patches as mpatches
+import matplotlib
+import matplotlib.patches as m_patches
+import matplotlib.colors as m_colors
 from utils.constants import Constants
 
 fInput = 'input10classes/VisualInputTrainingSet.csv'
 N = 1000
 lenExample = 2048
 NumXClass = 10
-
 
 def create_color_dict(ys, colors):
     unique_y = len(set(ys))
@@ -48,142 +46,122 @@ def create_color_dict(ys, colors):
     print(d)
     return d
 
-
-def printToFileCSV(prototipi, file):
+def printToFileCSV(prototipi,file):
     """
       print of the prototypes in file.csv
       prototipi: dictionary of the prototypes to print
     """
-
-    f = open(file, 'w')
-
+    f = open(file,'w')
     # stampa su file
     for k in prototipi.keys():
-        st = k + ','
+        st = k+','
         for v in prototipi[k]:
-            st += str(v) + ','
-        st = st[0:-1]
-        f.write(st + '\n')
-
+            st += str(v)+','
+            st = st[0:-1]
+            f.write(st+'\n')
     f.close()
 
-
-def showSom(som, inputs, labels, title, filenames=None, show=False):
+def show_som(som, inputs, labels, title, filenames=None, show=False):
     """
-      build of the map with the color associated to the different classes
+    Generates a plot displaying the SOM with its active BMUs and the relative examples
+    associated with them. Each class is associated with a different color.
+    :param SOM som:     SOM instance initialized with the wanted parameters (possibly already trained)
+    :param arr inputs:  np array (n, dims) containing data to be displayed on the map
+    :param arr labels:  np array (n,) containing a label for each example
+    :param str title:   title for the plot
+    :param arr filenames:   actually no clue
+    :param bool show:   whether to call show() or save to file
     """
-    if show:
-        matplotlib.use('TkAgg')
-    else:
-        matplotlib.use('Agg')
-
-    print('Building SOM "{}"...'.format(title))
+    matplotlib.use('TkAgg') #in order to print something
+    print('Building graph "{}"...'.format(title))
     mapped = som.map_vects(inputs)
-    #extra print
-    np.set_printoptions(threshold=np.nan)
-    print(np.array(mapped).reshape((200,10)))
-
-    image_grid = np.zeros(shape=(som._m, som._n, 3))
     print('Done mapping inputs, preparing canvas...')
-
     plt.style.use('dark_background')
     plt.figure()
-    if show:
-        plt.imshow(image_grid)
     plt.title(title)
 
-    # color generation
-    ## for 100 classes
-    # for i in range(100):
-    #   print(i)
-    #   c = Color(rgb=(random.random(), random.random(), random.random()))
-    #   classColor.append(str(c))
-    ## for 10 classes:
-    classColor = ['white', 'red', 'blue', 'cyan', 'yellow', 'green', 'gray', 'brown', 'orange', 'magenta']
-    color_dict = {label: col for label, col in zip(np.unique(labels), classColor)}
+    #generate colors based on the # of classes
+    np.random.seed(42)
+    classes = np.unique(labels)
+    colors = np.random.choice(m_colors, len(classes), replace=False)
+    color_dict = {label: col for label, col in zip(np.unique(labels), colors)}
+    reverse_color_dict = {col: label for label, col in color_dict.items()}
 
     print('Adding labels for each mapped input...', end='')
     xx = [t[0] for t in mapped]
     yy = [t[1] for t in mapped]
     plt.scatter(xx, yy, c='k', marker='.')
     if filenames == None:
-        for i, m in enumerate(mapped):
-            plt.text(m[1], m[0], str('___'), ha='center', va='center', color=color_dict[labels[i]], alpha=0.5,
+      for i, m in enumerate(mapped):
+        plt.text(m[1], m[0], str('___'), ha='center', va='center', color=color_dict[labels[i]], alpha=0.5,
                  bbox=dict(facecolor=color_dict[labels[i]], alpha=0.6, lw=0, boxstyle='round4'))
     else:
-        for i, m in enumerate(mapped):
-            plt.text(m[1], m[0], str('_{:03d}_'.format(i)), ha='center', va='center', color=color_dict[labels[i]],
-                     alpha=0.5,
-                     bbox=dict(facecolor=color_dict[labels[i]], alpha=0.6, lw=0, boxstyle='round4'))
-            print('{}: {}'.format(i, filenames[i]))
+      for i, m in enumerate(mapped):
+        plt.text(m[1], m[0], str('_{:03d}_'.format(i)), ha='center', va='center', color=color_dict[labels[i]],
+                 alpha=0.5,
+                 bbox=dict(facecolor=color_dict[labels[i]], alpha=0.6, lw=0, boxstyle='round4'))
+        print('{}: {}'.format(i, filenames[i]))
     print('done.')
 
-    ## draw of the prototypes on the map
-    # for k in prototipi.keys():
-    #     [BMUi, BMUpos] = som.get_BMU(prototipi[k])
-    #     plt.text(BMUpos[1], BMUpos[0], str(k), ha='center', va='center',
-    #             bbox=dict(facecolor='white', alpha=0.9, lw=0))
-
-    # draw a legend
     print('Drawing legend...')
-    reverse_color_dict = {v: k for k, v in color_dict.items()}
     patch_list = []
-    for i in range(len(classColor)):
-        patch = mpatches.Patch(color=classColor[i], label=reverse_color_dict[classColor[i]])
-        patch_list.append(patch)
+    for i in range(len(classes)):
+      patch = m_patches.Patch(color=colors[i], label=reverse_color_dict[colors[i]])
+      patch_list.append(patch)
     plt.legend(handles=patch_list)
 
-    img_path = os.path.join(Constants.PLOT_FOLDER, 'viz_som.png')
+    img_name = 'som_{}x{}_s{}_a{}.png'.format(som._m, som._n, som.sigma, som.alpha)
+    img_path = os.path.join(Constants.PLOT_FOLDER, img_name)
     print('Saving file: {} ...'.format(img_path))
     if show:
-        plt.show()
+      plt.show()
     else:
-        plt.savefig(img_path)
-    return plt
+      plt.savefig(img_path)
 
 
-def classPrototype(inputs, nameInputs):
-    # build the prototypes of the different classes
-    protClass = dict()
-    nameS = list(set(nameInputs))
-    temp = np.array(inputs)
+def classPrototype(inputs,nameInputs):
+  #build the prototypes of the different classes
+  protClass = dict()
+  nameS = list(set(nameInputs))
+  temp = np.array(inputs)
 
-    i = 0
-    for name in nameS:
-        protClass[name] = np.mean(temp[i:i + NumXClass][:], axis=0)
-        i = i + NumXClass
+  i = 0
+  for name in nameS:
+    protClass[name] = np.mean(temp[i:i+NumXClass][:],axis=0)
+    i = i + NumXClass
 
-    # printToFileCSV(protClass,'prototipi.csv')
-    return protClass
+  #printToFileCSV(protClass,'prototipi.csv')
+  return protClass
+
 
 
 if __name__ == '__main__':
-    # read the inputs from the file fInput and show the SOM with the BMUs of each input
+  #read the inputs from the file fInput and show the SOM with the BMUs of each input
 
-    inputs = np.zeros(shape=(N, lenExample))
-    nameInputs = list()
+  inputs = np.zeros(shape=(N,lenExample))
+  nameInputs = list()
 
-    # read the inputs
-    with open(fInput, 'r') as inp:
-        i = 0
-        for line in inp:
-            if len(line) > 2:
-                inputs[i] = (np.array(line.split(',')[1:])).astype(np.float)
-                nameInputs.append((line.split(',')[0]).split('/')[6])
-                print(nameInputs)
-                i = i + 1
+  # read the inputs
+  with open(fInput, 'r') as inp:
+      i = 0
+      for line in inp:
+        if len(line)>2:
+          inputs[i] = (np.array(line.split(',')[1:])).astype(np.float)
+          nameInputs.append((line.split(',')[0]).split('/')[6])
+          print(nameInputs)
+          i = i+1
 
-    prototipi = classPrototype(inputs, nameInputs)
+  prototipi = classPrototype(inputs,nameInputs)
 
-    # get the 20x30 SOM or train a new one (if the folder does not contain the model)
-    som = SOM(20, 30, lenExample, checkpoint_dir='./AudioModel10classes/', n_iterations=20, sigma=4.0)
+  #get the 20x30 SOM or train a new one (if the folder does not contain the model)
+  som = SOM(20, 30, lenExample, checkpoint_dir= './AudioModel10classes/', n_iterations=20,sigma=4.0)
 
-    loaded = som.restore_trained()
-    if not loaded:
-        som.train(inputs)
+  loaded = som.restore_trained()
+  if not loaded:
+    som.train(inputs)
 
-    for k in range(len(nameInputs)):
-        nameInputs[k] = nameInputs[k].split('_')[0]
+  for k in range(len(nameInputs)):
+    nameInputs[k] = nameInputs[k].split('_')[0]
 
-    # shows the SOM
-    showSom(som, inputs, nameInputs, 1, 'Visual map')
+  #shows the SOM
+  showSom(som,inputs,nameInputs,1,'Visual map')

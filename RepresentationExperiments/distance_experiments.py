@@ -1,7 +1,6 @@
 import numpy as np
 import os
-from utils.utils import from_csv_with_filenames, from_npy_visual_data, from_csv_visual_100classes, \
-    labels_dictionary, transform_data, from_csv_visual_10classes
+from utils import utils
 from utils.constants import Constants
 import matplotlib
 import matplotlib.pyplot as plt
@@ -21,6 +20,7 @@ def get_prototypes(xs, ys):
     for y in set(sorted(ys)):
         result[y] = np.mean(prototype_dict[y], axis=0)
     return result
+
 
 def average_prototype_distance_matrix(xs, ys):
     """
@@ -48,8 +48,10 @@ def average_prototype_distance_matrix(xs, ys):
         ax.text(j, i, '{:0.2f}'.format(distance), ha='center', va='center')
     plt.show(True)
 
+
 def examples_distance(xs, i1, i2):
     return np.linalg.norm(xs[i1]-xs[i2])
+
 
 def cluster_compactness(xs, ys, num_classes):
     print('Fitting clustering model...')
@@ -134,9 +136,13 @@ def show_clustering(xs, ys, num_classes, labels, show_classes=True):
     plt.legend([p[0] for p in plots], cluster_labels if show_classes else classes_labels, loc='center left', bbox_to_anchor=(1, 0.5))
     plt.show()
 
+
+data_path = os.path.join(Constants.DATA_FOLDER, 'video', 'visual_10classes_train_a.npy')
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Analyze representation quality.')
-    parser.add_argument('--csv-path', metavar='csv_path', type=str, required=False, help='The csv file with the extracted representations.')
+    parser.add_argument('--csv-path', metavar='csv_path', type=str, required=True,
+                        help='The csv file with the extracted representations.')
     parser.add_argument('--classes100', action='store_true',
                         help='Specify whether you are analyzing \
                         a file with representations from 100 classes, as the loading functions are different.',
@@ -144,38 +150,41 @@ if __name__ == '__main__':
     parser.add_argument('--is-audio', action='store_true', default=False,
                         help='Specify whether the csv contains audio representations, as the loading functions are different.')
     parser.add_argument('--cluster', action='store_true', default=False)
+    parser.add_argument('--data', metavar='data', type=str, default='new', help='Use new data format or old')
+    parser.add_argument('--path', metavar='path', type=str, default=data_path,
+                        help='Specify the file containing data')
 
     args = parser.parse_args()
-    my_data = True
 
     if not args.classes100:
         num_classes = 10
         if not args.is_audio:
             print("Clustering visual data for 10 classes...")
-            if my_data:
-                xs, ys, label_to_id = from_npy_visual_data("../data/10classes/visual_10classes_train_a.npy")
-                id_names_dict = labels_dictionary('../data/coco-labels.json')
+            if args.data == 'new':
+                print('Reading new data...')
+                xs, ys, label_to_id = utils.from_npy_visual_data(args.path)
+                id_names_dict = utils.labels_dictionary('../data/coco-labels.json')
                 vals = np.unique(ys)
                 labels = {v: id_names_dict[label_to_id[v]] for v in vals}
             else:
                 print("Reading old data...")
-                xs, ys = from_csv_visual_10classes("../data/10classes/VisualInputTrainingSet.csv")
+                xs, ys = utils.from_csv_visual_10classes(args.path)
                 ys = [val - 1000 for val in ys]
                 xs = np.array(xs)
                 ys = np.array(ys)
                 labels = np.unique(ys)
-
         else:
-            xs, ys, _ = from_csv_with_filenames(args.csv_path)
+            xs, ys, _ = utils.from_csv_with_filenames(args.csv_path)
     else:
         num_classes = 100
         if not args.is_audio:
-            xs, ys = from_csv_visual_100classes(args.csv_path)
+            xs, ys = utils.from_csv_visual_100classes(args.csv_path)
         else:
-            xs, ys, _ =  from_csv_with_filenames(args.csv_path)
+            xs, ys, _ =  utils.from_csv_with_filenames(args.csv_path)
+        labels = np.unique(ys)
 
-    print(xs.shape, ys.shape)
-
-    xs, _ = transform_data(xs)
-    cluster_compactness(xs, ys, num_classes)
-    #show_clustering(xs, ys, num_classes, labels, show_classes=False)
+    if not args.cluster:
+        average_prototype_distance_matrix(xs, ys)
+    else:
+        cluster_compactness(xs, ys, num_classes)
+        show_clustering(xs, ys, num_classes, labels)

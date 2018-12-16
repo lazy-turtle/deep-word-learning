@@ -1,19 +1,15 @@
 from models.som.SOM import SOM
-from models.som.SOMTest import showSom
+from models.som.SOMTest import show_som
 import numpy as np
 from utils.constants import Constants
-from utils.utils import from_npy_visual_data, transform_data
-from sklearn.preprocessing import MinMaxScaler
+from utils.utils import from_npy_visual_data, transform_data, from_csv_visual_10classes
 import os
 import json
 import argparse
 
-visual_data_path = os.path.join(Constants.DATA_FOLDER, '10classes', 'visual_10classes_train_a.npy')
-model_path = os.path.join(Constants.DATA_FOLDER, 'saved_models', 'video_20x20_tau0.1_thrsh0.6_sigma10.0_batch128_alpha0.1_final')
-label_path = os.path.join(Constants.DATA_FOLDER, 'coco-labels.json')
-
-N = 1000
-dim = 2048
+visual_data_path = os.path.join(Constants.DATA_FOLDER, 'video', 'VisualInputTrainingSet.csv')
+model_path = os.path.join(Constants.DATA_FOLDER, 'saved_models', 'old_20x30_ta0.1_th0.6_s10.0_b128_a0.1_final')
+label_path = os.path.join(Constants.DATA_FOLDER, 'labels', 'coco-labels.json')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Visualise a Self Organising Map.')
@@ -21,12 +17,20 @@ if __name__ == '__main__':
     parser.add_argument('--subsample', action='store_true', default=False)
     args = parser.parse_args()
 
-    id_to_label = json.load(open(label_path))
-    id_to_label = {int(k): v for k,v in id_to_label.items()}
-    xs, ys, ids_dict = from_npy_visual_data(visual_data_path)
-    np.random.seed(42)
+    if 'csv' in visual_data_path:
+        xs, ys = from_csv_visual_10classes(visual_data_path)
+        ys = [v - 1000 for v in ys]
+        xs = np.array(xs)
+        ys = np.array(ys)
+        labels = ys
+    else:
+        id_to_label = json.load(open(label_path))
+        id_to_label = {int(k): v for k,v in id_to_label.items()}
+        xs, ys, ids_dict = from_npy_visual_data(visual_data_path)
+        labels = np.array([id_to_label[ids_dict[x]] for x in ys])
 
     if args.subsample:
+        np.random.seed(42)
         xs1 = []
         ys1 = []
         classes = np.arange(10)
@@ -39,10 +43,10 @@ if __name__ == '__main__':
         ys = np.array(ys1).reshape(100)
 
     xs, _ = transform_data(xs)
-    som_shape = (20, 20)
+    som_shape = (20, 30)
+    dim = xs.shape[1]
 
     som = SOM(som_shape[0], som_shape[1], dim, batch_size=128, checkpoint_loc=args.model, data='video')
     som.restore_trained(args.model)
 
-    labels = np.array([id_to_label[ids_dict[x]] for x in ys])
-    showSom(som, xs, labels, 'Visual map', show=True)
+    show_som(som, xs, labels, 'Visual map', show=False)
