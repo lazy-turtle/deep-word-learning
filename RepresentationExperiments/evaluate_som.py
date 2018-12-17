@@ -8,7 +8,9 @@
 import numpy as np
 import argparse
 from models.som.SOM import SOM
-from utils.utils import from_csv_with_filenames, from_csv_visual_10classes, from_csv_visual_100classes
+from utils.constants import Constants
+from utils.utils import from_npy_visual_data, from_csv_visual_100classes, from_csv_with_filenames
+import os
 
 
 
@@ -35,8 +37,8 @@ def class_compactness(som, xs, ys):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Analyze a SOM and get some measures.')
-    parser.add_argument('--csv-path', metavar='csv_path', type=str, required=True, help='The csv file with the test data.')
-    parser.add_argument('--model-path', metavar='model_path', type=str, required=True, help='The folder containing the tf checkpoint file.')
+    parser.add_argument('--csv-path', metavar='csv_path', type=str, help='The csv file with the test data.')
+    parser.add_argument('--model-path', metavar='model_path', type=str, help='The folder containing the tf checkpoint file.')
     parser.add_argument('--classes100', action='store_true',
                         help='Specify whether you are analyzing \
                         a file with representations from 100 classes, as the loading functions are different.',
@@ -45,13 +47,17 @@ if __name__ == '__main__':
                         help='Specify whether the csv contains audio representations, as the loading functions are different.')
     args = parser.parse_args()
 
+    data_path = os.path.join(Constants.DATA_FOLDER,
+                             'video', 'visual_10classes_train_a.npy')
+    model_path = os.path.join(Constants.DATA_FOLDER,
+                              'saved_models', 'video_20x30_tau0.1_thrsh0.6_sigma10.0_batch128_alpha0.1_final')
     if not args.classes100:
         num_classes = 10
         if not args.is_audio:
-            xs, ys = from_csv_visual_10classes(args.csv_path)
+            xs, ys, _ = from_npy_visual_data(data_path)
         else:
             xs, ys, _ = from_csv_with_filenames(args.csv_path)
-        ys = [int(y)-1000 for y in ys] # see comment in average_prototype_distance_matrix
+            ys = [int(y)-1000 for y in ys] # see comment in average_prototype_distance_matrix
     else:
         num_classes = 100
         if not args.is_audio:
@@ -59,8 +65,8 @@ if __name__ == '__main__':
         else:
             xs, ys, _ =  from_csv_with_filenames(args.csv_path)
 
-    som = SOM(20, 30, len(xs[0]), checkpoint_dir=args.model_path)
-    som.restore_trained()
+    som = SOM(20, 30, xs.shape[1], checkpoint_loc=model_path)
+    som.restore_trained(model_path)
     measure = class_compactness(som, xs, ys)
     print('Class Compactness: {}.'.format(measure))
     print('Avg Compactness: {}\n Variance: {}'.format(np.mean(measure), np.var(measure)))

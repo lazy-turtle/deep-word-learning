@@ -276,9 +276,13 @@ class SOM(object):
             summary_writer = tf.summary.FileWriter(self.logs_path)
             old_train_comp = [0]
             old_test_comp = [0]
+
+            iters = ''
+            stats = ''
             for iter_no in range(self._n_iterations):
                 if iter_no % 5 == 0:
-                    print('Iteration {}'.format(iter_no))
+                    iters = '{}/{}\n'.format(iter_no, self._n_iterations)
+                    self.print_progress(iter_no, self._n_iterations, iters + stats)
                     # delta sanity check
                     delta = self._sess.run(self.weightage_delta, feed_dict={self._vect_input: input_vects[0:1],
                             self._iter_input: iter_no})
@@ -308,11 +312,10 @@ class SOM(object):
                 if iter_no % log_every == 0:
                     if logging == True:
                     #Run summaries
-                        summary = ''
                         if input_classes is not None:
                             train_comp = old_train_comp
                             train_comp, train_confusion, train_worst_confusion, train_usage_rate = self.compactness_stats(input_vects, input_classes)
-                            summary += '\nTRAIN - comp.: {:.4f}, conf.: {:.4f}, bmu rate:{:.4f}\n'\
+                            stats = 'TRAIN - comp.: {:.4f}, conf.: {:.4f}, bmu rate:{:.4f}\n'\
                                 .format(np.mean(train_comp), train_confusion, train_usage_rate)
                             old_train_comp = train_comp
                             train_mean_conv, train_var_conv, train_conv = self.population_based_convergence(input_vects)
@@ -325,7 +328,7 @@ class SOM(object):
                         if test_classes is not None:
                             test_comp = old_test_comp
                             test_comp, test_confusion, test_worst_confusion, test_usage_rate = self.compactness_stats(test_vects, test_classes, train=False)
-                            summary += '\nTEST - comp.: {:.4f}, conf.: {:.4f}, bmu rate:{:.4f}\n'\
+                            stats += 'TEST  - comp.: {:.4f}, conf.: {:.4f}, bmu rate:{:.4f}\n'\
                                 .format(np.mean(test_comp), test_confusion, test_usage_rate)
                             old_test_comp = test_comp
                             test_mean_conv, test_var_conv, test_conv = self.population_based_convergence(test_vects)
@@ -335,7 +338,7 @@ class SOM(object):
                         else:
                             test_comp = [0]
                             test_conv = [0]
-                        self.print_progress(iter_no, self._n_iterations, summary)
+                        self.print_progress(iter_no, self._n_iterations, iters + stats)
                         summary = self._sess.run(self.summaries,
                                                  feed_dict={self._train_compactness: train_comp,
                                                             self._test_compactness: test_comp,
@@ -363,7 +366,8 @@ class SOM(object):
                     if not os.path.exists(self.checkpoint_loc):
                         os.makedirs(self.checkpoint_loc)
                     path = dirpath + 'model'
-                    print('Saving in {}'.format(path))
+                    output = 'Saving in {}'.format(path)
+                    self.print_progress(iter_no, self._n_iterations, iters + stats + output)
                     saver.save(self._sess, path, global_step=iter_no)
             for i, loc in enumerate(self._locations):
                 centroid_grid[loc[0]].append(self._weightages[i])

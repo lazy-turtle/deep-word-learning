@@ -1,6 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from utils.utils import transform_data
+from sklearn.preprocessing import MinMaxScaler
 import os
 
 DATA_PATH = '../data/video/visual_10classes_train_a.npy'
@@ -26,7 +27,7 @@ def load_data(type, path):
         data_x = data[:, :-1]
         data_y = data[:, -1].astype(np.int)
     else:
-        data_x, data_y = from_csv_visual_10classes('../data/10classes/VisualInputTrainingSet.csv')
+        data_x, data_y = from_csv_visual_10classes('../data/video/VisualInputTrainingSet.csv')
     return data_x, data_y
 
 def smooth(scalars, weight=0.0):  # Weight between 0 and 1
@@ -40,11 +41,20 @@ def smooth(scalars, weight=0.0):  # Weight between 0 and 1
     return smoothed
 
 # Data
-data_type = "new"
+data_type = "old"
 check = "mean"
 
 data_x, data_y = load_data(data_type, DATA_PATH)
+
+# normalize data somehow
 #data_x, _ = transform_data(data_x)
+scaler = MinMaxScaler()
+data_x = scaler.fit_transform(data_x)
+#m = data_x.min()
+#M = data_x.max()
+#data_x = ((data_x - m) / (M - m))
+#print(data_x.max())
+
 uniques = np.unique(data_y).tolist()
 indices_dict = {val: i for i, val in enumerate(uniques)}
 id_to_index = {label: index for index, label in enumerate(uniques)}
@@ -52,7 +62,7 @@ colors = ['red', 'pink', 'purple', 'blue', 'cyan', 'green', 'olive', 'orange', '
 
 smooth_val = 0.0
 xs = np.arange(2048)
-plt.figure(figsize=(40, 20))
+plt.figure(figsize=(12, 4))
 for c in range(10):
     print("class {} - label: {} - col: {}".format(c, data_y[c*100], colors[c]))
     rows = data_x[c*100:c*100+100]
