@@ -65,6 +65,7 @@ class SOM(object):
         #Assign required variables first
         self._m = m
         self._n = n
+        self.seed = seed
         self.alpha = 0.3 if alpha is None else float(alpha)
         self.sigma = max(m,n) / 2.0 if sigma is None else float(sigma)
         self.tau = tau
@@ -98,7 +99,7 @@ class SOM(object):
 
             #Randomly initialized weightage vectors for all neurons,
             #stored together as a matrix Variable of size [m*n, dim]
-            self._weightage_vects = tf.Variable(tf.random_normal([m*n, dim], mean=0, stddev=1, seed=42))
+            self._weightage_vects = tf.Variable(tf.random_normal([m*n, dim], mean=0, stddev=1, seed=seed))
 
             #Matrix of size [m*n, 2] for SOM grid locations
             #of neurons
@@ -307,11 +308,12 @@ class SOM(object):
                 if iter_no % log_every == 0:
                     if logging == True:
                     #Run summaries
+                        summary = ''
                         if input_classes is not None:
                             train_comp = old_train_comp
                             train_comp, train_confusion, train_worst_confusion, train_usage_rate = self.compactness_stats(input_vects, input_classes)
-                            print('Train compactness: {}'.format(np.mean(train_comp)))
-                            print('Train confusion: {}'.format(train_confusion))
+                            summary += '\nTRAIN - comp.: {:.4f}, conf.: {:.4f}, bmu rate:{:.4f}\n'\
+                                .format(np.mean(train_comp), train_confusion, train_usage_rate)
                             old_train_comp = train_comp
                             train_mean_conv, train_var_conv, train_conv = self.population_based_convergence(input_vects)
                             _ , train_quant_error = self.quantization_error(input_vects)
@@ -323,8 +325,8 @@ class SOM(object):
                         if test_classes is not None:
                             test_comp = old_test_comp
                             test_comp, test_confusion, test_worst_confusion, test_usage_rate = self.compactness_stats(test_vects, test_classes, train=False)
-                            print('Test compactness: {}'.format(np.mean(test_comp)))
-                            print('Test confusion: {}'.format(test_confusion))
+                            summary += '\nTEST - comp.: {:.4f}, conf.: {:.4f}, bmu rate:{:.4f}\n'\
+                                .format(np.mean(test_comp), test_confusion, test_usage_rate)
                             old_test_comp = test_comp
                             test_mean_conv, test_var_conv, test_conv = self.population_based_convergence(test_vects)
                             _, test_quant_error = self.quantization_error(test_vects)
@@ -333,6 +335,7 @@ class SOM(object):
                         else:
                             test_comp = [0]
                             test_conv = [0]
+                        self.print_progress(iter_no, self._n_iterations, summary)
                         summary = self._sess.run(self.summaries,
                                                  feed_dict={self._train_compactness: train_comp,
                                                             self._test_compactness: test_comp,
@@ -373,7 +376,7 @@ class SOM(object):
             if not os.path.exists(self.checkpoint_loc):
                 os.makedirs(self.checkpoint_loc)
             path = dirpath + 'model'
-            print('Saving in {}'.format(path))
+            self.print_progress(self._n_iterations, self._n_iterations, 'Saving model at "{}"'.format(path))
             saver.save(self._sess, path)
 
     def restore_trained(self, path):
@@ -402,24 +405,28 @@ class SOM(object):
             print('NO CHECKPOINT FOUND')
             return False
 
+
     def get_experiment_name(self):
         return str(self.data) + '_' + str(self._m) + 'x' + str(self._n) + '_tau' + str(self.tau) + '_thrsh' \
                + str(self.threshold) + '_sigma' + str(self.sigma) + '_batch' + str(self.batch_size) \
                + '_alpha' + str(self.alpha)
 
+
     def assign_weights(self, weights):
         assign_op = tf.assign(self._weightage_vects, weights)
         self._sess.run(assign_op)
+
 
     def init_toolbox(self, xs):
         ''' 
         This probably only makes sense if the data in xs 
         has been scaled using min-max scaling.
         '''
-        weights = np.random.uniform(size=(self._m * self._n, len(xs[0])),)
         col_wise_max = np.max(xs, axis=0)
         col_wise_min = np.min(xs, axis=0)
-        weights = (col_wise_max - col_wise_min) * weights + col_wise_min
+        shape = (self._m * self._n, xs.shape[1])
+        np.random.seed(self.seed)
+        weights = np.random.uniform(low=col_wise_min, high=col_wise_max, size=shape)
         self.assign_weights(weights)
 
 
@@ -431,6 +438,7 @@ class SOM(object):
         if not self._trained:
             raise ValueError("SOM not trained yet")
         return self._centroid_grid
+
 
     def map_vects(self, input_vects):
         """
@@ -451,16 +459,19 @@ class SOM(object):
             to_return.append(self._locations[min_index])
         return to_return
 
+
     def get_BMU(self, input_vect):
         min_index = min([i for i in range(len(self._weightages))],
                             key=lambda x: np.linalg.norm(input_vect-
                                                          self._weightages[x]))
         return [min_index,self._locations[min_index]]
 
+
     def get_BMU_mine(self, input_vect):
         diff = np.linalg.norm(self._weightages - input_vect, axis=1)
         min_index = np.argmin(diff)
         return [min_index, self._locations[min_index]]
+
 
     def map_vects_parallel(self, input_vects):
         input_vects = input_vects[:, np.newaxis, :]
@@ -472,12 +483,14 @@ class SOM(object):
             result.append(self._locations[index])
         return result
 
+
     def map_vects_memory_aware(self, input_vects):
         result = []
         for x in input_vects:
             _, bmu_loc = self.get_BMU_mine(x)
             result.append(bmu_loc)
         return result
+
 
     def map_vects_confusion(self, input_vects, ys):
         result = []
@@ -496,6 +509,7 @@ class SOM(object):
         bmu_confusion /= real_bmu_counter
         bmu_confusion /= self.num_classes
         return result, bmu_confusion
+
 
     def map_vects_get_confusion_stats(self, input_vects, ys):
         result = []
@@ -531,6 +545,7 @@ class SOM(object):
                     return True
         return False
 
+
     def print_som_evaluation(self, input_vects, ys):
         bmu_positions = self.map_vects_memory_aware(input_vects)
         class_comp = self.compactness_stats(input_vects, ys, train=False)
@@ -538,6 +553,7 @@ class SOM(object):
         print('Average Compactness: {}'.format(np.mean(class_comp)))
         print('Compactness Variance: {}'.format(np.var(class_comp)))
         print('Confusion: {}'.format(np.mean(confusion)))
+
 
     def neuron_collapse(self, input_vects, bmu_positions=None):
         if bmu_positions == None:
@@ -548,6 +564,7 @@ class SOM(object):
         print('Detected {} unique BMUs. \n Ratio of {} over the examples; ratio of {} over the number of neurons' \
                .format(len(set(bmu_positions)), ratio_examples, ratio_neurons))
         return ratio_examples, ratio_neurons
+
 
     def neuron_collapse_classwise(self, input_vects, ys, bmu_positions=None,):
         if bmu_positions == None:
@@ -631,12 +648,8 @@ class SOM(object):
         return superpositions
 
 
-
-
-    def get_activations(self, input_vect, normalize=True, threshold=0.6, mode='exp',
-                        tau=0.6):
+    def get_activations(self, input_vect, normalize=True, threshold=0.6, mode='exp', tau=0.6):
       # get activations for the word learning
-
       # Quantization error:
       activations = list()
       pos_activations = list()
@@ -658,7 +671,6 @@ class SOM(object):
       return [activations,pos_activations]
 
 
-
     def plot_som(self, X, y, plot_name='som-viz.png'):
         image_grid = np.zeros(shape=(self._n,self._m))
 
@@ -676,6 +688,7 @@ class SOM(object):
             plt.text(m[1], m[0], color_names[y[i]], ha='center', va='center',
                      bbox=dict(facecolor=color_names[y[i]], alpha=0.5, lw=0))
         plt.savefig(os.path.join(Constants.PLOT_FOLDER, plot_name))
+
 
     def compactness_stats(self, xs, ys, train=True, strategy='memory-aware'):
         confusion = [0]
@@ -719,6 +732,7 @@ class SOM(object):
         else:
             class_comp = intra_class_distance/self.test_inter_class_distance
         return class_comp, confusion, worst_confusion, usage_rate
+
 
     def population_based_convergence(self, xs, alpha=0.05):
         '''
@@ -773,12 +787,30 @@ class SOM(object):
                len(var_pos_converged) / len(neuron_feature_mean), \
                len(np.intersect1d(mean_pos_converged, var_pos_converged, assume_unique=True)) / len(neuron_feature_mean)
 
+
     def quantization_error(self, xs):
         weights = self._sess.run(self._weightage_vects)
         total_quant_error = [np.linalg.norm(weights - x) for x in xs]
         diff = np.mean(total_quant_error)
         return total_quant_error, diff
 
+
+    def print_progress(self, iter, total, suffix='', length=100, fill='='):
+        """
+        Call in a loop to create terminal progress bar
+        :param int iter:    current iteration
+        :param int total:   required number of iterations
+        :param str suffix:  suffix string to append at the end
+        :param int length:  amount of chars to use for the bar
+        :param str fill:    char to use for the filled out part
+        """
+        percent = ("{0:.2f}").format(100 * (iter / float(total)))
+        filledLength = int(length * iter // total)
+        bar = fill * filledLength + '-' * (length - filledLength)
+        print('\r[{}] {} - {}'.format(bar, percent, suffix), end='\r')
+        # Print New Line on Complete
+        if iter == total:
+            print()
 
 
 if __name__ == '__main__':

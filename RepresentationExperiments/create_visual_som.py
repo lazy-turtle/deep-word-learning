@@ -7,8 +7,12 @@ import os
 import json
 import argparse
 
-visual_data_path = os.path.join(Constants.DATA_FOLDER, 'video', 'VisualInputTrainingSet.csv')
-model_path = os.path.join(Constants.DATA_FOLDER, 'saved_models', 'old_20x30_ta0.1_th0.6_s10.0_b128_a0.1_final')
+visual_data_path = os.path.join(Constants.DATA_FOLDER,
+                                'video',
+                                'visual_10classes_train_a.npy')
+model_path = os.path.join(Constants.DATA_FOLDER,
+                          'saved_models',
+                          'video_10x20_tau0.1_thrsh0.6_sigma5.0_batch128_alpha0.1_final')
 label_path = os.path.join(Constants.DATA_FOLDER, 'labels', 'coco-labels.json')
 
 if __name__ == '__main__':
@@ -42,11 +46,11 @@ if __name__ == '__main__':
         xs = np.array(xs1).reshape((100, 2048))
         ys = np.array(ys1).reshape(100)
 
-    xs, _ = transform_data(xs)
-    som_shape = (20, 30)
+    #xs, _ = transform_data(xs)
+    som_shape = (10, 20)
     dim = xs.shape[1]
 
     som = SOM(som_shape[0], som_shape[1], dim, batch_size=128, checkpoint_loc=args.model, data='video')
     som.restore_trained(args.model)
 
-    show_som(som, xs, labels, 'Visual map', show=False)
+    show_som(som, xs, labels, 'Visual map', show=True)
