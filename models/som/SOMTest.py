@@ -21,7 +21,7 @@ from .SOM import SOM
 import os
 import matplotlib
 import matplotlib.patches as m_patches
-import matplotlib.colors as m_colors
+import seaborn as sb
 from utils.constants import Constants
 
 fInput = 'input10classes/VisualInputTrainingSet.csv'
@@ -61,7 +61,7 @@ def printToFileCSV(prototipi,file):
             f.write(st+'\n')
     f.close()
 
-def show_som(som, inputs, labels, title, filenames=None, show=False):
+def show_som(som, inputs, labels, title, filenames=None, show=False, dark=True):
     """
     Generates a plot displaying the SOM with its active BMUs and the relative examples
     associated with them. Each class is associated with a different color.
@@ -74,27 +74,35 @@ def show_som(som, inputs, labels, title, filenames=None, show=False):
     """
     matplotlib.use('TkAgg') #in order to print something
     print('Building graph "{}"...'.format(title))
-    mapped = som.map_vects(inputs)
+    classes = np.unique(labels)
+    mapped = np.array(som.map_vects(inputs))
+
+    bmu_list = []
+    for c in classes:
+        class_bmu = mapped[np.where(labels == c)]
+        bmu_list.append(np.unique(class_bmu, axis=0, return_counts=True))
     print('Done mapping inputs, preparing canvas...')
-    plt.style.use('dark_background')
-    plt.figure()
+
+    palette = 'Set1'
+    if dark:
+        plt.style.use('dark_background')
+        palette = 'Set2'
+    plt.figure(figsize=(som._n/2.0, som._m/2.0))
+    plt.xlim([0, som._n])
+    plt.ylim([0, som._m])
     plt.title(title)
 
     #generate colors based on the # of classes
     np.random.seed(42)
-    classes = np.unique(labels)
-    colors = np.random.choice(m_colors, len(classes), replace=False)
+    colors = sb.color_palette(palette, n_colors=len(classes))
     color_dict = {label: col for label, col in zip(np.unique(labels), colors)}
-    reverse_color_dict = {col: label for label, col in color_dict.items()}
 
     print('Adding labels for each mapped input...', end='')
-    xx = [t[0] for t in mapped]
-    yy = [t[1] for t in mapped]
-    plt.scatter(xx, yy, c='k', marker='.')
     if filenames == None:
-      for i, m in enumerate(mapped):
-        plt.text(m[1], m[0], str('___'), ha='center', va='center', color=color_dict[labels[i]], alpha=0.5,
-                 bbox=dict(facecolor=color_dict[labels[i]], alpha=0.6, lw=0, boxstyle='round4'))
+        for i, (bmu, counts) in enumerate(bmu_list):
+            xx = [m[1] for m in bmu]
+            yy = [m[0] for m in bmu]
+            plt.scatter(xx, yy, s=counts*4, c=colors[i])
     else:
       for i, m in enumerate(mapped):
         plt.text(m[1], m[0], str('_{:03d}_'.format(i)), ha='center', va='center', color=color_dict[labels[i]],
@@ -106,9 +114,9 @@ def show_som(som, inputs, labels, title, filenames=None, show=False):
     print('Drawing legend...')
     patch_list = []
     for i in range(len(classes)):
-      patch = m_patches.Patch(color=colors[i], label=reverse_color_dict[colors[i]])
+      patch = m_patches.Patch(color=colors[i], label=classes[i])
       patch_list.append(patch)
-    plt.legend(handles=patch_list)
+    plt.legend(handles=patch_list, loc='center left',bbox_to_anchor=(1, 0.5))
 
     img_name = 'som_{}x{}_s{}_a{}.png'.format(som._m, som._n, som.sigma, som.alpha)
     img_path = os.path.join(Constants.PLOT_FOLDER, img_name)

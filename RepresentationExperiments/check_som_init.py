@@ -1,7 +1,8 @@
 from models.som.SOM import SOM
 from utils.constants import Constants
-from utils.utils import from_csv_with_filenames, from_csv_visual_100classes, from_csv, to_csv, from_npy_visual_data
+from utils.utils import from_csv_with_filenames, from_csv_visual_100classes, from_npy_visual_data
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
 from utils.utils import transform_data
 import os
 import numpy as np
@@ -26,7 +27,7 @@ if __name__ == '__main__':
     parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Random generator seed')
     parser.add_argument('--neurons1', type=int, default=20,
                         help='Number of neurons for audio SOM, first dimension')
-    parser.add_argument('--neurons2', type=int, default=30,
+    parser.add_argument('--neurons2', type=int, default=20,
                         help='Number of neurons for audio SOM, second dimension')
     parser.add_argument('--epochs', type=int, default=100,
                         help='Number of epochs the SOM will be trained for')
@@ -39,7 +40,6 @@ if __name__ == '__main__':
     parser.add_argument('--batch', type=int, default=128)
 
     args = parser.parse_args()
-
 
     if args.data == 'audio':
         xs, ys, _ = from_csv_with_filenames(audio_data_path)
@@ -57,21 +57,21 @@ if __name__ == '__main__':
     dim = xs.shape[1]
     som = SOM(args.neurons1, args.neurons2, dim, n_iterations=args.epochs, alpha=args.alpha,
                  tau=0.1, threshold=0.6, batch_size=args.batch, data=args.data, sigma=args.sigma,
-                 num_classes=args.classes, sigma_decay='linear')
+                 num_classes=args.classes, sigma_decay='linear', seed=args.seed)
 
     if args.subsample:
         xs, _, ys, _ = train_test_split(xs, ys, test_size=0.6, stratify=ys, random_state=args.seed)
     print('Training on {} examples.'.format(len(xs)))
 
     xs_train, xs_test, ys_train, ys_test = train_test_split(xs, ys, test_size=0.2, stratify=ys, random_state=args.seed)
-    xs_train, xs_test = transform_data(xs_train, xs_test, rotation=True)
+    #xs_train, xs_test = transform_data(xs_train, xs_test, rotation=True)
     xs_train, xs_val, ys_train, ys_val = train_test_split(xs_train, ys_train, test_size=0.5, stratify=ys_train,
                                                           random_state=args.seed)
 
-    #scaler = MinMaxScaler()
-    #xs_train = scaler.fit_transform(xs_train)
-    #xs_val = scaler.transform(xs_val)
-    #som.init_toolbox(xs_train)
+    scaler = MinMaxScaler(feature_range=(-1, 1))
+    xs_train = scaler.fit_transform(xs_train)
+    xs_val = scaler.transform(xs_val)
+    som.init_toolbox(xs_train)
     #b = som.quantization_error(xs_train)
     np.set_printoptions(threshold=np.nan)
     bmus = som._sess.run(som.bmu_indexes, feed_dict={som._vect_input: xs_train})
