@@ -1,9 +1,9 @@
 import numpy as np
 from matplotlib import pyplot as plt
-from utils.utils import create_folds, transform_data
+from utils.utils import transform_data
 import os
 
-DATA_PATH = '../data/10classes/visual_10classes_train_b.npy'
+DATA_PATH = '../data/video/visual_10classes_train_a.npy'
 
 
 def from_csv_visual_10classes(path, labels='imagenet-labels.json'):
@@ -44,6 +44,7 @@ data_type = "new"
 check = "mean"
 
 data_x, data_y = load_data(data_type, DATA_PATH)
+#data_x, _ = transform_data(data_x)
 uniques = np.unique(data_y).tolist()
 indices_dict = {val: i for i, val in enumerate(uniques)}
 id_to_index = {label: index for index, label in enumerate(uniques)}
@@ -72,7 +73,7 @@ for c in range(10):
 
 plt.xlim([-10,2058])
 plt.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.05)
-plt.gca().set_ylim(bottom=-0.15)
+#plt.gca().set_ylim(bottom=-0.15)
 plt.gca().yaxis.grid(True)
-#plt.show()
-plt.savefig("C:/Users/Edoardo/Desktop/representations/repr_{}_{}_smooth{}_b.png".format(data_type, check, smooth_val))
+plt.show()
+#plt.savefig("C:/Users/Edoardo/Desktop/representations/repr_{}_{}_smooth{}_b.png".format(data_type, check, smooth_val))
