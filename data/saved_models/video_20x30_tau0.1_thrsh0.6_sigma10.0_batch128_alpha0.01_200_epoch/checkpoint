@@ -1,6 +1,0 @@
-model_checkpoint_path: "model-200"
-all_model_checkpoint_paths: "../video_20x30_tau0.1_thrsh0.6_sigma10.0_batch128_alpha0.01_0_epoch/model-0"
-all_model_checkpoint_paths: "../video_20x30_tau0.1_thrsh0.6_sigma10.0_batch128_alpha0.01_50_epoch/model-50"
-all_model_checkpoint_paths: "../video_20x30_tau0.1_thrsh0.6_sigma10.0_batch128_alpha0.01_100_epoch/model-100"
-all_model_checkpoint_paths: "../video_20x30_tau0.1_thrsh0.6_sigma10.0_batch128_alpha0.01_150_epoch/model-150"
-all_model_checkpoint_paths: "model-200"

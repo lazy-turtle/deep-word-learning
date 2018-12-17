@@ -1,6 +1,0 @@
-model_checkpoint_path: "model"
-all_model_checkpoint_paths: "../old_20x30_ta0.1_th0.6_s10.0_b128_a0.1_20_epoch/model-20"
-all_model_checkpoint_paths: "../old_20x30_ta0.1_th0.6_s10.0_b128_a0.1_40_epoch/model-40"
-all_model_checkpoint_paths: "../old_20x30_ta0.1_th0.6_s10.0_b128_a0.1_60_epoch/model-60"
-all_model_checkpoint_paths: "../old_20x30_ta0.1_th0.6_s10.0_b128_a0.1_80_epoch/model-80"
-all_model_checkpoint_paths: "model"
