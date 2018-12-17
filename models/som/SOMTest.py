@@ -61,7 +61,7 @@ def printToFileCSV(prototipi,file):
             f.write(st+'\n')
     f.close()
 
-def show_som(som, inputs, labels, title, filenames=None, show=False, dark=True):
+def show_som(som, inputs, labels, title, filenames=None, show=False, dark=True, scatter=True):
     """
     Generates a plot displaying the SOM with its active BMUs and the relative examples
     associated with them. Each class is associated with a different color.
@@ -83,13 +83,16 @@ def show_som(som, inputs, labels, title, filenames=None, show=False, dark=True):
         bmu_list.append(np.unique(class_bmu, axis=0, return_counts=True))
     print('Done mapping inputs, preparing canvas...')
 
-    palette = 'Set1'
+    palette = 'colorblind'
     if dark:
         plt.style.use('dark_background')
-        palette = 'Set2'
-    plt.figure(figsize=(som._n/2.0, som._m/2.0))
-    plt.xlim([0, som._n])
-    plt.ylim([0, som._m])
+        palette = 'bright'
+    plt.figure(figsize=(som._n/3.0, som._m/3.0))
+    plt.xlim([-1, som._n])
+    plt.ylim([-1, som._m])
+    plt.gca().set_xticks(np.arange(-1, som._n, 1))
+    plt.gca().set_yticks(np.arange(-1, som._m, 1))
+    plt.gca().grid(alpha=0.2, linestyle=':')
     plt.title(title)
 
     #generate colors based on the # of classes
@@ -99,10 +102,15 @@ def show_som(som, inputs, labels, title, filenames=None, show=False, dark=True):
 
     print('Adding labels for each mapped input...', end='')
     if filenames == None:
-        for i, (bmu, counts) in enumerate(bmu_list):
-            xx = [m[1] for m in bmu]
-            yy = [m[0] for m in bmu]
-            plt.scatter(xx, yy, s=counts*4, c=colors[i])
+        if scatter:
+            for i, (bmu, counts) in enumerate(bmu_list):
+                xx = [m[1] for m in bmu]
+                yy = [m[0] for m in bmu]
+                plt.scatter(xx, yy, s=counts*16, color=colors[i])
+        else:
+            for i, m in enumerate(mapped):
+                plt.text(m[1], m[0], str('__'), ha='center', va='center', color=color_dict[labels[i]],alpha=0.5,
+                         bbox=dict(facecolor=color_dict[labels[i]], alpha=0.6, lw=0, boxstyle='round4'))
     else:
       for i, m in enumerate(mapped):
         plt.text(m[1], m[0], str('_{:03d}_'.format(i)), ha='center', va='center', color=color_dict[labels[i]],
