@@ -2,4 +2,4 @@ __*__*
 *.pkl
 *.pyc
 .idea/*
-saved_models/*_epoch
+saved_models/*_epoch/
