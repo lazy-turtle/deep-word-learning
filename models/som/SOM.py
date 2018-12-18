@@ -314,8 +314,8 @@ class SOM(object):
                     #Run summaries
                         if input_classes is not None:
                             train_comp = old_train_comp
-                            train_comp, train_confusion, train_worst_confusion, train_usage_rate = self.compactness_stats(input_vects, input_classes)
-                            stats = 'TRAIN - comp.: {:.4f}, conf.: {:.4f}, bmu rate:{:.4f}\n'\
+                            train_comp, train_confusion, train_worst_confusion, train_usage_rate = self.calc_stats(input_vects, input_classes)
+                            stats = 'TRAIN - comp.: {:.4f}, conf.: {:.4f}, bmu rate:{:.4f} '\
                                 .format(np.mean(train_comp), train_confusion, train_usage_rate)
                             old_train_comp = train_comp
                             train_mean_conv, train_var_conv, train_conv = self.population_based_convergence(input_vects)
@@ -327,8 +327,8 @@ class SOM(object):
                             train_conv = [0]
                         if test_classes is not None:
                             test_comp = old_test_comp
-                            test_comp, test_confusion, test_worst_confusion, test_usage_rate = self.compactness_stats(test_vects, test_classes, train=False)
-                            stats += 'TEST  - comp.: {:.4f}, conf.: {:.4f}, bmu rate:{:.4f}\n'\
+                            test_comp, test_confusion, test_worst_confusion, test_usage_rate = self.calc_stats(test_vects, test_classes, train=False)
+                            stats += '- TEST - comp.: {:.4f}, conf.: {:.4f}, bmu rate:{:.4f} '\
                                 .format(np.mean(test_comp), test_confusion, test_usage_rate)
                             old_test_comp = test_comp
                             test_mean_conv, test_var_conv, test_conv = self.population_based_convergence(test_vects)
@@ -366,7 +366,7 @@ class SOM(object):
                     if not os.path.exists(self.checkpoint_loc):
                         os.makedirs(self.checkpoint_loc)
                     path = dirpath + 'model'
-                    output = 'Saving in {}'.format(path)
+                    output = '- Saving in {}'.format(path)
                     self.print_progress(iter_no, self._n_iterations, iters + stats + output)
                     saver.save(self._sess, path, global_step=iter_no)
             for i, loc in enumerate(self._locations):
@@ -415,7 +415,7 @@ class SOM(object):
                + '_b' + str(self.batch_size) \
                + '_a' + str(self.alpha)
         if unique:
-            name += time.strftime('%y%m%d%H%M')
+            name += '_' + time.strftime('%y%m%d%H%M')
         return name
 
 
@@ -541,7 +541,7 @@ class SOM(object):
         bmu_confusion /= self.num_classes
         bmu_usage_rate = real_bmu_counter / (self._m * self._n)
         bmu_confusion_worst = np.mean(worst_offenders) / num_classes
-        return result, bmu_confusion, bmu_confusion_worst, bmu_usage_rate
+        return np.array(result), bmu_confusion, bmu_confusion_worst, bmu_usage_rate
 
 
     def detect_superpositions(self, l):
@@ -554,7 +554,7 @@ class SOM(object):
 
     def print_som_evaluation(self, input_vects, ys):
         bmu_positions = self.map_vects_memory_aware(input_vects)
-        class_comp = self.compactness_stats(input_vects, ys, train=False)
+        class_comp = self.calc_stats(input_vects, ys, train=False)
         _, confusion = self.map_vects_confusion(input_vects, ys)
         print('Average Compactness: {}'.format(np.mean(class_comp)))
         print('Compactness Variance: {}'.format(np.var(class_comp)))
@@ -696,47 +696,47 @@ class SOM(object):
         plt.savefig(os.path.join(Constants.PLOT_FOLDER, plot_name))
 
 
-    def compactness_stats(self, xs, ys, train=True, strategy='memory-aware'):
+    def calc_stats(self, xs, ys, train=True, strategy='memory-aware'):
         confusion = [0]
         if strategy == 'memory-aware':
             bmu_positions, confusion, worst_confusion, usage_rate = self.map_vects_get_confusion_stats(xs, ys)
         elif strategy == 'parallel':
             bmu_positions = self.map_vects_parallel(xs)
+            worst_confusion, usage_rate = [],[]
         else:
             raise ValueError('Unrecognized strategy parameter in class_compactness function.')
-            sys.exit(1)
-        class_belonging_dict = {y: [] for y in list(set(ys))}
-        for i, y in enumerate(ys):
-            class_belonging_dict[y].append(i)
-        intra_class_distance = [0 for y in list(set(ys))]
-        for y in set(ys):
-            for index, j in enumerate(class_belonging_dict[y]):
-                x1 = xs[j]
-                for k in class_belonging_dict[y][index+1:]:
-                    x2 = xs[k]
-                    pos_x1 = bmu_positions[j]
-                    pos_x2 = bmu_positions[k]
-                    intra_class_distance[y] += np.linalg.norm(pos_x1-pos_x2)
+
+        classes = np.unique(ys)
+        count = len(bmu_positions)
+        intra_class_dist = np.zeros(classes.size)
+        inter_class_dist = 0.0
+
+        # intra cluster distance
+        # avg of ||bmu(i) - bmu(j)|| for each i,j in C
+        for c in classes:
+            class_bmus = bmu_positions[np.where(ys == c)]
+            n = class_bmus.shape[0]
+            iter_count = ((n - 1) * n) / 2  # gauss n(n+1)/2
+            for i, x1 in enumerate(class_bmus):
+                for x2 in class_bmus[i + 1:]:
+                    intra_class_dist[c] += np.linalg.norm(x1 - x2)
+            intra_class_dist[c] /= iter_count
+
+        # inter cluster distance
+        # avg of ||bmu(i) - bmu(j)|| for each i,j in every C
+        iter_count = (count - 1) * count / 2
+        for i, x1 in enumerate(bmu_positions):
+            for x2 in bmu_positions[i + 1:]:
+                inter_class_dist += np.linalg.norm(x1 - x2)
+
+        inter_class_dist /= float(iter_count)
+
         if train == True:
-            inter_class_distance = self.train_inter_class_distance
+            self.train_inter_class_distance = inter_class_dist
         else:
-            inter_class_distance = self.test_inter_class_distance
-        if inter_class_distance == None:
-            inter_class_distance = 0
-            for i, x1 in enumerate(xs):
-                for j, x2 in enumerate(xs[i+1:]):
-                    pos_x1 = bmu_positions[i]
-                    pos_x2 = bmu_positions[j]
-                    inter_class_distance += np.linalg.norm(pos_x1 - pos_x2)
-            inter_class_distance /= len(xs)
-            if train == True:
-                self.train_inter_class_distance = inter_class_distance
-            else:
-                self.test_inter_class_distance = inter_class_distance
-        if train == True:
-            class_comp = intra_class_distance/self.train_inter_class_distance
-        else:
-            class_comp = intra_class_distance/self.test_inter_class_distance
+            self.test_inter_class_distance = inter_class_dist
+
+        class_comp = intra_class_dist / inter_class_dist
         return class_comp, confusion, worst_confusion, usage_rate
 
 
@@ -801,7 +801,7 @@ class SOM(object):
         return total_quant_error, diff
 
 
-    def print_progress(self, iter, total, suffix='', length=100, fill='='):
+    def print_progress(self, iter, total, suffix='', length=50, fill='='):
         """
         Call in a loop to create terminal progress bar
         :param int iter:    current iteration
