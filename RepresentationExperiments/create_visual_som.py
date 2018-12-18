@@ -9,7 +9,7 @@ import argparse
 
 visual_data_path = os.path.join(Constants.DATA_FOLDER,
                                 'video',
-                                'visual_10classes_train_b.npy')
+                                'visual_10classes_train_b_zebra.npy')
 model_name = 'video_20x30_s10.0_b128_a0.1_1812181504_final'
 model_path = os.path.join(Constants.DATA_FOLDER,
                           'saved_models',
@@ -68,4 +68,4 @@ if __name__ == '__main__':
               batch_size=info['batch'], checkpoint_loc=args.model, data='video')
     som.restore_trained(args.model)
 
-    show_som(som, xs, labels, 'Visual map', show=True, dark=True)
+    show_som(som, xs, labels, 'Visual map', show=False, dark=True, suffix='group_b')
