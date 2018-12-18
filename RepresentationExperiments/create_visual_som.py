@@ -9,8 +9,8 @@ import argparse
 
 visual_data_path = os.path.join(Constants.DATA_FOLDER,
                                 'video',
-                                'visual_10classes_train_a.npy')
-model_name = 'video_20x30_tau0.1_thrsh0.6_sigma5.0_batch128_alpha0.1_final'
+                                'visual_10classes_train_b.npy')
+model_name = 'video_20x30_s10.0_b128_a0.1_1812181504_final'
 model_path = os.path.join(Constants.DATA_FOLDER,
                           'saved_models',
                            model_name)
@@ -22,9 +22,9 @@ def extract_som_info(model_name):
     info = dict()
     shape = model_info[0].split('x')
     info['shape'] = tuple([int(shape[0]), int(shape[1])])
-    info['sigma'] = float(model_info[3][5:])
-    info['batch'] = int(model_info[4][5:])
-    info['alpha'] = float(model_info[5][5:])
+    info['sigma'] = float(model_info[1][1:])
+    info['batch'] = int(model_info[2][1:])
+    info['alpha'] = float(model_info[3][1:])
     return info
 
 
@@ -68,4 +68,4 @@ if __name__ == '__main__':
               batch_size=info['batch'], checkpoint_loc=args.model, data='video')
     som.restore_trained(args.model)
 
-    show_som(som, xs, labels, 'Visual map', show=False, dark=True)
+    show_som(som, xs, labels, 'Visual map', show=True, dark=True)

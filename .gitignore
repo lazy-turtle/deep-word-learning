@@ -2,4 +2,5 @@ __*__*
 *.pkl
 *.pyc
 .idea/*
+.vscode/*
 data/saved_models/*_epoch/

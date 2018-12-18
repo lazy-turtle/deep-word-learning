@@ -89,9 +89,11 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     data_path = os.path.join(Constants.DATA_FOLDER,
-                             'video', 'visual_10classes_train_a.npy')
+                            'video', 'visual_10classes_train_b.npy')
     model_path = os.path.join(Constants.DATA_FOLDER,
-                              'saved_models', 'video_20x30_tau0.1_thrsh0.6_sigma10.0_batch128_alpha0.1_best_so_far')
+                            'saved_models', 'video_20x30_s10.0_b128_a0.1_1812181504_final')
+    label_path = os.path.join(Constants.DATA_FOLDER, 
+                            'labels', 'coco-labels.json')
     id_dict = dict()
     if not args.classes100:
         num_classes = 10
@@ -111,7 +113,7 @@ if __name__ == '__main__':
     som.restore_trained(model_path)
     #measure = class_compactness(som, xs, ys)
     measure = my_compactness(som, xs, ys)
-    labels = labels_dictionary('../data/labels/coco-labels.json')
+    labels = labels_dictionary(label_path)
     cpt = {labels[id_dict[i]]: val for i, val in enumerate(measure)}
     print('Class Compactness: {}.'.format(cpt))
-    print('Avg Compactness: {}\n Variance: {}'.format(np.mean(measure), np.var(measure)))
+    print('Avg Compactness: {}\nVariance: {}'.format(np.mean(measure), np.var(measure)))
