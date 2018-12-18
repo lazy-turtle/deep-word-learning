@@ -10,7 +10,7 @@ import argparse
 visual_data_path = os.path.join(Constants.DATA_FOLDER,
                                 'video',
                                 'visual_10classes_train_a.npy')
-model_name = 'video_20x30_tau0.1_thrsh0.6_sigma10.0_batch128_alpha0.1_final'
+model_name = 'video_20x30_tau0.1_thrsh0.6_sigma5.0_batch128_alpha0.1_final'
 model_path = os.path.join(Constants.DATA_FOLDER,
                           'saved_models',
                            model_name)
