@@ -13,7 +13,7 @@ audio_data_path = os.path.join(Constants.DATA_FOLDER,
                                'audio100classes.csv')
 visual_data_path = os.path.join(Constants.DATA_FOLDER,
                                 'video',
-                                'visual_10classes_train_a.npy')
+                                'visual_10classes_train_b.npy')
 old_visual_path = os.path.join(Constants.DATA_FOLDER,
                                 'video',
                                 'VisualInputTrainingSet.csv')
