@@ -5,3 +5,4 @@ __*__*
 .vscode/*
 #data/saved_models/*ep/
 data/saved_models/*_epoch/
+nohup.out
