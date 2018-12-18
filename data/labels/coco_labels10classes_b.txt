@@ -1,7 +1,7 @@
 bird
 book
 cat
-zebra
+sheep
 cup
 potted plant
 apple

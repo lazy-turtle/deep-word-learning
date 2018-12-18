@@ -61,7 +61,7 @@ def printToFileCSV(prototipi,file):
             f.write(st+'\n')
     f.close()
 
-def show_som(som, inputs, labels, title, filenames=None, show=False, dark=True, scatter=True):
+def show_som(som, inputs, labels, title, filenames=None, show=False, dark=True, scatter=True, suffix=''):
     """
     Generates a plot displaying the SOM with its active BMUs and the relative examples
     associated with them. Each class is associated with a different color.
@@ -126,7 +126,7 @@ def show_som(som, inputs, labels, title, filenames=None, show=False, dark=True, 
       patch_list.append(patch)
     plt.legend(handles=patch_list, loc='center left',bbox_to_anchor=(1, 0.5))
 
-    img_name = 'som_{}x{}_s{}_a{}.png'.format(som._m, som._n, som.sigma, som.alpha)
+    img_name = 'som_{}x{}_s{}_a{}_{}.png'.format(som._m, som._n, som.sigma, som.alpha, suffix)
     img_path = os.path.join(Constants.PLOT_FOLDER, img_name)
     print('Saving file: {} ...'.format(img_path))
     if show:
@@ -178,6 +178,3 @@ if __name__ == '__main__':
 
   for k in range(len(nameInputs)):
     nameInputs[k] = nameInputs[k].split('_')[0]
-
-  #shows the SOM
-  showSom(som,inputs,nameInputs,1,'Visual map')
