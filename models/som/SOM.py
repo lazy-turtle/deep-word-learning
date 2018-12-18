@@ -362,7 +362,7 @@ class SOM(object):
 
                 #Save model periodically
                 if iter_no % save_every == 0:
-                    dirpath = self.checkpoint_loc + '_' + str(iter_no) +'_epoch' + os.sep
+                    dirpath = self.checkpoint_loc + '_' + str(iter_no) +'ep' + os.sep
                     if not os.path.exists(self.checkpoint_loc):
                         os.makedirs(self.checkpoint_loc)
                     path = dirpath + 'model'
@@ -410,10 +410,13 @@ class SOM(object):
             return False
 
 
-    def get_experiment_name(self):
-        return str(self.data) + '_' + str(self._m) + 'x' + str(self._n) + '_tau' + str(self.tau) + '_thrsh' \
-               + str(self.threshold) + '_sigma' + str(self.sigma) + '_batch' + str(self.batch_size) \
-               + '_alpha' + str(self.alpha)
+    def get_experiment_name(self, unique=True):
+        name = str(self.data) + '_' + str(self._m) + 'x' + str(self._n) + '_s' + str(self.sigma) \
+               + '_b' + str(self.batch_size) \
+               + '_a' + str(self.alpha)
+        if unique:
+            name += time.strftime('%y%m%d%H%M')
+        return name
 
 
     def assign_weights(self, weights):
@@ -454,7 +457,6 @@ class SOM(object):
         info for each input vector(in the same order), corresponding
         to mapped neuron.
         """
-
         to_return = []
         for vect in input_vects:
             min_index = min([i for i in range(len(self._weightages))],

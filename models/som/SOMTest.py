@@ -106,7 +106,7 @@ def show_som(som, inputs, labels, title, filenames=None, show=False, dark=True, 
             for i, (bmu, counts) in enumerate(bmu_list):
                 xx = [m[1] for m in bmu]
                 yy = [m[0] for m in bmu]
-                plt.scatter(xx, yy, s=counts*16, color=colors[i])
+                plt.scatter(xx, yy, s=counts*16, color=colors[i], alpha=0.5)
         else:
             for i, m in enumerate(mapped):
                 plt.text(m[1], m[0], str('__'), ha='center', va='center', color=color_dict[labels[i]],alpha=0.5,
