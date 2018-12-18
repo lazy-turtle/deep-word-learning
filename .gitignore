@@ -3,4 +3,5 @@ __*__*
 *.pyc
 .idea/*
 .vscode/*
+data/saved_models/*ep/
 data/saved_models/*_epoch/
