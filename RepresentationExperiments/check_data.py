@@ -1,6 +1,6 @@
 import numpy as np
 from matplotlib import pyplot as plt
-from utils.utils import transform_data
+from utils.utils import transform_data, global_transform
 from sklearn.preprocessing import MinMaxScaler
 import os
 
@@ -41,13 +41,14 @@ def smooth(scalars, weight=0.0):  # Weight between 0 and 1
     return smoothed
 
 # Data
-data_type = "old"
+data_type = "new"
 check = "mean"
 
 data_x, data_y = load_data(data_type, DATA_PATH)
 
 # normalize data somehow
 #data_x, _ = transform_data(data_x)
+data_x, _ = global_transform(data_x)
 #scaler = MinMaxScaler()
 #data_x = scaler.fit_transform(data_x)
 #m = data_x.min()

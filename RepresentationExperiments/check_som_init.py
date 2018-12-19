@@ -1,6 +1,6 @@
 from models.som.SOM import SOM
 from utils.constants import Constants
-from utils.utils import from_csv_with_filenames, from_csv_visual_100classes, from_npy_visual_data
+from utils.utils import from_csv_with_filenames, from_csv_visual_100classes, from_npy_visual_data, global_transform
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 from utils.utils import transform_data
@@ -17,7 +17,7 @@ visual_data_path = os.path.join(Constants.DATA_FOLDER,
                                 'VisualInputTrainingSet.csv')
 edo_path = os.path.join(Constants.DATA_FOLDER,
                         'video',
-                        'visual_10classes_train_b.npy')
+                        'visual_10classes_train_a.npy')
 
 
 if __name__ == '__main__':
@@ -64,13 +64,11 @@ if __name__ == '__main__':
     print('Training on {} examples.'.format(len(xs)))
 
     xs_train, xs_test, ys_train, ys_test = train_test_split(xs, ys, test_size=0.2, stratify=ys, random_state=args.seed)
-    #xs_train, xs_test = transform_data(xs_train, xs_test, rotation=True)
+    #xs_train, xs_test = global_transform(xs_train, xs_test)
     xs_train, xs_val, ys_train, ys_val = train_test_split(xs_train, ys_train, test_size=0.5, stratify=ys_train,
                                                           random_state=args.seed)
 
-    scaler = MinMaxScaler(feature_range=(-1, 1))
-    xs_train = scaler.fit_transform(xs_train)
-    xs_val = scaler.transform(xs_val)
+
     som.init_toolbox(xs_train)
     #b = som.quantization_error(xs_train)
     np.set_printoptions(threshold=np.nan)
