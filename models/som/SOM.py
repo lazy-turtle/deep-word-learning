@@ -72,10 +72,10 @@ class SOM(object):
         self.threshold = threshold
         self.batch_size = batch_size
         self._n_iterations = abs(int(n_iterations))
+        self._suffix = suffix
         self.data = data
         self.logs_path = Constants.DATA_FOLDER + '/tblogs/' + self.get_experiment_name()
         self.num_classes = num_classes
-        self.suffix = suffix
 
         # helper structure
         self.neuron_loc_list = list([tuple(loc) for loc in self._neuron_locations(self._m, self._n)])
@@ -415,9 +415,10 @@ class SOM(object):
         name = str(self.data) + '_' + str(self._m) + 'x' + str(self._n) + '_s' + str(self.sigma) \
                + '_b' + str(self.batch_size) \
                + '_a' + str(self.alpha) \
-               + '_' + self.suffix
+               + '_' + self._suffix \
+               + '_seed{}'.format(self.seed)
         if unique:
-            name += '_' + time.strftime('%y%m%d%H%M')
+            name += '_{}'.format(int(time.time()))
         return name
 
 

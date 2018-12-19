@@ -277,6 +277,22 @@ def transform_data(xs, test_xs=None, rotation=True):
     return xs, test_xs
 
 
+def global_transform(xs, test_xs=None):
+    """
+    Computes a z-score standardization with global mean and std.
+    :param xs:      numpy array containing data, shape (n1, n_dims)
+    :param test_xs: numpy array with extra data, shape (n2, n_dims)
+    :return:        transformed data matrices
+    """
+    m = np.mean(xs)
+    s = np.std(xs)
+    z = (xs - m)/s
+    z_test = None
+    if test_xs is not None:
+        z_test = (test_xs - m)/s
+    return z, z_test
+
+
 def from_npy_visual_data(path, classes=10):
     """
     Read a numpy array pickled as file .npy
