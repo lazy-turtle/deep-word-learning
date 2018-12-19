@@ -75,10 +75,10 @@ if __name__ == '__main__':
         xs, _, ys, _ = train_test_split(xs, ys, test_size=0.6, stratify=ys, random_state=args.seed)
     print('Training on {} examples.'.format(len(xs)))
     xs_train, xs_test, ys_train, ys_test = train_test_split(xs, ys, test_size=0.2, stratify=ys, random_state=args.seed)
-    if args.tranform == 'featurewise':
+    if args.transform == 'featurewise':
         print('Centering data feature-wise...')
         xs_train, xs_test = transform_data(xs_train, xs_test, rotation=args.rotation)
-    elif args.tranform == 'global':
+    elif args.transform == 'global':
         print('Normalizing with global mean and std...')
         xs_train, xs_test = global_transform(xs_train, xs_test)
 
