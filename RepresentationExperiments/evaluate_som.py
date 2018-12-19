@@ -91,7 +91,7 @@ if __name__ == '__main__':
     data_path = os.path.join(Constants.DATA_FOLDER,
                             'video', 'visual_10classes_train_b.npy')
     model_path = os.path.join(Constants.DATA_FOLDER,
-                            'saved_models', 'video_20x30_s10.0_b128_a0.1_1812181504_final')
+                            'saved_models', 'video_20x30_s15.0_b128_a0.2_1812181900_final')
     label_path = os.path.join(Constants.DATA_FOLDER, 
                             'labels', 'coco-labels.json')
     id_dict = dict()

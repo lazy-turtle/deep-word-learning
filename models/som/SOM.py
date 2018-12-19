@@ -46,7 +46,7 @@ class SOM(object):
     def __init__(self, m, n, dim, n_iterations=50, alpha=None, sigma=None,
                  tau=0.5, threshold=0.6, batch_size=500, num_classes=100,
                  checkpoint_loc = None, data='audio', sigma_decay='time',
-                 lr_decay='time', seed=42):
+                 lr_decay='time', seed=42, suffix=''):
         """
         Initializes all necessary components of the TensorFlow
         Graph.
@@ -75,6 +75,7 @@ class SOM(object):
         self.data = data
         self.logs_path = Constants.DATA_FOLDER + '/tblogs/' + self.get_experiment_name()
         self.num_classes = num_classes
+        self.suffix = suffix
 
         # helper structure
         self.neuron_loc_list = list([tuple(loc) for loc in self._neuron_locations(self._m, self._n)])
@@ -413,7 +414,8 @@ class SOM(object):
     def get_experiment_name(self, unique=True):
         name = str(self.data) + '_' + str(self._m) + 'x' + str(self._n) + '_s' + str(self.sigma) \
                + '_b' + str(self.batch_size) \
-               + '_a' + str(self.alpha)
+               + '_a' + str(self.alpha) \
+               + '_' + self.suffix
         if unique:
             name += '_' + time.strftime('%y%m%d%H%M')
         return name
@@ -736,7 +738,7 @@ class SOM(object):
         else:
             self.test_inter_class_distance = inter_class_dist
 
-        class_comp = intra_class_dist / inter_class_dist
+        class_comp = intra_class_dist / (inter_class_dist + 1e-10)
         return class_comp, confusion, worst_confusion, usage_rate
 
 
@@ -813,7 +815,8 @@ class SOM(object):
         percent = ("{0:.2f}").format(100 * (iter / float(total)))
         filledLength = int(length * iter // total)
         bar = fill * filledLength + '-' * (length - filledLength)
-        print('\r[{}] {} - {}'.format(bar, percent, suffix), end='\r')
+        sys.stdout.write('[{}] {}{} - {}\r'.format(bar, percent, '%', suffix))
+        sys.stdout.flush()
         # Print New Line on Complete
         if iter == total:
             print()

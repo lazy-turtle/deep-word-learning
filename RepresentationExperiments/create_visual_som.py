@@ -9,8 +9,8 @@ import argparse
 
 visual_data_path = os.path.join(Constants.DATA_FOLDER,
                                 'video',
-                                'visual_10classes_train_b_zebra.npy')
-model_name = 'video_20x30_s10.0_b128_a0.1_1812181504_final'
+                                'visual_10classes_train_b.npy')
+model_name = 'video_20x30_s15.0_b128_a0.2_1812181900_final'
 model_path = os.path.join(Constants.DATA_FOLDER,
                           'saved_models',
                            model_name)
@@ -62,7 +62,8 @@ if __name__ == '__main__':
     #xs, _ = transform_data(xs)
     dim = xs.shape[1]
 
-    info = extract_som_info(model_name)
+    #info = extract_som_info(model_name)
+    info = {'shape':[20,30], 'alpha':0.3, 'sigma':15.0, 'batch':128}
     som_shape = info['shape']
     som = SOM(som_shape[0], som_shape[1], dim, alpha=info['alpha'], sigma=info['sigma'],
               batch_size=info['batch'], checkpoint_loc=args.model, data='video')

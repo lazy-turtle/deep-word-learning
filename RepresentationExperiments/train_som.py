@@ -11,7 +11,10 @@ import argparse
 audio_data_path = os.path.join(Constants.DATA_FOLDER,
                                'audio',
                                'audio100classes.csv')
-visual_data_path = os.path.join(Constants.DATA_FOLDER,
+visual_data_path_a = os.path.join(Constants.DATA_FOLDER,
+                                'video',
+                                'visual_10classes_train_a.npy')
+visual_data_path_b = os.path.join(Constants.DATA_FOLDER,
                                 'video',
                                 'visual_10classes_train_b.npy')
 old_visual_path = os.path.join(Constants.DATA_FOLDER,
@@ -34,6 +37,7 @@ if __name__ == '__main__':
                         help='Number of classes the model will be trained on')
     parser.add_argument('--subsample', action='store_true', default=False)
     parser.add_argument('--data', metavar='data', type=str, default='video')
+    parser.add_argument('--group', metavar='group', type=str, default='a')
     parser.add_argument('--rotation', action='store_true', default=False)
     parser.add_argument('--logging', action='store_true', default=True)
     parser.add_argument('--batch', type=int, default=128)
@@ -47,7 +51,8 @@ if __name__ == '__main__':
         xs = np.array(xs)
     elif args.data == 'video':
         print('Loading visual data...', end='')
-        xs, ys, _ = from_npy_visual_data(visual_data_path)
+        path = visual_data_path_a if args.group == 'a' else visual_data_path_b
+        xs, ys, _ = from_npy_visual_data(path)
         print('done. data: {} - labels: {}'.format(xs.shape, ys.shape))
     elif args.data == 'old':
         print('Loading old visual data...', end='')
@@ -64,7 +69,7 @@ if __name__ == '__main__':
     dim = xs.shape[1]
     som = SOM(args.neurons1, args.neurons2, dim, n_iterations=args.epochs, alpha=args.alpha,
                  tau=0.1, threshold=0.6, batch_size=args.batch, data=args.data, sigma=args.sigma,
-                 num_classes=args.classes, seed=args.seed)
+                 num_classes=args.classes, seed=args.seed, suffix='group-' + args.group)
 
     if args.subsample:
         xs, _, ys, _ = train_test_split(xs, ys, test_size=0.6, stratify=ys, random_state=args.seed)
@@ -77,4 +82,4 @@ if __name__ == '__main__':
 
     som.init_toolbox(xs)
     som.train(xs_train, input_classes=ys_train, test_vects=xs_val, test_classes=ys_val,
-              logging=args.logging, save_every=50, log_every=20)
+              logging=args.logging, save_every=50, log_every=50)
