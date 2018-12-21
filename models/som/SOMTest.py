@@ -127,7 +127,7 @@ def show_som(som, inputs, labels, title, filenames=None, show=False, dark=True, 
     plt.legend(handles=patch_list, loc='center left',bbox_to_anchor=(1, 0.5))
 
     img_name = 'som_{}x{}_s{}_a{}_{}.png'.format(som._m, som._n, som.sigma, som.alpha, suffix)
-    img_path = os.path.join(Constants.PLOT_FOLDER, img_name)
+    img_path = os.path.join(Constants.PLOT_FOLDER, som.data, img_name)
     print('Saving file: {} ...'.format(img_path))
     if show:
       plt.show()

@@ -1,8 +1,0 @@
-model_checkpoint_path: "model-300"
-all_model_checkpoint_paths: "../video_20x30_s15.0_b128_a0.2_1812181900_0ep/model-0"
-all_model_checkpoint_paths: "../video_20x30_s15.0_b128_a0.2_1812181900_50ep/model-50"
-all_model_checkpoint_paths: "../video_20x30_s15.0_b128_a0.2_1812181900_100ep/model-100"
-all_model_checkpoint_paths: "../video_20x30_s15.0_b128_a0.2_1812181900_150ep/model-150"
-all_model_checkpoint_paths: "../video_20x30_s15.0_b128_a0.2_1812181900_200ep/model-200"
-all_model_checkpoint_paths: "../video_20x30_s15.0_b128_a0.2_1812181900_250ep/model-250"
-all_model_checkpoint_paths: "model-300"

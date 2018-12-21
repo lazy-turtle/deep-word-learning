@@ -6,7 +6,7 @@ import matplotlib
 matplotlib.use('Agg')
 matplotlib.rcParams.update({'font.size': 8})
 import matplotlib.pyplot as plt
-from RepresentationExperiments.distance_experiments import get_prototypes
+from experiments.distance_experiments import get_prototypes
 from sklearn.preprocessing import MinMaxScaler
 from utils.constants import Constants
 from utils.utils import softmax, get_plot_filename

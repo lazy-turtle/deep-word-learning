@@ -86,7 +86,7 @@ class SOM(object):
             os.makedirs(self.logs_path)
 
         if checkpoint_loc is None:
-          self.checkpoint_loc = Constants.DATA_FOLDER + '/saved_models/' + self.get_experiment_name()
+          self.checkpoint_loc = os.path.join(Constants.TRAINED_MODELS_FOLDER, self.data, self.get_experiment_name())
         else:
           self.checkpoint_loc = checkpoint_loc
 
