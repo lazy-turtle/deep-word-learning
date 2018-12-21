@@ -30,3 +30,19 @@ Class Compactness:
 
 Avg Comp: 0.3075
 Variance: 0.0110
+--------------------
+MODEL: video_20x20_s8.0_b128_a0.2_group-a_seed42_1545312173_final - DATA: visual_10classes_train_b.npy
+Class Compactness:
+	bird                : 0.3494
+	cat                 : 0.3233
+	sheep               : 0.4894
+	umbrella            : 0.3715
+	sports ball         : 0.3809
+	cup                 : 0.2913
+	banana              : 0.5158
+	apple               : 0.4703
+	potted plant        : 0.4074
+	book                : 0.5360
+
+Avg Comp: 0.4135
+Variance: 0.0065
