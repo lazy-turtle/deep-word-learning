@@ -1,0 +1,2 @@
+model_checkpoint_path: "../data/saved_models/audio/audio_model_25t/model.ckpt-1"
+all_model_checkpoint_paths: "../saved_models/audio/audio_model_25t/model.ckpt-1"

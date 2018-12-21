@@ -91,7 +91,7 @@ if __name__ == '__main__':
 
     data_type = 'video' if not args.is_audio else 'audio'
     data_group = 'visual_10classes_train_b.npy'
-    model_name = 'video_20x20_s10.0_b128_a0.1_group-b_seed42_1545211116_final'
+    model_name = 'video_20x20_s8.0_b128_a0.2_group-a_seed42_1545312173_final'
     data_path = os.path.join(Constants.DATA_FOLDER, data_type, data_group)
     model_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, data_type, model_name)
     out_path = os.path.join(Constants.OUTPUT_FOLDER, data_type, 'evaluate_som.txt')
