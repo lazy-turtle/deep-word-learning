@@ -1,0 +1,32 @@
+--------------------
+MODEL: video_20x30_s10.0_b128_a0.2_group-b_seed42_1545208672_final - DATA: visual_10classes_train_b.npy
+Class Compactness:
+	book                : 0.2132
+	cup                 : 0.2252
+	apple               : 0.3001
+	sheep               : 0.2899
+	potted plant        : 0.3371
+	banana              : 0.2693
+	sports ball         : 0.2769
+	umbrella            : 0.3092
+	bird                : 0.5221
+	cat                 : 0.3075
+
+Avg Comp: 0.3050
+Variance: 0.0065
+--------------------
+MODEL: video_20x20_s10.0_b128_a0.1_group-b_seed42_1545211116_final - DATA: visual_10classes_train_b.npy
+Class Compactness:
+	cup                 : 0.2477
+	potted plant        : 0.3885
+	sheep               : 0.3813
+	sports ball         : 0.2327
+	bird                : 0.5492
+	apple               : 0.3475
+	book                : 0.2098
+	banana              : 0.2956
+	umbrella            : 0.1961
+	cat                 : 0.2270
+
+Avg Comp: 0.3075
+Variance: 0.0110

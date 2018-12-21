@@ -1,6 +1,0 @@
-model_checkpoint_path: "model-200"
-all_model_checkpoint_paths: "../video_10x20_s10.0_b128_a0.1_group-b_seed42_1545210225_0ep/model-0"
-all_model_checkpoint_paths: "../video_10x20_s10.0_b128_a0.1_group-b_seed42_1545210225_50ep/model-50"
-all_model_checkpoint_paths: "../video_10x20_s10.0_b128_a0.1_group-b_seed42_1545210225_100ep/model-100"
-all_model_checkpoint_paths: "../video_10x20_s10.0_b128_a0.1_group-b_seed42_1545210225_150ep/model-150"
-all_model_checkpoint_paths: "model-200"
