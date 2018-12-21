@@ -47,6 +47,7 @@ if __name__ == '__main__':
         if args.classes == 10:
             path = visual_data_path_a if args.group == 'a' else visual_data_path_b
         else:
+            print('Training on {} classes, good luck!'.format(args.classes))
             path = visual_data_80classes
 
         xs, ys, _ = from_npy_visual_data(path, classes=args.classes)
@@ -84,4 +85,4 @@ if __name__ == '__main__':
 
     som.init_toolbox(xs)
     som.train(xs_train, input_classes=ys_train, test_vects=xs_val, test_classes=ys_val,
-              logging=args.logging, save_every=50, log_every=50)
+              logging=args.logging, save_every=100, log_every=100)
