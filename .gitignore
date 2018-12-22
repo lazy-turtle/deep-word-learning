@@ -6,3 +6,4 @@ __*__*
 data/trained-models/*/*ep/
 data/trained-models/*/*_epoch/
 nohup.out
+data/video/*80classes*
