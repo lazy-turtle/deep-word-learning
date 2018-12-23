@@ -78,7 +78,7 @@ if __name__ == '__main__':
 
     # transform
     a_xs = MinMaxScaler().fit_transform(a_xs)
-    v_xs,_ = global_transform(v_xs)
+    v_xs = MinMaxScaler().fit_transform(v_xs)
     a_dim = len(a_xs[0])
     v_dim = len(v_xs[0])
     print('Data loaded and transformed, building SOMs...')
