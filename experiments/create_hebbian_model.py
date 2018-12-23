@@ -1,7 +1,7 @@
 from models.som.SOM import SOM
 from models.som.HebbianModel import HebbianModel
 from utils.constants import Constants
-from utils.utils import from_csv_with_filenames, from_npy_visual_data, global_transform
+from utils.utils import from_csv_with_filenames, from_npy_visual_data, global_transform, min_max_scale
 from sklearn.utils import shuffle
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
@@ -76,9 +76,11 @@ if __name__ == '__main__':
     v_xs, v_ys, _ = from_npy_visual_data(video_data_path)
     # fix labels to 0-9 range
 
-    # transform
+    # transform. #TODO: check if this transform is needed
     a_xs = MinMaxScaler().fit_transform(a_xs)
-    v_xs = MinMaxScaler().fit_transform(v_xs)
+    #v_xs,_ = global_transform(v_xs)
+    #v_xs = min_max_scale(xs)
+
     a_dim = len(a_xs[0])
     v_dim = len(v_xs[0])
     print('Data loaded and transformed, building SOMs...')

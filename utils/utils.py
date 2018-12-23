@@ -292,6 +292,11 @@ def global_transform(xs, test_xs=None):
         z_test = (test_xs - m)/s
     return z, z_test
 
+def min_max_scale(xs):
+    m = xs.min()
+    M = xs.max()
+    return (xs - m)/(M - m)
+
 
 def from_npy_visual_data(path, classes=10):
     """
