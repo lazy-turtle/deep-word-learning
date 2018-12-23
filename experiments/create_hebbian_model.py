@@ -1,7 +1,7 @@
 from models.som.SOM import SOM
 from models.som.HebbianModel import HebbianModel
 from utils.constants import Constants
-from utils.utils import from_csv_with_filenames, from_csv_visual_10classes, from_csv, to_csv
+from utils.utils import from_csv_with_filenames, from_npy_visual_data, global_transform
 from sklearn.utils import shuffle
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
@@ -12,15 +12,11 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-soma_path = os.path.join(Constants.DATA_FOLDER, '10classes', 'audio_model_25t', '')
-somv_path = os.path.join(Constants.DATA_FOLDER, '10classes', 'visual_model_tau', '')
-hebbian_path = os.path.join(Constants.DATA_FOLDER, '10classes', 'hebbian_model', '')
-audio_data_path = os.path.join(Constants.DATA_FOLDER,
-                               '10classes',
-                               'audio_data_25t.csv')
-visual_data_path = os.path.join(Constants.DATA_FOLDER,
-                                '10classes',
-                                'VisualInputTrainingSet.csv')
+soma_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', 'audio_model_10classes')
+somv_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'video_20x30_tau0.1_thrsh0.6_sigma10.0_batch128_alpha0.1_best_so_far')
+hebbian_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'hebbian', 'hebbian_model')
+audio_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_train.csv')
+video_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_a.npy')
 
 def create_folds(a_xs, v_xs, a_ys, v_ys, n_folds=1, n_classes=10):
     '''
@@ -63,7 +59,7 @@ def create_folds(a_xs, v_xs, a_ys, v_ys, n_folds=1, n_classes=10):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Train a Hebbian model.')
-    parser.add_argument('--lr', metavar='lr', type=float, default=100, help='The model learning rate')
+    parser.add_argument('--lr', metavar='lr', type=float, default=10, help='The model learning rate')
     parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Random generator seed')
     parser.add_argument('--algo', metavar='algo', type=str, default='sorted',
                         help='Algorithm choice')
@@ -74,24 +70,24 @@ if __name__ == '__main__':
     exp_description = 'lr' + str(args.lr) + '_algo_' + args.algo + '_source_' + args.source
 
     a_xs, a_ys, _ = from_csv_with_filenames(audio_data_path)
-    v_xs, v_ys = from_csv_visual_10classes(visual_data_path)
-    # fix labels to 0-9 range
-    a_ys = [int(y)-1000 for y in a_ys]
-    v_ys = [int(y)-1000 for y in v_ys]
-    # scale data to 0-1 range
-    a_xs = MinMaxScaler().fit_transform(a_xs)
-    v_xs = MinMaxScaler().fit_transform(v_xs)
-    a_dim = len(a_xs[0])
-    v_dim = len(v_xs[0])
-    som_a = SOM(20, 30, a_dim, checkpoint_dir=soma_path, n_iterations=10000,
-                tau=0.1, threshold=0.6)
-    som_v = SOM(20, 30, v_dim, checkpoint_dir=somv_path, n_iterations=10000,
-                tau=0.1, threshold=0.6)
-
-    v_ys = np.array(v_ys)
-    v_xs = np.array(v_xs)
+    a_ys = [v - 1000 for v in a_ys]
     a_xs = np.array(a_xs)
     a_ys = np.array(a_ys)
+    v_xs, v_ys, _ = from_npy_visual_data(video_data_path)
+    # fix labels to 0-9 range
+
+    # transform
+    a_xs = MinMaxScaler().fit_transform(a_xs)
+    v_xs,_ = global_transform(v_xs)
+    a_dim = len(a_xs[0])
+    v_dim = len(v_xs[0])
+    print('Data loaded and transformed, building SOMs...')
+    som_a = SOM(20, 30, a_dim, checkpoint_loc=soma_path, n_iterations=10000,
+                tau=0.1, threshold=0.6)
+    som_v = SOM(20, 30, v_dim, checkpoint_loc=somv_path, n_iterations=10000,
+                tau=0.1, threshold=0.6)
+
+
     a_xs_train, a_xs_test, a_ys_train, a_ys_test = train_test_split(a_xs, a_ys, test_size=0.2)
     v_xs_train, v_xs_test, v_ys_train, v_ys_test = train_test_split(v_xs, v_ys, test_size=0.2)
     a_xs_train, a_xs_dev, a_ys_train, a_ys_dev = train_test_split(a_xs, a_ys, test_size=0.2)
@@ -101,11 +97,12 @@ if __name__ == '__main__':
         som_a.train(a_xs_train, input_classes=a_ys_train, test_vects=a_xs_dev, test_classes=a_ys_dev)
         som_v.train(v_xs_train, input_classes=v_ys_train, test_vects=v_xs_dev, test_classes=v_ys_dev)
     else:
-        som_a.restore_trained()
-        som_v.restore_trained()
+        som_a.restore_trained(soma_path)
+        som_v.restore_trained(somv_path)
 
     acc_a_list = []
     acc_v_list = []
+    print('Preparing Hebbian model...')
     for n in range(1, 15):
         hebbian_model = HebbianModel(som_a, som_v, a_dim=a_dim,
                                      v_dim=v_dim, n_presentations=n,
@@ -130,4 +127,4 @@ if __name__ == '__main__':
         hebbian_model.make_plot(a_xs_test[0], v_xs_test[0], v_ys_test[0], v_xs_fold[0], source='a')
     plt.plot(acc_a_list, color='teal')
     plt.plot(acc_v_list, color='orange')
-    plt.savefig('./plots/'+exp_description+'.pdf', transparent=True)
+    plt.savefig('../data/plots/'+exp_description+'.png', transparent=False)
