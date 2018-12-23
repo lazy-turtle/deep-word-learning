@@ -654,6 +654,7 @@ class SOM(object):
             self.train_bmu_class_dict = bmu_class_dict
         else:
             self.test_bmu_class_dict = bmu_class_dict
+        self.bmu_class_dict = bmu_class_dict
         return superpositions
 
 
