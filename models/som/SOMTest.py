@@ -74,7 +74,8 @@ def show_som(som, inputs, labels, title, filenames=None, show=False, dark=True, 
     """
     matplotlib.use('TkAgg') #in order to print something
     print('Building graph "{}"...'.format(title))
-    classes = np.unique(labels)
+    _, indices = np.unique(labels, return_index=True)
+    classes = labels[np.sort(indices)] #otherwise np.unique orders the values alphabetically
     mapped = np.array(som.map_vects(inputs))
 
     bmu_list = []
@@ -87,6 +88,11 @@ def show_som(som, inputs, labels, title, filenames=None, show=False, dark=True, 
     if dark:
         plt.style.use('dark_background')
         palette = 'bright'
+
+    #for 80 classes readability
+    if len(classes) > 10:
+        palette = 'cubehelix'
+
     plt.figure(figsize=(som._n/3.0, som._m/3.0))
     plt.xlim([-1, som._n])
     plt.ylim([-1, som._m])
@@ -98,7 +104,7 @@ def show_som(som, inputs, labels, title, filenames=None, show=False, dark=True, 
     #generate colors based on the # of classes
     np.random.seed(42)
     colors = sb.color_palette(palette, n_colors=len(classes))
-    color_dict = {label: col for label, col in zip(np.unique(labels), colors)}
+    color_dict = {label: col for label, col in zip(classes, colors)}
 
     print('Adding labels for each mapped input...', end='')
     if filenames == None:
