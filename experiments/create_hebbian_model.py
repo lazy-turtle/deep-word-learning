@@ -12,10 +12,10 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-soma_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', 'audio_model_10classes')
+soma_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'video_20x30_sigma10.0_alpha0.1_group_a')
 somv_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'video_20x30_sigma10.0_alpha0.1_group_a')
 hebbian_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'hebbian', 'hebbian_model')
-audio_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_train.csv')
+audio_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'visual_10classes_train_a.npy')
 video_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_a.npy')
 
 def create_folds(a_xs, v_xs, a_ys, v_ys, n_folds=1, n_classes=10):
@@ -69,15 +69,15 @@ if __name__ == '__main__':
     args = parser.parse_args()
     exp_description = 'lr' + str(args.lr) + '_algo_' + args.algo + '_source_' + args.source
 
-    a_xs, a_ys, _ = from_csv_with_filenames(audio_data_path)
-    a_ys = [v - 1000 for v in a_ys]
-    a_xs = np.array(a_xs)
-    a_ys = np.array(a_ys)
+    a_xs, a_ys, _ = from_npy_visual_data(audio_data_path)
+    #a_ys = [v - 1000 for v in a_ys]
+    #a_xs = np.array(a_xs)
+    #a_ys = np.array(a_ys)
     v_xs, v_ys, _ = from_npy_visual_data(video_data_path)
     # fix labels to 0-9 range
 
     # transform. #TODO: check if this transform is needed
-    a_xs = MinMaxScaler().fit_transform(a_xs)
+    #a_xs = MinMaxScaler().fit_transform(a_xs)
     #v_xs,_ = global_transform(v_xs)
     #v_xs = min_max_scale(xs)
 
@@ -129,4 +129,4 @@ if __name__ == '__main__':
         hebbian_model.make_plot(a_xs_test[0], v_xs_test[0], v_ys_test[0], v_xs_fold[0], source='a')
     plt.plot(acc_a_list, color='teal')
     plt.plot(acc_v_list, color='orange')
-    plt.savefig('../data/plots/'+exp_description+'.png', transparent=False)
+    plt.savefig('../data/plots/hebbian/'+exp_description+'.png', transparent=False)
