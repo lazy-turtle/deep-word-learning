@@ -203,7 +203,7 @@ class HebbianModel(object):
         for yi, yj in zip(y_pred, y_source):
             if yi == yj:
                 correct += 1
-        print('source: {}, correct: {}' .format(source_som, correct))
+        print('source: {}, correct: {}' .format(source, correct))
         print(y_source)
         print(y_pred)
         return correct/len(y_pred)
