@@ -77,7 +77,8 @@ if __name__ == '__main__':
     # fix labels to 0-9 range
 
     # transform. #TODO: check if this transform is needed
-    #a_xs = MinMaxScaler().fit_transform(a_xs)
+    a_xs = MinMaxScaler().fit_transform(a_xs)
+    v_xs = MinMaxScaler().fit_transform(v_xs)
     #v_xs,_ = global_transform(v_xs)
     #v_xs = min_max_scale(xs)
 
