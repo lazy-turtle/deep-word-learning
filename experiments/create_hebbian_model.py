@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 soma_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'video_20x30_sigma10.0_alpha0.1_group_a')
 somv_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'video_20x30_sigma10.0_alpha0.1_group_a')
 hebbian_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'hebbian', 'hebbian_model')
-audio_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'visual_10classes_train_a.npy')
+audio_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_a.npy')
 video_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_a.npy')
 
 def create_folds(a_xs, v_xs, a_ys, v_ys, n_folds=1, n_classes=10):
