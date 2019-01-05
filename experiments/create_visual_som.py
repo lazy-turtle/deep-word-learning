@@ -8,10 +8,10 @@ import os
 import json
 import argparse
 
-visual_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_train.csv')
-#model_name = 'video_20x30_sigma10.0_alpha0.1_group_a'
-model_name = 'audio_model_10classes'
-model_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', model_name)
+visual_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_a.npy')
+model_name = 'video_20x30_s10.0_b128_a0.1_trsf_minmax_group_a_seed42_1546688212_final'
+#model_name = 'audio_model_10classes'
+model_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', model_name)
 label_path = os.path.join(Constants.LABELS_FOLDER, 'coco-labels.json')
 
 

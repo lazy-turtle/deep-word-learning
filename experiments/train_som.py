@@ -88,7 +88,7 @@ if __name__ == '__main__':
     elif args.transform == TRANSFORMS[3]:
         print('Normalizing with MinMaxScaler...')
         scaler = MinMaxScaler()
-        scaler.fit(xs_train)
+        scaler.fit(xs)
         xs_train = scaler.transform(xs_train)
         xs_test = scaler.transform(xs_test)
 
