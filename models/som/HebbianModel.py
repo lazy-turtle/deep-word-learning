@@ -46,7 +46,8 @@ class HebbianModel(object):
             self.activation_v = tf.placeholder(dtype=tf.float32, shape=[self.num_neurons])
             self.assigned_weights = tf.placeholder(dtype=tf.float32, shape=[self.num_neurons, self.num_neurons])
 
-            self.delta = 1 - tf.exp(-self.learning_rate * tf.matmul(tf.reshape(self.activation_a, (-1, 1)),                            tf.reshape(self.activation_v, (1, -1))))
+            self.delta = 1 - tf.exp(-self.learning_rate * tf.matmul(tf.reshape(self.activation_a, (-1, 1)),
+                                                                    tf.reshape(self.activation_v, (1, -1))))
             new_weights = tf.add(self.weights, self.delta)
             self.training = tf.assign(self.weights, new_weights)
 
@@ -80,6 +81,9 @@ class HebbianModel(object):
                 # get activations from som
                 activation_a, _ = self.som_a.get_activations(input_a[i])
                 activation_v, _ = self.som_v.get_activations(input_v[i])
+
+                self.som_a.plot_activations(activation_a)
+                self.som_v.plot_activations(activation_v)
 
                 # run training op
                 _, d = self._sess.run([self.training, self.delta],
@@ -137,6 +141,7 @@ class HebbianModel(object):
        som: {}'.format(target_activation.shape, to_som._n * to_som._m))
             sys.exit(1)
         return target_activation
+
 
     def get_bmus_propagate(self, x, source_som='v'):
         '''
@@ -267,7 +272,7 @@ class HebbianModel(object):
         axis_arr[2, 0].matshow(np.zeros((source_som._m, source_som._n)))
         plt.tight_layout()
         filename = get_plot_filename(Constants.PLOT_FOLDER)
-        plt.savefig(os.path.join(Constants.PLOT_FOLDER, filename))
+        plt.savefig(os.path.join(Constants.PLOT_FOLDER, 'hebbian', filename))
         plt.clf()
 
     def get_bmu_k_closest(self, som, activations, pos_activations, k, train=True):

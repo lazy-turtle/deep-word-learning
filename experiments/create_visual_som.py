@@ -2,14 +2,16 @@ from models.som.SOM import SOM
 from models.som.SOMTest import show_som
 import numpy as np
 from utils.constants import Constants
-from utils.utils import from_npy_visual_data, transform_data, from_csv_visual_10classes, global_transform
+from utils.utils import from_npy_visual_data, transform_data, from_csv, global_transform, from_csv_with_filenames
+from sklearn.preprocessing import MinMaxScaler
 import os
 import json
 import argparse
 
-visual_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_a.npy')
-model_name = 'video_20x30_sigma10.0_alpha0.1_group_a'
-model_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', model_name)
+visual_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_train.csv')
+#model_name = 'video_20x30_sigma10.0_alpha0.1_group_a'
+model_name = 'audio_model_10classes'
+model_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', model_name)
 label_path = os.path.join(Constants.LABELS_FOLDER, 'coco-labels.json')
 
 
@@ -31,7 +33,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if 'csv' in visual_data_path:
-        xs, ys = from_csv_visual_10classes(visual_data_path)
+        xs, ys, _ = from_csv_with_filenames(visual_data_path)
         ys = [v - 1000 for v in ys]
         xs = np.array(xs)
         ys = np.array(ys)
@@ -56,6 +58,8 @@ if __name__ == '__main__':
         ys = np.array(ys1).reshape(100)
 
     #xs, _ = global_transform(xs)
+    #xs, _ = transform_data(xs)
+    xs = MinMaxScaler().fit_transform(xs)
     dim = xs.shape[1]
 
     #info = extract_som_info(model_name)
