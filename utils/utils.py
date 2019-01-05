@@ -150,7 +150,7 @@ def infer_label_10classes(label_string, labels_dict):
 
 def from_csv_visual_10classes(path):
     f = open(path,'r')
-    labels_dict_path = os.path.join(Constants.DATA_FOLDER, 'imagenet-labels.json')
+    labels_dict_path = os.path.join(Constants.LABELS_FOLDER, 'imagenet-labels.json')
     labels_dict = json.load(open(labels_dict_path))
     labels_dict = {v: k for k, v in labels_dict.items()}
     xs = []

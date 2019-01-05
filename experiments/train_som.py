@@ -3,6 +3,7 @@ from utils.constants import Constants
 from utils.utils import from_csv_with_filenames, from_npy_visual_data, from_csv_visual_10classes
 from sklearn.model_selection import train_test_split
 from utils.utils import transform_data, global_transform
+from sklearn.preprocessing import MinMaxScaler
 import os
 import numpy as np
 import argparse
@@ -13,6 +14,8 @@ visual_data_path_a = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes
 visual_data_path_b = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_b.npy')
 visual_data_80classes = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_80classes_train.npy')
 old_visual_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'VisualInputTrainingSet.csv')
+
+TRANSFORMS = ['none', 'zscore', 'global', 'minmax']
 
 
 if __name__ == '__main__':
@@ -73,12 +76,21 @@ if __name__ == '__main__':
         xs, _, ys, _ = train_test_split(xs, ys, test_size=0.6, stratify=ys, random_state=args.seed)
     print('Training on {} examples.'.format(len(xs)))
     xs_train, xs_test, ys_train, ys_test = train_test_split(xs, ys, test_size=0.2, stratify=ys, random_state=args.seed)
-    if args.transform == 'featurewise':
+
+    if args.transform not in TRANSFORMS:
+        raise ValueError('transformation not valid, choose one of the following: {}'.format(TRANSFORMS))
+    if args.transform == TRANSFORMS[1]:
         print('Centering data feature-wise...')
         xs_train, xs_test = transform_data(xs_train, xs_test, rotation=args.rotation)
-    elif args.transform == 'global':
+    elif args.transform == TRANSFORMS[2]:
         print('Normalizing with global mean and std...')
         xs_train, xs_test = global_transform(xs_train, xs_test)
+    elif args.transform == TRANSFORMS[3]:
+        print('Normalizing with MinMaxScaler...')
+        scaler = MinMaxScaler()
+        scaler.fit(xs_train)
+        xs_train = scaler.transform(xs_train)
+        xs_test = scaler.transform(xs_test)
 
     xs_train, xs_val, ys_train, ys_val = train_test_split(xs_train, ys_train, test_size=0.5, stratify=ys_train, random_state=args.seed)
 

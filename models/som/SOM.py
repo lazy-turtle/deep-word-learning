@@ -681,6 +681,15 @@ class SOM(object):
       return [activations,pos_activations]
 
 
+    def get_activations_alt(self, xj, threshold=0.6, mode='exp', tau=0.6):
+        w = np.array(self._weightages)
+        distances = np.sqrt(np.sum((w - xj)**2, axis=1)) # || x -wj(n)||
+        activations = np.exp(-(distances/tau))
+        activations[np.where(activations < threshold)] = 0.0
+        pos_activations = self._locations
+        return [activations, pos_activations]
+
+
     def plot_som(self, X, y, plot_name='som-viz.png'):
         image_grid = np.zeros(shape=(self._n,self._m))
 
@@ -698,6 +707,15 @@ class SOM(object):
             plt.text(m[1], m[0], color_names[y[i]], ha='center', va='center',
                      bbox=dict(facecolor=color_names[y[i]], alpha=0.5, lw=0))
         plt.savefig(os.path.join(Constants.PLOT_FOLDER, plot_name))
+
+
+    def plot_activations(self, activations):
+        matplotlib.use('TkAgg')  # in order to print something
+        assert activations.size == self._n * self._m
+        img = activations.reshape((self._m, self._n))
+        plt.imshow(img, interpolation='nearest')
+        plt.colorbar()
+        plt.show()
 
 
     def calc_stats(self, xs, ys, train=True, strategy='memory-aware'):

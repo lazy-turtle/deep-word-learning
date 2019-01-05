@@ -12,10 +12,10 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-soma_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'video_20x30_sigma10.0_alpha0.1_group_a')
+soma_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', 'audio_model_10classes')
 somv_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'video_20x30_sigma10.0_alpha0.1_group_a')
 hebbian_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'hebbian', 'hebbian_model')
-audio_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_a.npy')
+audio_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_train.csv')
 video_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_a.npy')
 
 def create_folds(a_xs, v_xs, a_ys, v_ys, n_folds=1, n_classes=10):
@@ -59,7 +59,7 @@ def create_folds(a_xs, v_xs, a_ys, v_ys, n_folds=1, n_classes=10):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Train a Hebbian model.')
-    parser.add_argument('--lr', metavar='lr', type=float, default=10, help='The model learning rate')
+    parser.add_argument('--lr', metavar='lr', type=float, default=100, help='The model learning rate')
     parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Random generator seed')
     parser.add_argument('--algo', metavar='algo', type=str, default='sorted',
                         help='Algorithm choice')
@@ -69,18 +69,18 @@ if __name__ == '__main__':
     args = parser.parse_args()
     exp_description = 'lr' + str(args.lr) + '_algo_' + args.algo + '_source_' + args.source
 
-    a_xs, a_ys, _ = from_npy_visual_data(audio_data_path)
-    #a_ys = [v - 1000 for v in a_ys]
-    #a_xs = np.array(a_xs)
-    #a_ys = np.array(a_ys)
-    v_xs, v_ys, _ = from_npy_visual_data(video_data_path)
+    a_xs, a_ys, _ = from_csv_with_filenames(audio_data_path)
     # fix labels to 0-9 range
+    a_ys = [v - 1000 for v in a_ys]
+    v_xs, v_ys, _ = from_npy_visual_data(video_data_path)
 
     # transform. #TODO: check if this transform is needed
     a_xs = MinMaxScaler().fit_transform(a_xs)
-    v_xs = MinMaxScaler().fit_transform(v_xs)
+    #v_xs = MinMaxScaler().fit_transform(v_xs)
     #v_xs,_ = global_transform(v_xs)
     #v_xs = min_max_scale(xs)
+    a_xs = np.array(a_xs)
+    a_ys = np.array(a_ys)
 
     a_dim = len(a_xs[0])
     v_dim = len(v_xs[0])
@@ -130,4 +130,4 @@ if __name__ == '__main__':
         hebbian_model.make_plot(a_xs_test[0], v_xs_test[0], v_ys_test[0], v_xs_fold[0], source='a')
     plt.plot(acc_a_list, color='teal')
     plt.plot(acc_v_list, color='orange')
-    plt.savefig('../data/plots/hebbian/'+exp_description+'.png', transparent=False)
+    plt.savefig(os.path.join(Constants.PLOT_FOLDER, 'hebbian/' + exp_description+'.png'), transparent=False)
