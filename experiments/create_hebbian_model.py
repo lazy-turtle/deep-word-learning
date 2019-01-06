@@ -13,7 +13,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 soma_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', 'audio_model_10classes')
-somv_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'video_20x30_tau0.1_thrsh0.6_sigma15.0_batch128_alpha0.1_final_no_transf')
+somv_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'video_20x30_s10.0_b128_a0.1_group_a_seed42_best_no_trsf')
 hebbian_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'hebbian', 'hebbian_model')
 audio_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_train.csv')
 video_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_a.npy')
