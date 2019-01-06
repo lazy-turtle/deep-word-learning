@@ -36,6 +36,7 @@ if __name__ == '__main__':
     parser.add_argument('--group', metavar='group', type=str, default='a')
     parser.add_argument('--transform', metavar='transform', type=str, default='none')
     parser.add_argument('--logging', action='store_true', default=True)
+    parser.add_argument('--use-gpu', action='store_true', default=True)
     parser.add_argument('--batch', type=int, default=128)
 
     args = parser.parse_args()

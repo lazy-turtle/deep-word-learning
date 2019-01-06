@@ -13,7 +13,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 soma_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', 'audio_model_10classes')
-somv_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'video_20x30_sigma10.0_alpha0.1_group_a')
+somv_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'video_20x30_tau0.1_thrsh0.6_sigma15.0_batch128_alpha0.1_final_no_transf')
 hebbian_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'hebbian', 'hebbian_model')
 audio_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_train.csv')
 video_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_a.npy')
@@ -59,7 +59,7 @@ def create_folds(a_xs, v_xs, a_ys, v_ys, n_folds=1, n_classes=10):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Train a Hebbian model.')
-    parser.add_argument('--lr', metavar='lr', type=float, default=100, help='The model learning rate')
+    parser.add_argument('--lr', metavar='lr', type=float, default=1, help='The model learning rate')
     parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Random generator seed')
     parser.add_argument('--algo', metavar='algo', type=str, default='sorted',
                         help='Algorithm choice')
@@ -117,7 +117,7 @@ if __name__ == '__main__':
         som_a.memorize_examples_by_class(a_xs_train, a_ys_train)
         som_v.memorize_examples_by_class(v_xs_train, v_ys_train)
         print('Training...')
-        hebbian_model.train(a_xs_fold, v_xs_fold)
+        hebbian_model.train(a_xs_fold, v_xs_fold, step=n)
         print('Evaluating...')
         accuracy_a = hebbian_model.evaluate(a_xs_test, v_xs_test, a_ys_test, v_ys_test, source='a',
                                           prediction_alg=args.algo)
