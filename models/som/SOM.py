@@ -685,6 +685,9 @@ class SOM(object):
         w = np.array(self._weightages)
         distances = np.sqrt(np.sum((w - xj)**2, axis=1)) # || x -wj(n)||
         activations = np.exp(-(distances/tau))
+        max_v = np.max(activations)
+        min_v = np.min(activations)
+        activations = (activations - min_v) / (max_v - min_v)
         activations[np.where(activations < threshold)] = 0.0
         pos_activations = self._locations
         return [activations, pos_activations]
@@ -709,13 +712,16 @@ class SOM(object):
         plt.savefig(os.path.join(Constants.PLOT_FOLDER, plot_name))
 
 
-    def plot_activations(self, activations):
+    def plot_activations(self, activations, cmap='gray', title='activations'):
         matplotlib.use('TkAgg')  # in order to print something
         assert activations.size == self._n * self._m
         img = activations.reshape((self._m, self._n))
-        plt.imshow(img, interpolation='nearest')
+        plt.figure()
+        plt.imshow(img, interpolation='nearest', cmap=cmap)
         plt.colorbar()
-        plt.show()
+        filename = title.replace(' ', '_')
+        filename = filename + '_' + str(int(time.time()))
+        plt.savefig(os.path.join(Constants.PLOT_FOLDER, 'hebbian/{}.png'.format(filename)), transparent=False)
 
 
     def calc_stats(self, xs, ys, train=True, strategy='memory-aware'):

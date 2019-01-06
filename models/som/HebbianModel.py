@@ -57,7 +57,7 @@ class HebbianModel(object):
             init_op = tf.global_variables_initializer()
             self._sess.run(init_op)
 
-    def train(self, input_a, input_v):
+    def train(self, input_a, input_v, step=0):
         '''
         input_a: list containing a number of training examples equal to
                  self.n_presentations
@@ -80,10 +80,11 @@ class HebbianModel(object):
             for i in range(len(input_a)):
                 # get activations from som
                 activation_a, _ = self.som_a.get_activations(input_a[i])
-                activation_v, _ = self.som_v.get_activations(input_v[i])
+                activation_v, _ = self.som_v.get_activations_alt(input_v[i])
 
-                self.som_a.plot_activations(activation_a)
-                self.som_v.plot_activations(activation_v)
+                if step == 0:
+                    self.som_a.plot_activations(activation_a, cmap='viridis', title='audio activations')
+                    self.som_v.plot_activations(activation_v, cmap='plasma', title='video activations')
 
                 # run training op
                 _, d = self._sess.run([self.training, self.delta],
