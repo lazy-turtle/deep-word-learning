@@ -1,2 +1,0 @@
-model_checkpoint_path: "/usr/home/studenti/sp160362/project/deep-word-learning/data/trained-models/hebbian/hebbian_model/model.ckpt-1"
-all_model_checkpoint_paths: "/usr/home/studenti/sp160362/project/deep-word-learning/data/trained-models/hebbian/hebbian_model/model.ckpt-1"
