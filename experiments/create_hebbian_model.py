@@ -21,7 +21,7 @@ video_model_list = [
 ]
 
 video_model = video_model_list[1]
-soma_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', 'audio_model_10classes')
+soma_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', 'audio_20x30_s10.0_b128_a0.1_group-x_seed42_1145208211_minmax')
 somv_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'best', video_model)
 hebbian_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'hebbian')
 audio_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_train.csv')
@@ -92,8 +92,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Train a Hebbian model.')
     parser.add_argument('--lr', metavar='lr', type=float, default=10, help='The model learning rate')
     parser.add_argument('--taua', metavar='taua', type=float, default=0.5, help='Tau value audio som')
-    parser.add_argument('--tauv', metavar='tauv', type=float, default=1, help='Tau value video som')
-    parser.add_argument('--th', metavar='th', type=float, default=0.0, help='Threshold to cut values from')
+    parser.add_argument('--tauv', metavar='tauv', type=float, default=0.1, help='Tau value video som')
+    parser.add_argument('--th', metavar='th', type=float, default=0.6, help='Threshold to cut values from')
     parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Random generator seed')
     parser.add_argument('--somv', metavar='somv', type=str, default=somv_path,
                         help='Video SOM model path')
@@ -125,8 +125,10 @@ if __name__ == '__main__':
     # for video SOM uncomment the required transformation, if needed
     trasf = somv_info['trsf']
     if trasf == 'minmax':
+        print('Using MinMaxScaler...')
         v_xs = MinMaxScaler().fit_transform(v_xs)
     elif trasf == 'global':
+        print('Normalizing with global mean and std...')
         v_xs,_ = global_transform(v_xs)
     elif trasf != 'none':
         raise ValueError('Normalization not recognised, please check som filename.')
