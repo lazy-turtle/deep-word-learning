@@ -20,7 +20,7 @@ video_model_list = [
     'video_20x20_s8.0_b128_a0.2_group-a_seed42_1545312173_global',
 ]
 
-video_model = video_model_list[2]
+video_model = video_model_list[1]
 soma_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', 'audio_model_10classes')
 somv_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'best', video_model)
 hebbian_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'hebbian')
@@ -29,7 +29,7 @@ audio_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_tra
 video_data_paths = {
     'a': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_a.npy'),
     'b': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_b.npy'),
-    'z': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_b_zebra.npy'),
+    'z': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_z.npy'),
 }
 num_presentations = 15
 
@@ -92,8 +92,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Train a Hebbian model.')
     parser.add_argument('--lr', metavar='lr', type=float, default=10, help='The model learning rate')
     parser.add_argument('--taua', metavar='taua', type=float, default=0.5, help='Tau value audio som')
-    parser.add_argument('--tauv', metavar='tauv', type=float, default=3, help='Tau value video som')
-    parser.add_argument('--th', metavar='th', type=float, default=0.5, help='Threshold to cut values from')
+    parser.add_argument('--tauv', metavar='tauv', type=float, default=1, help='Tau value video som')
+    parser.add_argument('--th', metavar='th', type=float, default=0.0, help='Threshold to cut values from')
     parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Random generator seed')
     parser.add_argument('--somv', metavar='somv', type=str, default=somv_path,
                         help='Video SOM model path')
