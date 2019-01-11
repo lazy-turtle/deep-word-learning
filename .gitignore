@@ -3,7 +3,7 @@ __*__*
 *.pyc
 .idea/*
 .vscode/*
-data/plots/*
+#data/plots/*
 data/trained-models/*/*ep/
 data/trained-models/*/*_epoch/
 data/trained-models/*/*60x60*/
