@@ -714,7 +714,7 @@ class SOM(object):
 
 
     def plot_activations(self, activations, step, cmap='gray', title='activations'):
-        #matplotlib.use('TkAgg')  # for interactive plot display
+        matplotlib.use('TkAgg')  # for interactive plot display
         assert activations.size == self._n * self._m
         img = activations.reshape((self._m, self._n))
         plt.figure()
@@ -722,8 +722,8 @@ class SOM(object):
         plt.colorbar()
         filename = title.replace(' ', '_')
         filename = filename + '_' + str(int(time.time()))
-        #plt.show()
-        plt.savefig(os.path.join(Constants.PLOT_FOLDER, 'hebbian/step{}_{}.png'.format(step, filename)), transparent=False)
+        plt.show()
+        #plt.savefig(os.path.join(Constants.PLOT_FOLDER, 'hebbian/step{}_{}.png'.format(step, filename)), transparent=False)
 
 
     def calc_stats(self, xs, ys, train=True, strategy='memory-aware'):
