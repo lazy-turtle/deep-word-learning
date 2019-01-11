@@ -17,9 +17,10 @@ import time
 video_model_list = [
     'video_20x30_s10.0_b128_a0.1_group-a_seed42_1545208211_none',
     'video_20x30_s10.0_b128_a0.2_group-b_seed42_1545208672_global',
+    'video_20x20_s8.0_b128_a0.2_group-a_seed42_1545312173_global',
 ]
 
-video_model = video_model_list[1]
+video_model = video_model_list[2]
 soma_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', 'audio_model_10classes')
 somv_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'best', video_model)
 hebbian_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'hebbian')
@@ -91,8 +92,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Train a Hebbian model.')
     parser.add_argument('--lr', metavar='lr', type=float, default=10, help='The model learning rate')
     parser.add_argument('--taua', metavar='taua', type=float, default=0.5, help='Tau value audio som')
-    parser.add_argument('--tauv', metavar='tauv', type=float, default=0.4, help='Tau value video som')
-    parser.add_argument('--th', metavar='th', type=float, default=0.6, help='Threshold to cut values from')
+    parser.add_argument('--tauv', metavar='tauv', type=float, default=3, help='Tau value video som')
+    parser.add_argument('--th', metavar='th', type=float, default=0.5, help='Threshold to cut values from')
     parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Random generator seed')
     parser.add_argument('--somv', metavar='somv', type=str, default=somv_path,
                         help='Video SOM model path')
@@ -137,10 +138,10 @@ if __name__ == '__main__':
     v_dim = len(v_xs[0])
     print('Data loaded and transformed, building SOMs...')
     som_a = SOM(20, 30, a_dim, checkpoint_loc=soma_path, n_iterations=10000,
-                tau=0.1, threshold=0.6)
+                tau=args.taua, threshold=args.th)
     dims = somv_info['dims']
     som_v = SOM(dims[0], dims[1], v_dim, checkpoint_loc=somv_path, n_iterations=10000,
-                tau=0.1, threshold=0.6)
+                tau=args.tauv, threshold=args.th)
 
 
     a_xs_train, a_xs_test, a_ys_train, a_ys_test = train_test_split(a_xs, a_ys, test_size=0.2, random_state=args.seed)
@@ -182,7 +183,8 @@ if __name__ == '__main__':
         acc_a_list.append(accuracy_a * 100)
         acc_v_list.append(accuracy_v * 100)
         # make a plot - placeholder
-        hebbian_model.make_plot(a_xs_test[0], v_xs_test[0], v_ys_test[0], v_xs_fold[0], source='a')
+        hebbian_model.make_plot(a_xs_test[0], v_xs_test[0], v_ys_test[0], v_xs_fold[0], source='a', step=n)
+        hebbian_model.make_plot(v_xs_test[0], a_xs_test[0], a_ys_test[0], a_xs_fold[0], source='v', step=n)
 
     fig = plt.figure(figsize=(8,6))
     ax = fig.add_subplot(1,1,1)

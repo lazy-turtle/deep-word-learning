@@ -658,7 +658,7 @@ class SOM(object):
         return superpositions
 
 
-    def get_activations_old(self, input_vect, normalize=True, threshold=0.6, mode='exp', tau=0.5):
+    def get_activations_abs(self, input_vect, normalize=True, threshold=0.6, mode='exp', tau=0.5):
       # get activations for the word learning
       # Quantization error:
       activations = list()
@@ -722,7 +722,7 @@ class SOM(object):
         plt.colorbar()
         filename = title.replace(' ', '_')
         filename = filename + '_' + str(int(time.time()))
-        plt.show()
+        #plt.show()
         plt.savefig(os.path.join(Constants.PLOT_FOLDER, 'hebbian/step{}_{}.png'.format(step, filename)), transparent=False)
 
 

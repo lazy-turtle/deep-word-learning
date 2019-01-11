@@ -206,11 +206,8 @@ def softmax(x):
     return out
 
 def get_plot_filename(folder_path):
-    date_str = datetime.datetime.now().strftime("%Y-%m-%d")
-    i = 0
-    while os.path.exists(os.path.join(folder_path, date_str + "_" + str(i)) + '.png'):
-        i += 1
-    return date_str + "_" + str(i) + '.png'
+    date_str = datetime.datetime.now().strftime("%Y.%m.%d_%H.%M.%S")
+    return date_str + '.png'
 
 def create_folds(a_xs, v_xs, a_ys, v_ys, n_folds=1, n_classes=100):
     '''
