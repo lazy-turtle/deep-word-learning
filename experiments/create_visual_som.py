@@ -9,10 +9,10 @@ import json
 import argparse
 
 DATA_TYPE = 'video'
-visual_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_80classes_train.npy')
+visual_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_a.npy')
 #visual_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_train.csv')
 
-model_name = 'video_60x60_s30.0_b256_a0.1__seed10_1545471476_final'
+model_name = 'video_20x20_s8.0_b128_a0.2_group-a_seed42_1545312173_final'
 #model_name = 'audio_model_10classes'
 model_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, DATA_TYPE, model_name)
 label_path = os.path.join(Constants.LABELS_FOLDER, 'coco-labels.json')
@@ -44,7 +44,7 @@ if __name__ == '__main__':
     else:
         id_to_label = json.load(open(label_path))
         id_to_label = {int(k): v for k,v in id_to_label.items()}
-        xs, ys, ids_dict = from_npy_visual_data(visual_data_path, classes=80)
+        xs, ys, ids_dict = from_npy_visual_data(visual_data_path, classes=10)
         labels = np.array([id_to_label[ids_dict[x]] for x in ys])
 
     if args.subsample:
@@ -66,7 +66,7 @@ if __name__ == '__main__':
     dim = xs.shape[1]
 
     #info = extract_som_info(model_name)
-    info = {'shape':[60,60], 'alpha':0.1, 'sigma':30.0, 'batch':128}
+    info = {'shape':[20,20], 'alpha':0.2, 'sigma':8.0, 'batch':128}
     som_shape = info['shape']
     som = SOM(som_shape[0], som_shape[1], dim, alpha=info['alpha'], sigma=info['sigma'],
               batch_size=info['batch'], checkpoint_loc=args.model, data=DATA_TYPE)

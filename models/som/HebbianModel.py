@@ -83,12 +83,12 @@ class HebbianModel(object):
             # present images to model
             for i in range(len(input_a)):
                 # get activations from som
-                activation_a, _ = self.som_a.get_activations_old(input_a[i], tau=tau_a, threshold=th)
-                activation_v, _ = self.som_v.get_activations_old(input_v[i], tau=tau_v, threshold=th)
+                activation_a, _ = self.som_a.get_activations(input_a[i], tau=tau_a, threshold=th)
+                activation_v, _ = self.som_v.get_activations(input_v[i], tau=tau_v, threshold=th)
 
                 #if step == 1:
-                #    self.som_a.plot_activations(activation_a, step, cmap='viridis', title='audio activations')
-                #    self.som_v.plot_activations(activation_v, step, cmap='plasma', title='video activations')
+                    #self.som_a.plot_activations(activation_a, step, cmap='viridis', title='audio activations')
+                    #self.som_v.plot_activations(activation_v, step, cmap='plasma', title='video activations')
                     #exit(0)
 
                 # run training op
@@ -169,7 +169,7 @@ class HebbianModel(object):
             to_som = self.som_v
         else:
             raise ValueError('Wrong string for source_som parameter')
-        source_activation, _ = from_som.get_activations(x)
+        source_activation, _ = from_som.get_activations(x, tau=from_som.tau, threshold=from_som.threshold)
         source_bmu_index = np.argmax(np.array(source_activation))
         source_activation = np.array(source_activation).reshape((-1, 1))
         target_activation = self.propagate_activation(source_activation, source_som=source_som)
@@ -239,9 +239,9 @@ class HebbianModel(object):
         yi_pred = y_target[yi_pred_idx]
         return yi_pred
 
-    def make_plot(self, x_source, x_target, y_target, X_target_all, source):
+    def make_plot(self, x_source, x_target, y_target, X_target_all, source, step):
         source_bmu, target_bmu = self.get_bmus_propagate(x_source, source_som=source)
-
+        cmap = 'viridis' if source == 'a' else 'plasma'
         if source == 'a':
             hebbian_weights = self.weights[:][source_bmu]
             source_som = self.som_a
@@ -251,33 +251,45 @@ class HebbianModel(object):
             source_som = self.som_v
             target_som = self.som_a
 
-        source_activation, _ = source_som.get_activations(x_source)
-        target_activation_true, _ = target_som.get_activations(x_target)
+        source_activation, _ = source_som.get_activations(x_source,
+                                                          tau=source_som.tau,
+                                                          threshold=source_som.threshold)
+        target_activation_true, _ = target_som.get_activations(x_target,
+                                                               tau=target_som.tau,
+                                                               threshold=target_som.threshold)
 
         # TODO: replicate some of the other make_prediction code to get this
         yi_pred = self.make_prediction_sort(x_source, source_som, target_som, source)
-        target_activation_pred, _ = target_som.get_activations(X_target_all[yi_pred])
+        target_activation_pred, _ = target_som.get_activations(X_target_all[yi_pred],
+                                                               tau=target_som.tau,
+                                                               threshold=target_som.threshold)
         propagated_activation = self.propagate_activation(source_activation, source_som=source)
 
-        fig, axis_arr = plt.subplots(3, 2)
-        axis_arr[0, 0].matshow(np.array(source_activation)
-                               .reshape((source_som._m, source_som._n)))
+        height, width = 3, 2
+        fig, axis_arr = plt.subplots(height, width)
+        fig.set_figheight(3 * height)
+        fig.set_figwidth(3 * width)
+        axis_arr[0, 0].matshow(np.array(source_activation).reshape((source_som._m, source_som._n)), cmap=cmap)
         axis_arr[0, 0].set_title('Source SOM activation')
-        axis_arr[0, 1].matshow(propagated_activation
-                               .reshape((source_som._m, source_som._n)))
+
+        axis_arr[0, 1].matshow(propagated_activation.reshape((target_som._m, target_som._n)), cmap=cmap)
         axis_arr[0, 1].set_title('Propagation of activation to target')
-        axis_arr[1, 0].matshow(np.array(target_activation_true)
-                               .reshape((source_som._m, source_som._n)))
+
+        axis_arr[1, 0].matshow(np.array(target_activation_true).reshape((target_som._m, target_som._n)), cmap=cmap)
         axis_arr[1, 0].set_title('Target SOM activation true label ({})'.format(y_target))
-        axis_arr[1, 1].matshow(np.array(target_activation_pred)
-                               .reshape((source_som._m, source_som._n)))
+
+        axis_arr[1, 1].matshow(np.array(target_activation_pred).reshape((target_som._m, target_som._n)), cmap=cmap)
         axis_arr[1, 1].set_title('Target SOM activation predicted label ({})'.format(yi_pred))
-        axis_arr[2, 1].matshow(np.array(hebbian_weights)
-                               .reshape((source_som._m, source_som._n)))
+
+        mm = target_som._m if source == 'a' else source_som._m
+        nn = target_som._n if source == 'a' else source_som._n
+        axis_arr[2, 1].matshow(np.array(hebbian_weights).reshape((mm,nn)), cmap=cmap)
         axis_arr[2, 1].set_title('Hebbian weights of source BMU')
+
         axis_arr[2, 0].matshow(np.zeros((source_som._m, source_som._n)))
         plt.tight_layout()
-        filename = str(int(time.time())) + get_plot_filename(Constants.PLOT_FOLDER)
+        filename = 'stats_{}{}_ta{}tv{}th{}_'.format(step, source, self.som_a.tau, self.som_v.tau, self.som_a.threshold)
+        filename += get_plot_filename(Constants.PLOT_FOLDER)
         plt.savefig(os.path.join(Constants.PLOT_FOLDER, 'hebbian', filename))
         plt.clf()
 
@@ -310,7 +322,9 @@ class HebbianModel(object):
             bmu_class_dict = target_som.train_bmu_class_dict
         else:
             bmu_class_dict = target_som.test_bmu_class_dict
-        source_activation, pos_source_activation = source_som.get_activations(x)
+        source_activation, pos_source_activation = source_som.get_activations(x,
+                                                                              tau=source_som.tau,
+                                                                              threshold=source_som.threshold)
         source_activation = np.array(source_activation).reshape((-1, 1))
         target_activation = self.propagate_activation(source_activation, source_som=source)
         hebbian_bmu_index = np.argmax(target_activation)
@@ -337,7 +351,9 @@ class HebbianModel(object):
             bmu_class_dict = target_som.train_bmu_class_dict
         else:
             bmu_class_dict = target_som.test_bmu_class_dict
-        source_activation, pos_source_activation = source_som.get_activations(x)
+        source_activation, pos_source_activation = source_som.get_activations(x,
+                                                                              tau=source_som.tau,
+                                                                              threshold=source_som.threshold)
         source_activation = np.array(source_activation).reshape((-1, 1))
         target_activation = self.propagate_activation(source_activation, source_som=source)
         # vote weighting alternatives
@@ -375,7 +391,7 @@ class HebbianModel(object):
         return np.argmax(class_count)
 
     def make_prediction_sort(self, x, source_som, target_som, source):
-        source_activation, _ = source_som.get_activations(x)
+        source_activation, _ = source_som.get_activations(x, tau=source_som.tau, threshold=source_som.threshold)
         source_activation = np.array(source_activation).reshape((-1, 1))
         target_activation = self.propagate_activation(source_activation, source_som=source)
         for i in range(len(target_activation)):
