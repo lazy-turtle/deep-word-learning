@@ -3,6 +3,8 @@ import numpy as np
 import os
 import sys
 import matplotlib
+import time
+
 matplotlib.use('Agg')
 matplotlib.rcParams.update({'font.size': 8})
 import matplotlib.pyplot as plt
@@ -17,8 +19,9 @@ class HebbianModel(object):
                  n_presentations=1, n_classes=10, threshold=.6,
                  checkpoint_dir=None, a_threshold=.6, v_threshold=.6,
                  a_tau=.6, v_tau=.6):
-        assert som_a._m == som_v._m and som_a._n == som_v._n
-        self.num_neurons = som_a._m * som_a._n
+        #assert som_a._m == som_v._m and som_a._n == som_v._n probably not needed
+        self.num_neurons_a = som_a._m * som_a._n
+        self.num_neurons_v = som_v._m * som_v._n
         self._graph = tf.Graph()
         self.som_a = som_a
         self.som_v = som_v
@@ -36,15 +39,16 @@ class HebbianModel(object):
         self.v_tau = v_tau
 
         with self._graph.as_default():
+            n = max(self.num_neurons_a, self.num_neurons_v)
             self.weights = tf.Variable(
-                             tf.random_normal([self.num_neurons, self.num_neurons],
-                             mean=1/self.num_neurons,
-                             stddev=1/np.sqrt(1000*self.num_neurons))
+                             tf.random_normal([self.num_neurons_a, self.num_neurons_v],
+                             mean=1/n,
+                             stddev=1/np.sqrt(1000*n))
                            )
 
-            self.activation_a = tf.placeholder(dtype=tf.float32, shape=[self.num_neurons])
-            self.activation_v = tf.placeholder(dtype=tf.float32, shape=[self.num_neurons])
-            self.assigned_weights = tf.placeholder(dtype=tf.float32, shape=[self.num_neurons, self.num_neurons])
+            self.activation_a = tf.placeholder(dtype=tf.float32, shape=[self.num_neurons_a])
+            self.activation_v = tf.placeholder(dtype=tf.float32, shape=[self.num_neurons_v])
+            self.assigned_weights = tf.placeholder(dtype=tf.float32, shape=[self.num_neurons_a, self.num_neurons_v])
 
             self.delta = 1 - tf.exp(-self.learning_rate * tf.matmul(tf.reshape(self.activation_a, (-1, 1)),
                                                                     tf.reshape(self.activation_v, (1, -1))))
@@ -57,7 +61,7 @@ class HebbianModel(object):
             init_op = tf.global_variables_initializer()
             self._sess.run(init_op)
 
-    def train(self, input_a, input_v, step=0):
+    def train(self, input_a, input_v, step=1, tau_a=0.2, tau_v=0.1, th=0.2):
         '''
         input_a: list containing a number of training examples equal to
                  self.n_presentations
@@ -79,12 +83,13 @@ class HebbianModel(object):
             # present images to model
             for i in range(len(input_a)):
                 # get activations from som
-                activation_a, _ = self.som_a.get_activations(input_a[i])
-                activation_v, _ = self.som_v.get_activations_alt(input_v[i])
+                activation_a, _ = self.som_a.get_activations_old(input_a[i], tau=tau_a, threshold=th)
+                activation_v, _ = self.som_v.get_activations_old(input_v[i], tau=tau_v, threshold=th)
 
-                if step == 0:
-                    self.som_a.plot_activations(activation_a, cmap='viridis', title='audio activations')
-                    self.som_v.plot_activations(activation_v, cmap='plasma', title='video activations')
+                #if step == 1:
+                #    self.som_a.plot_activations(activation_a, step, cmap='viridis', title='audio activations')
+                #    self.som_v.plot_activations(activation_v, step, cmap='plasma', title='video activations')
+                    #exit(0)
 
                 # run training op
                 _, d = self._sess.run([self.training, self.delta],
@@ -96,7 +101,7 @@ class HebbianModel(object):
             w = w.flatten()
             w_sum = np.sum(w)
             w_norm = [wi / w_sum for wi in w]
-            w = np.reshape(w_norm, (self.num_neurons, self.num_neurons))
+            w = np.reshape(w_norm, (self.num_neurons_a, self.num_neurons_v))
 
             self._sess.run(self.assign_op, feed_dict={self.assigned_weights: w})
             self._trained = True
@@ -209,8 +214,8 @@ class HebbianModel(object):
         for yi, yj in zip(y_pred, y_source):
             if yi == yj:
                 correct += 1
-        print('source: {}, correct: {}' .format(source, correct))
-        print(y_source)
+        print('source: {}, correct: {} out of {}' .format(source, correct, len(y_pred)))
+        print(y_source.tolist())
         print(y_pred)
         return correct/len(y_pred)
 
@@ -272,7 +277,7 @@ class HebbianModel(object):
         axis_arr[2, 1].set_title('Hebbian weights of source BMU')
         axis_arr[2, 0].matshow(np.zeros((source_som._m, source_som._n)))
         plt.tight_layout()
-        filename = get_plot_filename(Constants.PLOT_FOLDER)
+        filename = str(int(time.time())) + get_plot_filename(Constants.PLOT_FOLDER)
         plt.savefig(os.path.join(Constants.PLOT_FOLDER, 'hebbian', filename))
         plt.clf()
 
