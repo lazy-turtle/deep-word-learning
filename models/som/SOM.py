@@ -658,7 +658,7 @@ class SOM(object):
         return superpositions
 
 
-    def get_activations(self, input_vect, normalize=True, threshold=0.6, mode='exp', tau=0.6):
+    def get_activations_old(self, input_vect, normalize=True, threshold=0.6, mode='exp', tau=0.5):
       # get activations for the word learning
       # Quantization error:
       activations = list()
@@ -681,13 +681,14 @@ class SOM(object):
       return [activations,pos_activations]
 
 
-    def get_activations_alt(self, xj, threshold=0.6, mode='exp', tau=0.6):
+    def get_activations(self, xj, threshold=0.6, normalize=True, mode='exp', tau=0.5):
         w = np.array(self._weightages)
         distances = np.sqrt(np.sum((w - xj)**2, axis=1)) # || x -wj(n)||
         activations = np.exp(-(distances/tau))
-        max_v = np.max(activations)
-        min_v = np.min(activations)
-        activations = (activations - min_v) / (max_v - min_v)
+        if normalize:
+            max_v = np.max(activations)
+            min_v = np.min(activations)
+            activations = (activations - min_v) / (max_v - min_v)
         activations[np.where(activations < threshold)] = 0.0
         pos_activations = self._locations
         return [activations, pos_activations]
@@ -712,16 +713,17 @@ class SOM(object):
         plt.savefig(os.path.join(Constants.PLOT_FOLDER, plot_name))
 
 
-    def plot_activations(self, activations, cmap='gray', title='activations'):
-        matplotlib.use('TkAgg')  # in order to print something
+    def plot_activations(self, activations, step, cmap='gray', title='activations'):
+        #matplotlib.use('TkAgg')  # for interactive plot display
         assert activations.size == self._n * self._m
         img = activations.reshape((self._m, self._n))
         plt.figure()
-        plt.imshow(img, interpolation='nearest', cmap=cmap)
+        plt.imshow(img, interpolation='nearest', cmap=cmap, origin='lower')
         plt.colorbar()
         filename = title.replace(' ', '_')
         filename = filename + '_' + str(int(time.time()))
-        plt.savefig(os.path.join(Constants.PLOT_FOLDER, 'hebbian/{}.png'.format(filename)), transparent=False)
+        plt.show()
+        plt.savefig(os.path.join(Constants.PLOT_FOLDER, 'hebbian/step{}_{}.png'.format(step, filename)), transparent=False)
 
 
     def calc_stats(self, xs, ys, train=True, strategy='memory-aware'):
