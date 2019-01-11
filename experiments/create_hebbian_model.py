@@ -18,9 +18,11 @@ video_model_list = [
     'video_20x30_s10.0_b128_a0.1_group-a_seed42_1545208211_none',
     'video_20x30_s10.0_b128_a0.2_group-b_seed42_1545208672_global',
     'video_20x20_s8.0_b128_a0.2_group-a_seed42_1545312173_global',
+    'video_20x30_s15.0_b128_a0.2_group-a_seed42_1546936577_minmax',
+    'video_20x30_s12.0_b128_a0.1_group-b_seed33_1547237808_minmax',
 ]
 
-video_model = video_model_list[1]
+video_model = video_model_list[4]
 soma_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', 'audio_20x30_s10.0_b128_a0.1_group-x_seed42_1145208211_minmax')
 somv_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'best', video_model)
 hebbian_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'hebbian')
@@ -92,14 +94,14 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Train a Hebbian model.')
     parser.add_argument('--lr', metavar='lr', type=float, default=10, help='The model learning rate')
     parser.add_argument('--taua', metavar='taua', type=float, default=0.5, help='Tau value audio som')
-    parser.add_argument('--tauv', metavar='tauv', type=float, default=0.1, help='Tau value video som')
-    parser.add_argument('--th', metavar='th', type=float, default=0.6, help='Threshold to cut values from')
-    parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Random generator seed')
+    parser.add_argument('--tauv', metavar='tauv', type=float, default=0.5, help='Tau value video som')
+    parser.add_argument('--th', metavar='th', type=float, default=0.5, help='Threshold to cut values from')
+    parser.add_argument('--seed', metavar='seed', type=int, default=10, help='Random generator seed')
     parser.add_argument('--somv', metavar='somv', type=str, default=somv_path,
                         help='Video SOM model path')
     parser.add_argument('--algo', metavar='algo', type=str, default='sorted',
                         help='Algorithm choice')
-    parser.add_argument('--act', metavar='act', type=str, default='abs',
+    parser.add_argument('--act', metavar='act', type=str, default='eucl',
                         help='Activation function choice')
     parser.add_argument('--source', metavar='source', type=str, default='v',
                         help='Source SOM')

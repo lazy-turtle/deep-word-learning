@@ -17,15 +17,20 @@ video_model_list = [
     'video_20x30_s10.0_b128_a0.1_group-a_seed42_1545208211_none',
     'video_20x30_s10.0_b128_a0.2_group-b_seed42_1545208672_global',
     'video_20x20_s8.0_b128_a0.2_group-a_seed42_1545312173_global',
+    'video_20x20_s6.0_b128_a0.1_group-a_seed42_1547219065_minmax',
+    'video_20x30_s15.0_b128_a0.2_group-a_seed42_1546936577_minmax',
+    'video_20x30_s12.0_b128_a0.1_group-b_seed33_1547237808_minmax'
 ]
 
 audio_model_list = [
     'audio_20x30_s10.0_b128_a0.1_group-x_seed42_1145208211_minmax'
 ]
 
-video_model = video_model_list[1]
+video_model = video_model_list[5]
 audio_model = audio_model_list[0]
+#som_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', audio_model)
 som_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'best', video_model)
+
 
 data_paths = {
     'a': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_a.npy'),
@@ -52,8 +57,8 @@ def extract_som_info(filename):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Check SOM activations.')
     parser.add_argument('--lr', metavar='lr', type=float, default=10, help='The model learning rate')
-    parser.add_argument('--tau', metavar='tau', type=float, default=0.1, help='Tau value audio som')
-    parser.add_argument('--th', metavar='th', type=float, default=0.6, help='Threshold to cut values from')
+    parser.add_argument('--tau', metavar='tau', type=float, default=0.6, help='Tau value audio som')
+    parser.add_argument('--th', metavar='th', type=float, default=0.5, help='Threshold to cut values from')
     parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Random generator seed')
     parser.add_argument('--som', metavar='som', type=str, default=som_path,
                         help='Video SOM model path')
@@ -85,8 +90,10 @@ if __name__ == '__main__':
     # for video SOM uncomment the required transformation, if needed
     trasf = som_info['trsf']
     if trasf == 'minmax':
+        print('Using min-max scaler...')
         xs = MinMaxScaler().fit_transform(xs)
     elif trasf == 'global':
+        print('Using z-score with global stats...')
         xs,_ = global_transform(xs)
     elif trasf != 'none':
         raise ValueError('Normalization not recognised, please check som filename.')
@@ -101,7 +108,7 @@ if __name__ == '__main__':
     som.restore_trained(som_path)
 
     # get random samples for each class
-    num_samples = 10
+    num_samples = 1
     for id in range(num_classes):
         indices = np.where(ys == id)[0]
         sampled_indices = np.random.choice(indices, size=num_samples, replace=False)
