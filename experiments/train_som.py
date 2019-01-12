@@ -12,7 +12,8 @@ import argparse
 audio_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio100classes.csv')
 visual_data_path_a = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_a.npy')
 visual_data_path_b = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_b.npy')
-visual_data_path_z = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_b_zebra.npy')
+visual_data_path_z = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_z.npy')
+visual_data_path_as = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_as.npy')
 visual_data_80classes = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_80classes_train.npy')
 old_visual_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'VisualInputTrainingSet.csv')
 
@@ -56,6 +57,8 @@ if __name__ == '__main__':
                 path = visual_data_path_b
             elif args.group == 'z':
                 path = visual_data_path_z
+            elif args.group == 'as':
+                path = visual_data_path_as
             else:
                 raise ValueError('Data group not recognised')
         else:
