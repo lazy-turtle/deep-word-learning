@@ -21,9 +21,10 @@ video_model_list = [
     'video_20x30_s15.0_b128_a0.2_group-a_seed42_1546936577_minmax',
     'video_20x30_s12.0_b128_a0.1_group-b_seed33_1547237808_minmax',
     'video_20x30_s15.0_b128_a0.1_group-as_seed42_1547294638_minmax',
+    'video_20x30_s15.0_b128_a0.1_group-c_seed42_1547303679_minmax'
 ]
 
-video_model = video_model_list[1]
+video_model = video_model_list[-1]
 soma_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', 'audio_20x30_s10.0_b128_a0.1_group-x_seed42_1145208211_minmax')
 somv_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'best', video_model)
 hebbian_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'hebbian')
@@ -32,6 +33,7 @@ audio_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_tra
 video_data_paths = {
     'a': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_a.npy'),
     'b': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_b.npy'),
+    'c': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_c.npy'),
     'z': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_z.npy'),
     'as':os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_as.npy'),
 }
@@ -95,10 +97,10 @@ def create_folds(a_xs, v_xs, a_ys, v_ys, n_folds=1, n_classes=10):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Train a Hebbian model.')
     parser.add_argument('--lr', metavar='lr', type=float, default=10, help='The model learning rate')
-    parser.add_argument('--taua', metavar='taua', type=float, default=0.5, help='Tau value audio som')
-    parser.add_argument('--tauv', metavar='tauv', type=float, default=0.5, help='Tau value video som')
+    parser.add_argument('--taua', metavar='taua', type=float, default=1, help='Tau value audio som')
+    parser.add_argument('--tauv', metavar='tauv', type=float, default=1, help='Tau value video som')
     parser.add_argument('--th', metavar='th', type=float, default=0.5, help='Threshold to cut values from')
-    parser.add_argument('--seed', metavar='seed', type=int, default=10, help='Random generator seed')
+    parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Random generator seed')
     parser.add_argument('--somv', metavar='somv', type=str, default=somv_path,
                         help='Video SOM model path')
     parser.add_argument('--algo', metavar='algo', type=str, default='sorted',
@@ -173,9 +175,27 @@ if __name__ == '__main__':
         print('Hebbian model with {} presentations.'.format(n))
         hebbian_model = HebbianModel(som_a, som_v, a_dim=a_dim,
                                      v_dim=v_dim, n_presentations=n,
-                                     checkpoint_dir=model_path,
+                                     checkpoint_dir=None, #TODO replace with model_dir
                                      learning_rate=args.lr)
         a_xs_fold, v_xs_fold, a_ys_fold, v_ys_fold = create_folds(a_xs_train, v_xs_train, a_ys_train, v_ys_train, n_folds=n)
+
+        # # print(len(v_xs_fold))
+        # for c in range(10):
+        #     img_a = np.zeros((som_a._m, som_a._n))
+        #     img_v = np.zeros((som_v._m, som_v._n))
+        #     f, axarr = plt.subplots(1, 2)
+        #
+        #     for i in range(1):
+        #         j = i*10 + c
+        #         act_a,_ = som_a.get_activations(a_xs_fold[j], tau=1.0, threshold=0.5)
+        #         act_v,_ = som_v.get_activations(v_xs_fold[j], tau=1.0, threshold=0.5)
+        #         img_a += act_a.reshape((som_v._m, som_v._n))
+        #         img_v += act_v.reshape((som_v._m, som_v._n))
+        #     axarr[0].imshow(img_a, cmap='viridis', interpolation='nearest', origin='lower')
+        #     axarr[1].imshow(img_v, cmap='plasma', interpolation='nearest', origin='lower')
+        #     plt.show()
+        # exit(0)
+
         # prepare the soms for alternative matching strategies - this is not necessary
         # if prediction_alg='regular' in hebbian_model.evaluate(...) below
         som_a.memorize_examples_by_class(a_xs_train, a_ys_train)
