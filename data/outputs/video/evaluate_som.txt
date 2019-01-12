@@ -46,3 +46,19 @@ Class Compactness:
 
 Avg Comp: 0.4135
 Variance: 0.0065
+--------------------
+MODEL: video_20x30_s15.0_b128_a0.1_group-as_seed42_1547294638_minmax - DATA: visual_10classes_train_as.npy
+Class Compactness:
+	book                : 0.2021
+	apple               : 0.3369
+	umbrella            : 0.1697
+	banana              : 0.4329
+	dining table        : 0.3051
+	bird                : 0.3850
+	cat                 : 0.3724
+	cup                 : 0.3863
+	sports ball         : 0.2587
+	dog                 : 0.3730
+
+Avg Comp: 0.3222
+Variance: 0.0068

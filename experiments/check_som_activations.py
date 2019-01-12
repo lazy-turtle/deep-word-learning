@@ -19,14 +19,15 @@ video_model_list = [
     'video_20x20_s8.0_b128_a0.2_group-a_seed42_1545312173_global',
     'video_20x20_s6.0_b128_a0.1_group-a_seed42_1547219065_minmax',
     'video_20x30_s15.0_b128_a0.2_group-a_seed42_1546936577_minmax',
-    'video_20x30_s12.0_b128_a0.1_group-b_seed33_1547237808_minmax'
+    'video_20x30_s12.0_b128_a0.1_group-b_seed33_1547237808_minmax',
+    'video_20x30_s15.0_b128_a0.1_group-as_seed42_1547294638_minmax',
 ]
 
 audio_model_list = [
     'audio_20x30_s10.0_b128_a0.1_group-x_seed42_1145208211_minmax'
 ]
 
-video_model = video_model_list[5]
+video_model = video_model_list[6]
 audio_model = audio_model_list[0]
 #som_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', audio_model)
 som_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'best', video_model)
@@ -36,6 +37,7 @@ data_paths = {
     'a': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_a.npy'),
     'b': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_b.npy'),
     'z': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_z.npy'),
+    'as':os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_as.npy'),
     'x': os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_train.csv')
 }
 
