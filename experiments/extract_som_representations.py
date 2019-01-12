@@ -6,10 +6,10 @@ import os
 class ExtractConfig(object):
     DATA_PATH = '/usr/home/studenti/sp160362/data/representations/representations_train_raw.npy'
     DEST_PATH = '../data/video/'
-    RESULT_NAME ='visual_10classes_train_a1.npy'
+    RESULT_NAME ='visual_10classes_train_as.npy'
 
     LABELS_DICT = '../data/labels/coco-labels.json'
-    CLASSES_PATH = '../data/labels/coco_labels80classes.txt'
+    CLASSES_PATH = '../data/labels/coco_labels10classes_a.txt'
 
     SAMPLES = 100
     SAMPLES_SORT = 1000
@@ -73,10 +73,11 @@ def main():
             indices = np.where(labels == id)[0]
             samples = max(cfg.SAMPLES_SORT, len(indices))
             sampled_indices = np.random.choice(indices, size=samples, replace=False)
-            np.concatenate((data_subsample, raw_data[sampled_indices]), axis=0)
+            data_subsample = np.concatenate((data_subsample, raw_data[sampled_indices]), axis=0)
 
         #then extract the n most distant ones for each class
         labels_subsample = data_subsample[:,-1]
+        print('Subsampled data: {}'.format(data_subsample.shape))
         for i, (id, label_name) in enumerate(selected):
             print('Selecting the best {} samples from "{}..."'.format(cfg.SAMPLES, label_name))
             indices = np.where(labels_subsample == id)[0]
@@ -84,17 +85,23 @@ def main():
 
             mask = np.ones(labels_subsample.shape, dtype=bool)
             mask[indices] = False
-            xs_other = data_subsample[mask]
+            other_sampled_indices = np.random.choice(np.where(mask)[0], size=100 * num_classes, replace=False)
+            xs_other = data_subsample[other_sampled_indices]
 
-            print('Calculating avg distances...')
-            distances = [avg_distance(x, xs_other) for x in xs_class]
+            print('class xs: {}, other xs: {} . Calculating avg distances...'.format(xs_class.shape, xs_other.shape))
+            distances = np.zeros(len(xs_class))
+            for i, x in enumerate(xs_class):
+                print('{}/{}'.format(i, xs_class.shape[0]))
+                distances[i] = avg_distance(x, xs_other)
+            
             distances = np.array(distances).reshape(-1, 1)
             xs_sorted = np.concatenate((xs_class, distances), axis=1)
+            print(distances.shape, xs_sorted.shape)
 
             print('Sorting...')
             xs_sorted = np.array(sorted(xs_sorted, key=lambda x: x[-1], reverse=True))
             j = i * cfg.SAMPLES
-            result[j:j+cfg.SAMPLES] = xs_sorted[:cfg.SAMPLES]
+            result[j:j+cfg.SAMPLES] = xs_sorted[:cfg.SAMPLES,:-1]
     else:
         #otherwise simply select n random samples without replacement
         print("Selecting random samples...")
