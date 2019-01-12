@@ -1,0 +1,10 @@
+person
+car
+stop sign
+dog
+zebra
+baseball bat
+bottle
+fork
+orange
+book
