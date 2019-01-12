@@ -86,7 +86,13 @@ def main():
             mask[indices] = False
             xs_other = data_subsample[mask]
 
-            xs_sorted = np.array(sorted(xs_class, key=lambda x: avg_distance(x, xs_other), reverse=True))
+            print('Calculating avg distances...')
+            distances = [avg_distance(x, xs_other) for x in xs_class]
+            distances = np.array(distances).reshape(-1, 1)
+            xs_sorted = np.concatenate((xs_class, distances), axis=1)
+
+            print('Sorting...')
+            xs_sorted = np.array(sorted(xs_sorted, key=lambda x: x[-1], reverse=True))
             j = i * cfg.SAMPLES
             result[j:j+cfg.SAMPLES] = xs_sorted[:cfg.SAMPLES]
     else:
