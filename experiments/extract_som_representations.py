@@ -91,7 +91,7 @@ def main():
             print('class xs: {}, other xs: {} . Calculating avg distances...'.format(xs_class.shape, xs_other.shape))
             distances = np.zeros(len(xs_class))
             for i, x in enumerate(xs_class):
-                print('{}/{}'.format(i, xs_class.shape[0]))
+                print('{}/{}'.format(i, xs_class.shape[0]), end='\r')
                 distances[i] = avg_distance(x, xs_other)
             
             distances = np.array(distances).reshape(-1, 1)
@@ -100,6 +100,7 @@ def main():
 
             print('Sorting...')
             xs_sorted = np.array(sorted(xs_sorted, key=lambda x: x[-1], reverse=True))
+            print(xs_sorted.shape)
             j = i * cfg.SAMPLES
             result[j:j+cfg.SAMPLES] = xs_sorted[:cfg.SAMPLES,:-1]
     else:
