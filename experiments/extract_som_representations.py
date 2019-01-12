@@ -73,10 +73,11 @@ def main():
             indices = np.where(labels == id)[0]
             samples = max(cfg.SAMPLES_SORT, len(indices))
             sampled_indices = np.random.choice(indices, size=samples, replace=False)
-            np.concatenate((data_subsample, raw_data[sampled_indices]), axis=0)
+            data_subsample = np.concatenate((data_subsample, raw_data[sampled_indices]), axis=0)
 
         #then extract the n most distant ones for each class
         labels_subsample = data_subsample[:,-1]
+        print('Subsampled data: {}'.format(data_subsample.shape))
         for i, (id, label_name) in enumerate(selected):
             print('Selecting the best {} samples from "{}..."'.format(cfg.SAMPLES, label_name))
             indices = np.where(labels_subsample == id)[0]
