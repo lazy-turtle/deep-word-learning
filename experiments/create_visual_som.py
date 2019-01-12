@@ -9,10 +9,10 @@ import json
 import argparse
 
 DATA_TYPE = 'video'
-visual_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_as.npy')
+visual_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_c.npy')
 #visual_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_train.csv')
 
-model_name = 'video_20x30_s10.0_b128_a0.1_trsf_minmax_group_as_seed42_1547300343_final'
+model_name = 'video_20x30_s15.0_b128_a0.1_trsf_minmax_group_c_seed42_1547303679_final'
 #model_name = 'audio_model_10classes'
 model_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, DATA_TYPE, model_name)
 label_path = os.path.join(Constants.LABELS_FOLDER, 'coco-labels.json')
@@ -66,10 +66,10 @@ if __name__ == '__main__':
     dim = xs.shape[1]
 
     #info = extract_som_info(model_name)
-    info = {'shape':[20,30], 'alpha':0.1, 'sigma':10.0, 'batch':128}
+    info = {'shape':[20,30], 'alpha':0.1, 'sigma':15.0, 'batch':128}
     som_shape = info['shape']
     som = SOM(som_shape[0], som_shape[1], dim, alpha=info['alpha'], sigma=info['sigma'],
               batch_size=info['batch'], checkpoint_loc=args.model, data=DATA_TYPE)
     som.restore_trained(args.model)
 
-    show_som(som, xs, labels, 'Visual map', show=False, dark=True, suffix='group_as_trsf_minmax')
+    show_som(som, xs, labels, 'Visual map', show=False, dark=True, suffix='group_c_trsf_minmax')
