@@ -1,0 +1,7 @@
+model_checkpoint_path: "model-500"
+all_model_checkpoint_paths: "../video_20x30_s15.0_b128_a0.1_trsf_minmax_group_c_seed42_1547303679_0ep/model-0"
+all_model_checkpoint_paths: "../video_20x30_s15.0_b128_a0.1_trsf_minmax_group_c_seed42_1547303679_100ep/model-100"
+all_model_checkpoint_paths: "../video_20x30_s15.0_b128_a0.1_trsf_minmax_group_c_seed42_1547303679_200ep/model-200"
+all_model_checkpoint_paths: "../video_20x30_s15.0_b128_a0.1_trsf_minmax_group_c_seed42_1547303679_300ep/model-300"
+all_model_checkpoint_paths: "../video_20x30_s15.0_b128_a0.1_trsf_minmax_group_c_seed42_1547303679_400ep/model-400"
+all_model_checkpoint_paths: "model-500"
