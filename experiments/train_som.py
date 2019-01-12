@@ -12,6 +12,7 @@ import argparse
 audio_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio100classes.csv')
 visual_data_path_a = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_a.npy')
 visual_data_path_b = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_b.npy')
+visual_data_path_c = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_c.npy')
 visual_data_path_z = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_z.npy')
 visual_data_path_as = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_as.npy')
 visual_data_80classes = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_80classes_train.npy')
@@ -49,7 +50,7 @@ if __name__ == '__main__':
         ys = np.array(ys)
         xs = np.array(xs)
     elif args.data == 'video':
-        print('Loading visual data...', end='')
+        print('Loading visual data, group {}...'.format(args.group), end='')
         if args.classes == 10:
             if args.group == 'a':
                 path = visual_data_path_a
@@ -59,6 +60,8 @@ if __name__ == '__main__':
                 path = visual_data_path_z
             elif args.group == 'as':
                 path = visual_data_path_as
+            elif args.group == 'c':
+                path = visual_data_path_c
             else:
                 raise ValueError('Data group not recognised')
         else:
