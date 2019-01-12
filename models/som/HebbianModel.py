@@ -79,6 +79,7 @@ class HebbianModel(object):
                 is incoherent. len(input_a) = {}; len(input_v) = {}; \
                 n_presentations = {}, n_classes = {}'.format(len(input_a), len(input_v),
                                                       self.n_presentations, self.n_classes)
+
         with self._sess:
             # present images to model
             for i in range(len(input_a)):
@@ -239,7 +240,7 @@ class HebbianModel(object):
         yi_pred = y_target[yi_pred_idx]
         return yi_pred
 
-    def make_plot(self, x_source, x_target, y_target, X_target_all, source, step):
+    def make_plot(self, x_source, x_target, y_target, X_target_all, source, step, show=False):
         source_bmu, target_bmu = self.get_bmus_propagate(x_source, source_som=source)
         cmap = 'viridis' if source == 'a' else 'plasma'
         if source == 'a':
@@ -290,7 +291,10 @@ class HebbianModel(object):
         plt.tight_layout()
         filename = 'stats_{}{}_ta{}tv{}th{}_'.format(step, source, self.som_a.tau, self.som_v.tau, self.som_a.threshold)
         filename += get_plot_filename(Constants.PLOT_FOLDER)
-        plt.savefig(os.path.join(Constants.PLOT_FOLDER, 'hebbian', filename))
+        if show:
+            plt.show()
+        else:
+            plt.savefig(os.path.join(Constants.PLOT_FOLDER, 'temp', filename))
         plt.clf()
 
     def get_bmu_k_closest(self, som, activations, pos_activations, k, train=True):

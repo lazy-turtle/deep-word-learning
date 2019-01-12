@@ -1,5 +1,5 @@
-person
 car
+airplane
 stop sign
 dog
 zebra
