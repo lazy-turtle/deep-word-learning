@@ -658,7 +658,7 @@ class SOM(object):
         return superpositions
 
 
-    def get_activations(self, input_vect, normalize=True, threshold=0.6, mode='exp', tau=0.5):
+    def get_activations_abs(self, input_vect, normalize=True, threshold=0.6, mode='exp', tau=0.5):
       # get activations for the word learning
       # Quantization error:
       activations = list()
@@ -681,7 +681,7 @@ class SOM(object):
       return [activations,pos_activations]
 
 
-    def get_activations_eucl(self, xj, threshold=0.6, normalize=True, mode='exp', tau=0.5):
+    def get_activations(self, xj, threshold=0.6, normalize=True, mode='exp', tau=0.5):
         w = np.array(self._weightages)
         distances = np.sqrt(np.sum((w - xj)**2, axis=1)) # || x -wj(n)||
         activations = np.exp(-(distances/tau))
