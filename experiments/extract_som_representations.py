@@ -12,6 +12,7 @@ class ExtractConfig(object):
     CLASSES_PATH = '../data/labels/coco_labels80classes.txt'
 
     SAMPLES = 100
+    SAMPLES_SORT = 1000
 
 
 def read_selected_classes(path):
@@ -62,25 +63,41 @@ def main():
 
     result = np.empty((num_classes * cfg.SAMPLES, raw_data.shape[1]))
 
-    print("Selecting random samples...")
-    for i, (id, label_name) in enumerate(selected):
-        indices = np.where(labels == id)[0]
-        if args.sort:
-            # sort by distance from the other instances, descending
-            # and take only the most isolated ones
-            xs_class = raw_data[indices]
-            mask = np.ones(labels.shape, dtype=bool)
-            mask[indices] = False
-            xs_other = raw_data[mask]
-            xs_sorted = np.array(sorted(xs_class, key=lambda x: avg_distance(x, xs_other), reverse=True))
-            items = xs_sorted[:cfg.SAMPLES]
-        else:
-            # simply take n random elements from the raw data matrix
-            sampled_indices = np.random.choice(indices, size=cfg.SAMPLES, replace=False)
-            items = raw_data[sampled_indices]
+    if args.sort:
+        # sort by distance from the other instances, descending
+        # and take only the most isolated ones
+        print('Sub-sampling data...')
+        #first select a subsample from each class
+        data_subsample = np.empty((num_classes * cfg.SAMPLES_SORT, raw_data.shape[1]))
+        for i, (id, label) in enumerate(selected):
+            indices = np.where(labels == id)[0]
+            samples = max(cfg.SAMPLES_SORT, len(indices))
+            sampled_indices = np.random.choice(indices, size=samples, replace=False)
+            j = i * cfg.SAMPLES_SORT
+            data_subsample[j:j + cfg.SAMPLES_SORT] = raw_data[sampled_indices]
 
-        j = i * cfg.SAMPLES
-        result[j:j + cfg.SAMPLES] = items
+        #then extract the n most distant ones for each class
+        labels_subsample = data_subsample[:,-1]
+        for i, (id, label_name) in enumerate(selected):
+            print('Selecting the best {} samples from "{}..."'.format(cfg.SAMPLES, label_name))
+            indices = np.where(labels_subsample == id)[0]
+            xs_class = data_subsample[indices]
+
+            mask = np.ones(labels_subsample.shape, dtype=bool)
+            mask[indices] = False
+            xs_other = data_subsample[mask]
+
+            xs_sorted = np.array(sorted(xs_class, key=lambda x: avg_distance(x, xs_other), reverse=True))
+            j = i * cfg.SAMPLES
+            result[j:j+cfg.SAMPLES] = xs_sorted[:cfg.SAMPLES]
+    else:
+        #otherwise simply select n random samples without replacement
+        print("Selecting random samples...")
+        for i, (id, label_name) in enumerate(selected):
+            indices = np.where(labels == id)[0]
+            sampled_indices = np.random.choice(indices, size=cfg.SAMPLES, replace=False)
+            j = i * cfg.SAMPLES
+            result[j:j + cfg.SAMPLES] = raw_data[sampled_indices]
 
     print("Data selected, shape: {}".format(result.shape))
     print("Saving result to {}...".format(cfg.DEST_PATH))
