@@ -90,9 +90,8 @@ def main():
 
             print('class xs: {}, other xs: {} . Calculating avg distances...'.format(xs_class.shape, xs_other.shape))
             distances = np.zeros(len(xs_class))
-            for i, x in enumerate(xs_class):
-                print('{}/{}'.format(i, xs_class.shape[0]), end='\r')
-                distances[i] = avg_distance(x, xs_other)
+            for k, x in enumerate(xs_class):
+                print('{}/{}'.format(k, xs_class.shape[0]), end='\r')
             
             distances = np.array(distances).reshape(-1, 1)
             xs_sorted = np.concatenate((xs_class, distances), axis=1)
@@ -100,9 +99,11 @@ def main():
 
             print('Sorting...')
             xs_sorted = np.array(sorted(xs_sorted, key=lambda x: x[-1], reverse=True))
-            print(xs_sorted.shape)
+            best_samples = xs_sorted[:cfg.SAMPLES,:-1]
+
+            print('Samples: {}'.format(best_samples.shape))
             j = i * cfg.SAMPLES
-            result[j:j+cfg.SAMPLES] = xs_sorted[:cfg.SAMPLES,:-1]
+            result[j:j + cfg.SAMPLES] = best_samples
     else:
         #otherwise simply select n random samples without replacement
         print("Selecting random samples...")
