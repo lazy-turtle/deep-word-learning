@@ -23,7 +23,7 @@ video_model_list = [
     'video_20x30_s15.0_b128_a0.1_group-as_seed42_1547294638_minmax',
 ]
 
-video_model = video_model_list[5]
+video_model = video_model_list[1]
 soma_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', 'audio_20x30_s10.0_b128_a0.1_group-x_seed42_1145208211_minmax')
 somv_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'best', video_model)
 hebbian_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'hebbian')
@@ -113,6 +113,10 @@ if __name__ == '__main__':
     somv_info = extract_som_info(os.path.basename(args.somv))
     somv_path = args.somv
     somv_data = video_data_paths[somv_info['group']]
+    print('Training using video SOM: {}'.format(args.somv))
+    print('---------Info-------')
+    for k, v in somv_info.items():
+        print('{:<20s}: {:<40s}'.format(k, str(v)))
 
     exp_description = 'lr{}_algo_{}_ta{:.1f}_tv{:.1f}_th{:.1f}_{}_som{}_'\
                           .format(args.lr, args.algo, args.taua, args.tauv, args.th, args.act, somv_info['id']) \
