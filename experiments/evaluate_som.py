@@ -11,6 +11,7 @@ from models.som.SOM import SOM
 from utils.constants import Constants
 from utils.utils import from_npy_visual_data, from_csv_visual_100classes, from_csv_with_filenames, labels_dictionary, \
     global_transform
+from sklearn.preprocessing import MinMaxScaler
 import os
 
 
@@ -90,10 +91,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     data_type = 'video' if not args.is_audio else 'audio'
-    data_group = 'visual_10classes_train_b.npy'
-    model_name = 'video_20x20_s8.0_b128_a0.2_group-a_seed42_1545312173_final'
+    data_group = 'visual_10classes_train_as.npy'
+    model_name = 'video_20x30_s15.0_b128_a0.1_group-as_seed42_1547294638_minmax'
     data_path = os.path.join(Constants.DATA_FOLDER, data_type, data_group)
-    model_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, data_type, model_name)
+    model_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, data_type, 'best', model_name)
     out_path = os.path.join(Constants.OUTPUT_FOLDER, data_type, 'evaluate_som.txt')
     label_path = os.path.join(Constants.LABELS_FOLDER, 'coco-labels.json')
 
@@ -106,7 +107,8 @@ if __name__ == '__main__':
         num_classes = 10
         if not args.is_audio:
             xs, ys, id_dict = from_npy_visual_data(data_path)
-            xs, _ = global_transform(xs)
+            #xs, _ = global_transform(xs)
+            xs = MinMaxScaler().fit_transform(xs)
         else:
             xs, ys, _ = from_csv_with_filenames(args.csv_path)
             ys = [int(y)-1000 for y in ys] # see comment in average_prototype_distance_matrix
@@ -117,7 +119,7 @@ if __name__ == '__main__':
         else:
             xs, ys, _ =  from_csv_with_filenames(args.csv_path)
 
-    som = SOM(20, 20, xs.shape[1], checkpoint_loc=model_path)
+    som = SOM(20, 30, xs.shape[1], checkpoint_loc=model_path)
     som.restore_trained(model_path)
     #measure = class_compactness(som, xs, ys)
     measure = my_compactness(som, xs, ys)

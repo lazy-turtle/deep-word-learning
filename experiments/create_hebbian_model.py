@@ -20,9 +20,10 @@ video_model_list = [
     'video_20x20_s8.0_b128_a0.2_group-a_seed42_1545312173_global',
     'video_20x30_s15.0_b128_a0.2_group-a_seed42_1546936577_minmax',
     'video_20x30_s12.0_b128_a0.1_group-b_seed33_1547237808_minmax',
+    'video_20x30_s15.0_b128_a0.1_group-as_seed42_1547294638_minmax',
 ]
 
-video_model = video_model_list[4]
+video_model = video_model_list[5]
 soma_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', 'audio_20x30_s10.0_b128_a0.1_group-x_seed42_1145208211_minmax')
 somv_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'best', video_model)
 hebbian_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'hebbian')
@@ -32,6 +33,7 @@ video_data_paths = {
     'a': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_a.npy'),
     'b': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_b.npy'),
     'z': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_z.npy'),
+    'as':os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_as.npy'),
 }
 num_presentations = 15
 
