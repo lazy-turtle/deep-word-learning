@@ -68,13 +68,12 @@ def main():
         # and take only the most isolated ones
         print('Sub-sampling data...')
         #first select a subsample from each class
-        data_subsample = np.empty((num_classes * cfg.SAMPLES_SORT, raw_data.shape[1]))
+        data_subsample = np.empty((0, raw_data.shape[1]))
         for i, (id, label) in enumerate(selected):
             indices = np.where(labels == id)[0]
             samples = max(cfg.SAMPLES_SORT, len(indices))
             sampled_indices = np.random.choice(indices, size=samples, replace=False)
-            j = i * cfg.SAMPLES_SORT
-            data_subsample[j:j + cfg.SAMPLES_SORT] = raw_data[sampled_indices]
+            np.concatenate((data_subsample, raw_data[sampled_indices]), axis=0)
 
         #then extract the n most distant ones for each class
         labels_subsample = data_subsample[:,-1]
