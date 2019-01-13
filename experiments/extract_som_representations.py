@@ -6,7 +6,7 @@ import os
 class ExtractConfig(object):
     DATA_PATH = '/usr/home/studenti/sp160362/data/representations/representations_train_raw.npy'
     DEST_PATH = '../data/video/'
-    RESULT_NAME ='visual_10classes_train_c.npy'
+    RESULT_NAME ='visual_10classes_train_c2.npy'
 
     LABELS_DICT = '../data/labels/coco-labels.json'
     CLASSES_PATH = '../data/labels/coco_labels10classes_c.txt'
