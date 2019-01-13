@@ -658,7 +658,7 @@ class SOM(object):
         return superpositions
 
 
-    def get_activations(self, input_vect, normalize=True, threshold=0.6, mode='exp', tau=0.5):
+    def get_activations_abs(self, input_vect, normalize=True, mode='exp'):
       # get activations for the word learning
       # Quantization error:
       activations = list()
@@ -667,7 +667,7 @@ class SOM(object):
           d = np.array([])
           d = (np.absolute(input_vect-self._weightages[i])).tolist()
           if mode == 'exp':
-              activations.append(math.exp(-(np.sum(d)/len(d))/tau))
+              activations.append(math.exp(-(np.sum(d)/len(d))/self.tau))
           if mode == 'linear':
               activations.append(1/np.sum(d))
           pos_activations.append(self._locations[i])
@@ -676,20 +676,20 @@ class SOM(object):
           max_ = max(activations)
           min_ = min(activations)
           activations = (activations - min_) / float(max_ - min_)
-      idx = activations < threshold
+      idx = activations < self.threshold
       activations[idx] = 0
       return [activations,pos_activations]
 
 
-    def get_activations_eucl(self, xj, threshold=0.6, normalize=True, mode='exp', tau=0.5):
+    def get_activations(self, xj, normalize=True):
         w = np.array(self._weightages)
         distances = np.sqrt(np.sum((w - xj)**2, axis=1)) # || x -wj(n)||
-        activations = np.exp(-(distances/tau))
+        activations = np.exp(-(distances/self.tau))
         if normalize:
             max_v = np.max(activations)
             min_v = np.min(activations)
-            activations = (activations - min_v) / (max_v - min_v)
-        activations[np.where(activations < threshold)] = 0.0
+            activations = (activations - min_v) / float(max_v - min_v)
+        activations[np.where(activations < self.threshold)] = 0.0
         pos_activations = self._locations
         return [activations, pos_activations]
 

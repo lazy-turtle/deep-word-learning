@@ -84,8 +84,8 @@ class HebbianModel(object):
             # present images to model
             for i in range(len(input_a)):
                 # get activations from som
-                activation_a, _ = self.som_a.get_activations(input_a[i], tau=tau_a, threshold=th)
-                activation_v, _ = self.som_v.get_activations(input_v[i], tau=tau_v, threshold=th)
+                activation_a, _ = self.som_a.get_activations(input_a[i])
+                activation_v, _ = self.som_v.get_activations(input_v[i])
 
                 #if step == 1:
                     #self.som_a.plot_activations(activation_a, step, cmap='viridis', title='audio activations')
@@ -170,7 +170,7 @@ class HebbianModel(object):
             to_som = self.som_v
         else:
             raise ValueError('Wrong string for source_som parameter')
-        source_activation, _ = from_som.get_activations(x, tau=from_som.tau, threshold=from_som.threshold)
+        source_activation, _ = from_som.get_activations(x)
         source_bmu_index = np.argmax(np.array(source_activation))
         source_activation = np.array(source_activation).reshape((-1, 1))
         target_activation = self.propagate_activation(source_activation, source_som=source_som)
@@ -252,14 +252,12 @@ class HebbianModel(object):
             source_som = self.som_v
             target_som = self.som_a
 
-        source_activation, _ = source_som.get_activations(x_source, tau=source_som.tau, threshold=source_som.threshold)
-        target_activation_true, _ = target_som.get_activations(x_target, tau=target_som.tau, threshold=target_som.threshold)
+        source_activation, _ = source_som.get_activations(x_source)
+        target_activation_true, _ = target_som.get_activations(x_target)
 
         # TODO: replicate some of the other make_prediction code to get this
         yi_pred = self.make_prediction_sort(x_source, source_som, target_som, source)
-        target_activation_pred, _ = target_som.get_activations(X_target_all[yi_pred],
-                                                               tau=target_som.tau,
-                                                               threshold=target_som.threshold)
+        target_activation_pred, _ = target_som.get_activations(X_target_all[yi_pred])
         propagated_activation = self.propagate_activation(source_activation, source_som=source)
 
         height, width = 3, 2
@@ -322,9 +320,7 @@ class HebbianModel(object):
             bmu_class_dict = target_som.train_bmu_class_dict
         else:
             bmu_class_dict = target_som.test_bmu_class_dict
-        source_activation, pos_source_activation = source_som.get_activations(x,
-                                                                              tau=source_som.tau,
-                                                                              threshold=source_som.threshold)
+        source_activation, pos_source_activation = source_som.get_activations(x)
         source_activation = np.array(source_activation).reshape((-1, 1))
         target_activation = self.propagate_activation(source_activation, source_som=source)
         hebbian_bmu_index = np.argmax(target_activation)
@@ -351,9 +347,7 @@ class HebbianModel(object):
             bmu_class_dict = target_som.train_bmu_class_dict
         else:
             bmu_class_dict = target_som.test_bmu_class_dict
-        source_activation, pos_source_activation = source_som.get_activations(x,
-                                                                              tau=source_som.tau,
-                                                                              threshold=source_som.threshold)
+        source_activation, pos_source_activation = source_som.get_activations(x)
         source_activation = np.array(source_activation).reshape((-1, 1))
         target_activation = self.propagate_activation(source_activation, source_som=source)
         # vote weighting alternatives
@@ -391,7 +385,7 @@ class HebbianModel(object):
         return np.argmax(class_count)
 
     def make_prediction_sort(self, x, source_som, target_som, source):
-        source_activation, _ = source_som.get_activations(x, tau=source_som.tau, threshold=source_som.threshold)
+        source_activation, _ = source_som.get_activations(x)
         source_activation = np.array(source_activation).reshape((-1, 1))
         target_activation = self.propagate_activation(source_activation, source_som=source)
         for i in range(len(target_activation)):

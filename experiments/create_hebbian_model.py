@@ -1,7 +1,8 @@
 from models.som.SOM import SOM
 from models.som.HebbianModel import HebbianModel
 from utils.constants import Constants
-from utils.utils import from_csv_with_filenames, from_npy_visual_data, global_transform, min_max_scale
+from utils.utils import from_csv_with_filenames, from_npy_visual_data, global_transform, min_max_scale, \
+    from_npy_audio_data
 from sklearn.utils import shuffle
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
@@ -21,20 +22,28 @@ video_model_list = [
     'video_20x30_s15.0_b128_a0.2_group-a_seed42_1546936577_minmax',
     'video_20x30_s12.0_b128_a0.1_group-b_seed33_1547237808_minmax',
     'video_20x30_s15.0_b128_a0.1_group-as_seed42_1547294638_minmax',
-    'video_20x30_s15.0_b128_a0.1_group-c_seed42_1547303679_minmax'
+    'video_20x30_s15.0_b128_a0.1_group-c1_seed42_1547303679_minmax',
+    'video_20x30_s15.0_b128_a0.1_group-c2_seed42_1547388036_minmax'
+]
+
+audio_model_list = [
+    'audio_20x30_s10.0_b128_a0.1_group-x_seed42_1145208211_minmax',
+    'audio_20x30_s10.0_b128_a0.1_group-s_seed10_1547394149_minmax',
 ]
 
 video_model = video_model_list[-1]
-soma_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', 'audio_20x30_s10.0_b128_a0.1_group-x_seed42_1145208211_minmax')
+audio_model = audio_model_list[-1]
+soma_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', audio_model)
 somv_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'best', video_model)
 hebbian_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'hebbian')
-audio_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_train.csv')
+soma_data = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_synth.npy')
 
 video_data_paths = {
     'a': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_a.npy'),
     'b': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_b.npy'),
-    'c': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_c.npy'),
     'z': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_z.npy'),
+    'c1': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_c1.npy'),
+    'c2': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_c2.npy'),
     'as':os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_as.npy'),
 }
 num_presentations = 15
@@ -97,9 +106,9 @@ def create_folds(a_xs, v_xs, a_ys, v_ys, n_folds=1, n_classes=10):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Train a Hebbian model.')
     parser.add_argument('--lr', metavar='lr', type=float, default=10, help='The model learning rate')
-    parser.add_argument('--taua', metavar='taua', type=float, default=0.5, help='Tau value audio som')
-    parser.add_argument('--tauv', metavar='tauv', type=float, default=0.05, help='Tau value video som')
-    parser.add_argument('--th', metavar='th', type=float, default=0.6, help='Threshold to cut values from')
+    parser.add_argument('--taua', metavar='taua', type=float, default=1, help='Tau value audio som')
+    parser.add_argument('--tauv', metavar='tauv', type=float, default=1, help='Tau value video som')
+    parser.add_argument('--th', metavar='th', type=float, default=0.5, help='Threshold to cut values from')
     parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Random generator seed')
     parser.add_argument('--somv', metavar='somv', type=str, default=somv_path,
                         help='Video SOM model path')
@@ -125,14 +134,17 @@ if __name__ == '__main__':
                       + str(int(time.time()))
     model_path = os.path.join(hebbian_path, exp_description)
 
-    a_xs, a_ys, _ = from_csv_with_filenames(audio_data_path)
-    # fix labels to 0-9 range
-    a_ys = [v - 1000 for v in a_ys]
+    #audio data
+    if '.npy' not in soma_data:
+        a_xs, a_ys, _ = from_csv_with_filenames(soma_data)
+        a_ys = [v - 1000 for v in a_ys]
+    else:
+        a_xs, a_ys = from_npy_audio_data(soma_data)
+    #video data
     v_xs, v_ys, _ = from_npy_visual_data(somv_data)
 
     # transform.
     a_xs = MinMaxScaler().fit_transform(a_xs)
-    # for video SOM uncomment the required transformation, if needed
     trasf = somv_info['trsf']
     if trasf == 'minmax':
         print('Using MinMaxScaler...')
@@ -143,8 +155,8 @@ if __name__ == '__main__':
     elif trasf != 'none':
         raise ValueError('Normalization not recognised, please check som filename.')
 
-    a_xs = np.array(a_xs)
-    a_ys = np.array(a_ys)
+    #a_xs = np.array(a_xs)
+    #a_ys = np.array(a_ys)
 
     a_dim = len(a_xs[0])
     v_dim = len(v_xs[0])
