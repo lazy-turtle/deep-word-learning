@@ -97,13 +97,13 @@ def create_folds(a_xs, v_xs, a_ys, v_ys, n_folds=1, n_classes=10):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Train a Hebbian model.')
     parser.add_argument('--lr', metavar='lr', type=float, default=10, help='The model learning rate')
-    parser.add_argument('--taua', metavar='taua', type=float, default=1, help='Tau value audio som')
-    parser.add_argument('--tauv', metavar='tauv', type=float, default=1, help='Tau value video som')
-    parser.add_argument('--th', metavar='th', type=float, default=0.5, help='Threshold to cut values from')
+    parser.add_argument('--taua', metavar='taua', type=float, default=0.5, help='Tau value audio som')
+    parser.add_argument('--tauv', metavar='tauv', type=float, default=0.05, help='Tau value video som')
+    parser.add_argument('--th', metavar='th', type=float, default=0.6, help='Threshold to cut values from')
     parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Random generator seed')
     parser.add_argument('--somv', metavar='somv', type=str, default=somv_path,
                         help='Video SOM model path')
-    parser.add_argument('--algo', metavar='algo', type=str, default='sorted',
+    parser.add_argument('--algo', metavar='algo', type=str, default='regular',
                         help='Algorithm choice')
     parser.add_argument('--act', metavar='act', type=str, default='eucl',
                         help='Activation function choice')

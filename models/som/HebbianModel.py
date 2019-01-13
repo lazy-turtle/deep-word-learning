@@ -252,12 +252,8 @@ class HebbianModel(object):
             source_som = self.som_v
             target_som = self.som_a
 
-        source_activation, _ = source_som.get_activations(x_source,
-                                                          tau=source_som.tau,
-                                                          threshold=source_som.threshold)
-        target_activation_true, _ = target_som.get_activations(x_target,
-                                                               tau=target_som.tau,
-                                                               threshold=target_som.threshold)
+        source_activation, _ = source_som.get_activations(x_source, tau=source_som.tau, threshold=source_som.threshold)
+        target_activation_true, _ = target_som.get_activations(x_target, tau=target_som.tau, threshold=target_som.threshold)
 
         # TODO: replicate some of the other make_prediction code to get this
         yi_pred = self.make_prediction_sort(x_source, source_som, target_som, source)
