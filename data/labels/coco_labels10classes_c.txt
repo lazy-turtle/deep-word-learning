@@ -1,5 +1,4 @@
 car
-airplane
 stop sign
 dog
 zebra
@@ -7,4 +6,5 @@ baseball bat
 bottle
 fork
 orange
+donut
 book
