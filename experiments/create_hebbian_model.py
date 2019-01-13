@@ -187,7 +187,7 @@ if __name__ == '__main__':
         print('Hebbian model with {} presentations.'.format(n))
         hebbian_model = HebbianModel(som_a, som_v, a_dim=a_dim,
                                      v_dim=v_dim, n_presentations=n,
-                                     checkpoint_dir=None, #TODO replace with model_dir
+                                     checkpoint_dir=model_path,
                                      learning_rate=args.lr)
         a_xs_fold, v_xs_fold, a_ys_fold, v_ys_fold = create_folds(a_xs_train, v_xs_train, a_ys_train, v_ys_train, n_folds=n)
 
