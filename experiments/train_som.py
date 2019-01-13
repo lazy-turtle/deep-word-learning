@@ -1,6 +1,6 @@
 from models.som.SOM import SOM
 from utils.constants import Constants
-from utils.utils import from_csv_with_filenames, from_npy_visual_data, from_csv_visual_10classes
+from utils.utils import from_csv_with_filenames, from_npy_visual_data, from_csv_visual_10classes, from_npy_audio_data
 from sklearn.model_selection import train_test_split
 from utils.utils import transform_data, global_transform
 from sklearn.preprocessing import MinMaxScaler
@@ -10,6 +10,7 @@ import argparse
 
 
 audio_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio100classes.csv')
+synth_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_synth.npy')
 visual_data_path_a = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_a.npy')
 visual_data_path_b = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_b.npy')
 visual_data_path_c2 = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_c2.npy')
@@ -24,7 +25,7 @@ TRANSFORMS = ['none', 'zscore', 'global', 'minmax']
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Train a Hebbian model.')
     parser.add_argument('--sigma', metavar='sigma', type=float, default=10, help='The model neighborhood value')
-    parser.add_argument('--alpha', metavar='alpha', type=float, default=0.01, help='The SOM initial learning rate')
+    parser.add_argument('--alpha', metavar='alpha', type=float, default=0.1, help='The SOM initial learning rate')
     parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Random generator seed')
     parser.add_argument('--neurons1', type=int, default=20,
                         help='Number of neurons for audio SOM, first dimension')
@@ -35,7 +36,7 @@ if __name__ == '__main__':
     parser.add_argument('--classes', type=int, default=10,
                         help='Number of classes the model will be trained on')
     parser.add_argument('--subsample', action='store_true', default=False)
-    parser.add_argument('--data', metavar='data', type=str, default='video')
+    parser.add_argument('--data', metavar='data', type=str, default='audio')
     parser.add_argument('--group', metavar='group', type=str, default='a')
     parser.add_argument('--transform', metavar='transform', type=str, default='none')
     parser.add_argument('--logging', action='store_true', default=True)
@@ -46,9 +47,12 @@ if __name__ == '__main__':
 
 
     if args.data == 'audio':
-        xs, ys, _ = from_csv_with_filenames(audio_data_path)
-        ys = np.array(ys)
-        xs = np.array(xs)
+        print('Loading audio data...', end='')
+        # xs, ys, _ = from_csv_with_filenames(audio_data_path)
+        # ys = np.array(ys)
+        # xs = np.array(xs)
+        xs, ys = from_npy_audio_data(synth_data_path, classes=10)
+        print('done, data: {} - labels: {}'.format(xs.shape, ys.shape))
     elif args.data == 'video':
         print('Loading visual data, group {}...'.format(args.group), end='')
         if args.classes == 10:
@@ -82,12 +86,11 @@ if __name__ == '__main__':
 
     if args.transform not in TRANSFORMS:
         raise ValueError('transformation not valid, choose one of the following: {}'.format(TRANSFORMS))
-    min_val = np.min(xs)
-    max_val = np.max(xs)
+
     dim = xs.shape[1]
     som = SOM(args.neurons1, args.neurons2, dim, n_iterations=args.epochs, alpha=args.alpha,
                  tau=0.1, threshold=0.6, batch_size=args.batch, data=args.data, sigma=args.sigma,
-                 num_classes=args.classes, seed=args.seed, suffix='trsf_{}_group_{}'.format(args.transform, args.group))
+                 num_classes=args.classes, seed=args.seed, suffix='trsf_{}'.format(args.transform))
 
     if args.subsample:
         xs, _, ys, _ = train_test_split(xs, ys, test_size=0.6, stratify=ys, random_state=args.seed)
@@ -108,7 +111,6 @@ if __name__ == '__main__':
         xs_test = scaler.transform(xs_test)
 
     xs_train, xs_val, ys_train, ys_val = train_test_split(xs_train, ys_train, test_size=0.5, stratify=ys_train, random_state=args.seed)
-
 
     som.init_toolbox(xs)
     som.train(xs_train, input_classes=ys_train, test_vects=xs_val, test_classes=ys_val,

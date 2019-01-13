@@ -315,6 +315,19 @@ def from_npy_visual_data(path, classes=10):
     return xs, ys, index_to_id
 
 
+def from_npy_audio_data(path, classes=10):
+    """
+    Read a numpy array pickled as file .npy
+    :param str path:     file containing the numpy array
+    :param int classes:  number of classes in the data, useful for ID assignment
+    :return:   data examples, labels, and id conversion dictionary
+    """
+    data = np.load(path)
+    xs = data[:,:-1]
+    ys = data[:,-1].astype(np.int)
+    return xs, ys
+
+
 def labels_dictionary(filename):
     """
     Generates a python dictionary from the corresponding json file

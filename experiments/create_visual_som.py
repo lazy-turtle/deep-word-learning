@@ -8,12 +8,12 @@ import os
 import json
 import argparse
 
-DATA_TYPE = 'video'
-visual_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_c.npy')
-#visual_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_train.csv')
+DATA_TYPE = 'audio'
+#visual_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_c2.npy')
+visual_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_synth.npy')
 
-model_name = 'video_20x30_s15.0_b128_a0.1_trsf_minmax_group_c_seed42_1547303679_final'
-#model_name = 'audio_model_10classes'
+#model_name = 'video_20x30_s15.0_b128_a0.1_trsf_minmax_group_c2_seed42_1547388036_final'
+model_name = 'audio_20x30_s10.0_b128_a0.1_trsf_minmax_seed10_1547394149_final'
 model_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, DATA_TYPE, model_name)
 label_path = os.path.join(Constants.LABELS_FOLDER, 'coco-labels.json')
 
@@ -45,7 +45,7 @@ if __name__ == '__main__':
         id_to_label = json.load(open(label_path))
         id_to_label = {int(k): v for k,v in id_to_label.items()}
         xs, ys, ids_dict = from_npy_visual_data(visual_data_path, classes=10)
-        labels = np.array([id_to_label[ids_dict[x]] for x in ys])
+        labels = ys #np.array([id_to_label[ids_dict[x]] for x in ys])
 
     if args.subsample:
         np.random.seed(42)
@@ -62,14 +62,14 @@ if __name__ == '__main__':
 
     #xs, _ = global_transform(xs)
     #xs, _ = transform_data(xs)
-    xs = MinMaxScaler().fit_transform(xs)
+    #xs = MinMaxScaler().fit_transform(xs)
     dim = xs.shape[1]
 
     #info = extract_som_info(model_name)
-    info = {'shape':[20,30], 'alpha':0.1, 'sigma':15.0, 'batch':128}
+    info = {'shape':[20,30], 'alpha':0.1, 'sigma':10.0, 'batch':128}
     som_shape = info['shape']
     som = SOM(som_shape[0], som_shape[1], dim, alpha=info['alpha'], sigma=info['sigma'],
               batch_size=info['batch'], checkpoint_loc=args.model, data=DATA_TYPE)
     som.restore_trained(args.model)
 
-    show_som(som, xs, labels, 'Visual map', show=False, dark=True, suffix='group_c_trsf_minmax')
+    show_som(som, xs, labels, 'Visual map', show=False, dark=True, suffix='synth_trsf_minmax')
