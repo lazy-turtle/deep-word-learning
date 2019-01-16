@@ -89,11 +89,14 @@ def main():
             print(distances.shape)
 
             print('Sorting...')
+            #sort and remove the worst examples (outliers), selecting only the first half
             best_samples = [x for x,_ in np.array(sorted(zip(xs_class, distances), key=lambda x: x[1]))]
-            best_samples = np.array(best_samples)
-            print('Samples: {}'.format(best_samples.shape))
+            best_samples = np.array(best_samples[:len(best_samples)//2])
+
+            best_samples = np.random.choice(best_samples, size=cfg.SAMPLES, replace=False)
+            print('Chosen samples: {}'.format(best_samples.shape))
             j = i * cfg.SAMPLES
-            result[j:j + cfg.SAMPLES] = best_samples[:cfg.SAMPLES]
+            result[j:j + cfg.SAMPLES] = best_samples
     else:
         #otherwise simply select n random samples without replacement
         print("Selecting random samples...")
