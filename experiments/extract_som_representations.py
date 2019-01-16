@@ -83,7 +83,7 @@ def main():
             indices = np.where(labels_subsample == id)[0]
             xs_class = data_subsample[indices]
 
-            print('class xs: {}, calculating prototype and distances...'.format(xs_class))
+            print('class xs: {}, calculating prototype and distances...'.format(xs_class.shape))
             prototype = np.mean(xs_class, axis=0)
             distances = np.sum((xs_class - prototype)**2, axis=1)
             print(distances.shape)
