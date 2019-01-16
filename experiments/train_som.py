@@ -24,20 +24,20 @@ TRANSFORMS = ['none', 'zscore', 'global', 'minmax']
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Train a Hebbian model.')
-    parser.add_argument('--sigma', metavar='sigma', type=float, default=8, help='The model neighborhood value')
+    parser.add_argument('--sigma', metavar='sigma', type=float, default=10, help='The model neighborhood value')
     parser.add_argument('--alpha', metavar='alpha', type=float, default=0.2, help='The SOM initial learning rate')
     parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Random generator seed')
     parser.add_argument('--neurons1', type=int, default=20,
                         help='Number of neurons for audio SOM, first dimension')
-    parser.add_argument('--neurons2', type=int, default=20,
+    parser.add_argument('--neurons2', type=int, default=30,
                         help='Number of neurons for audio SOM, second dimension')
     parser.add_argument('--epochs', type=int, default=1000,
                         help='Number of epochs the SOM will be trained for')
     parser.add_argument('--classes', type=int, default=10,
                         help='Number of classes the model will be trained on')
     parser.add_argument('--subsample', action='store_true', default=False)
-    parser.add_argument('--data', metavar='data', type=str, default='audio')
-    parser.add_argument('--group', metavar='group', type=str, default='a')
+    parser.add_argument('--data', metavar='data', type=str, default='video')
+    parser.add_argument('--group', metavar='group', type=str, default='as')
     parser.add_argument('--transform', metavar='transform', type=str, default='none')
     parser.add_argument('--logging', action='store_true', default=True)
     parser.add_argument('--use-gpu', action='store_true', default=True)
