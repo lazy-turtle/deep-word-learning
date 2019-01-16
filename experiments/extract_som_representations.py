@@ -93,10 +93,10 @@ def main():
             best_samples = [x for x,_ in np.array(sorted(zip(xs_class, distances), key=lambda x: x[1]))]
             best_samples = np.array(best_samples[:len(best_samples)//2])
 
-            best_samples = np.random.choice(best_samples, size=cfg.SAMPLES, replace=False)
-            print('Chosen samples: {}'.format(best_samples.shape))
+            best_indices = np.random.choice(list(range(len(best_samples))), size=cfg.SAMPLES, replace=False)
+            print('Chosen samples: {}'.format(best_indices))
             j = i * cfg.SAMPLES
-            result[j:j + cfg.SAMPLES] = best_samples
+            result[j:j + cfg.SAMPLES] = best_samples[best_indices]
     else:
         #otherwise simply select n random samples without replacement
         print("Selecting random samples...")
