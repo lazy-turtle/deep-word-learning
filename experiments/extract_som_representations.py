@@ -71,7 +71,7 @@ def main():
         data_subsample = np.empty((0, raw_data.shape[1]))
         for i, (id, label) in enumerate(selected):
             indices = np.where(labels == id)[0]
-            samples = max(cfg.SAMPLES_SORT, len(indices))
+            samples = min(cfg.SAMPLES_SORT, len(indices))
             sampled_indices = np.random.choice(indices, size=samples, replace=False)
             data_subsample = np.concatenate((data_subsample, raw_data[sampled_indices]), axis=0)
 
