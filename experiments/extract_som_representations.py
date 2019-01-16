@@ -93,7 +93,7 @@ def main():
             best_samples = np.array(best_samples)
             print('Samples: {}'.format(best_samples.shape))
             j = i * cfg.SAMPLES
-            result[j:j + cfg.SAMPLES] = best_samples
+            result[j:j + cfg.SAMPLES] = best_samples[:cfg.SAMPLES]
     else:
         #otherwise simply select n random samples without replacement
         print("Selecting random samples...")
