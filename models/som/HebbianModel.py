@@ -1,3 +1,4 @@
+from datetime import date
 import tensorflow as tf
 import numpy as np
 import os
@@ -74,11 +75,6 @@ class HebbianModel(object):
                 # get activations from som
                 activation_a, _ = self.som_a.get_activations(input_a[i])
                 activation_v, _ = self.som_v.get_activations(input_v[i])
-
-                #if step == 1:
-                    #self.som_a.plot_activations(activation_a, step, cmap='viridis', title='audio activations')
-                    #self.som_v.plot_activations(activation_v, step, cmap='plasma', title='video activations')
-                    #exit(0)
 
                 # run training op
                 _, d = self._sess.run([self.training, self.delta],
@@ -276,7 +272,10 @@ class HebbianModel(object):
         if show:
             plt.show()
         else:
-            plt.savefig(os.path.join(Constants.PLOT_FOLDER, 'temp', filename))
+            save_loc = os.path.join(Constants.PLOT_FOLDER, 'hebbian', str(date.today()))
+            if not os.path.exists(save_loc):
+                os.makedirs(save_loc)
+            plt.savefig(os.path.join(save_loc, filename))
         plt.clf()
 
     def get_bmu_k_closest(self, som, activations, pos_activations, k, train=True):
