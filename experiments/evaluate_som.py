@@ -91,10 +91,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     data_type = 'video' if not args.is_audio else 'audio'
-    data_group = 'visual_80classes_train.npy'
-    model_name = 'video_60x80_s30.0_b128_a0.1_trsf_minmax_seed42_1547413093_final'
+    data_group = 'visual_10classes_train_as.npy'
+    model_name = 'video_20x30_s12.0_b128_a0.1_group-as_seed42_1547659811_minmax'
     data_path = os.path.join(Constants.DATA_FOLDER, data_type, data_group)
-    model_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, data_type, model_name)
+    model_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, data_type, 'best', model_name)
     out_path = os.path.join(Constants.OUTPUT_FOLDER, data_type, 'evaluate_som.txt')
     label_path = os.path.join(Constants.LABELS_FOLDER, 'coco-labels.json')
 
@@ -104,7 +104,7 @@ if __name__ == '__main__':
 
     id_dict = dict()
     if not args.classes100:
-        num_classes = 80
+        num_classes = 10
         if not args.is_audio:
             xs, ys, id_dict = from_npy_visual_data(data_path, classes=num_classes)
             #xs, _ = global_transform(xs)
@@ -119,7 +119,7 @@ if __name__ == '__main__':
         else:
             xs, ys, _ =  from_csv_with_filenames(args.csv_path)
 
-    som = SOM(60, 80, xs.shape[1], checkpoint_loc=model_path)
+    som = SOM(20, 30, xs.shape[1], checkpoint_loc=model_path)
     som.restore_trained(model_path)
     #measure = class_compactness(som, xs, ys)
     measure = my_compactness(som, xs, ys)

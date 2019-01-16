@@ -196,3 +196,35 @@ Class Compactness:
 
 Avg Comp: 0.4703
 Variance: 0.0539
+--------------------
+MODEL: video_20x30_s10.0_b128_a0.1_trsf_global_group-as__seed42_1547662883_final - DATA: visual_10classes_train_as.npy
+Class Compactness:
+	banana              : 0.1641
+	apple               : 0.1962
+	dog                 : 0.3587
+	dining table        : 0.2213
+	bird                : 0.3878
+	cat                 : 0.1962
+	book                : 0.3647
+	umbrella            : 0.2744
+	cup                 : 0.2620
+	sports ball         : 0.2807
+
+Avg Comp: 0.2706
+Variance: 0.0055
+--------------------
+MODEL: video_20x30_s12.0_b128_a0.1_group-as_seed42_1547659811_minmax - DATA: visual_10classes_train_as.npy
+Class Compactness:
+	dog                 : 0.2191
+	bird                : 0.4737
+	cat                 : 0.2151
+	sports ball         : 0.2511
+	dining table        : 0.1324
+	cup                 : 0.2175
+	banana              : 0.2810
+	apple               : 0.2537
+	book                : 0.2266
+	umbrella            : 0.2219
+
+Avg Comp: 0.2492
+Variance: 0.0069

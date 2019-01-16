@@ -13,17 +13,20 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.ticker as tkr
+from datetime import date
 import time
 
 video_model_list = [
     'video_20x30_s10.0_b128_a0.1_group-a_seed42_1545208211_none',
-    'video_20x30_s10.0_b128_a0.2_group-b_seed42_1545208672_global',
     'video_20x20_s8.0_b128_a0.2_group-a_seed42_1545312173_global',
     'video_20x30_s15.0_b128_a0.2_group-a_seed42_1546936577_minmax',
+    'video_20x30_s10.0_b128_a0.2_group-b_seed42_1545208672_global',
     'video_20x30_s12.0_b128_a0.1_group-b_seed33_1547237808_minmax',
-    'video_20x30_s15.0_b128_a0.1_group-as_seed42_1547294638_minmax',
     'video_20x30_s15.0_b128_a0.1_group-c1_seed42_1547303679_minmax',
-    'video_20x30_s15.0_b128_a0.1_group-c2_seed42_1547388036_minmax'
+    'video_20x30_s15.0_b128_a0.1_group-c2_seed42_1547388036_minmax',
+    'video_20x30_s12.0_b128_a0.1_group-as_seed42_1547659811_minmax,'
+    'video_20x30_s10.0_b128_a0.1_group-as_seed42_1547662883_global',
+
 ]
 
 audio_model_list = [
@@ -31,7 +34,7 @@ audio_model_list = [
     'audio_20x30_s10.0_b128_a0.1_group-s_seed10_1547394149_minmax',
 ]
 
-video_model = video_model_list[1]
+video_model = video_model_list[-1]
 audio_model = audio_model_list[-1]
 soma_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', audio_model)
 somv_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'best', video_model)
@@ -132,6 +135,9 @@ if __name__ == '__main__':
     exp_description = 'lr{}_algo_{}_ta{:.1f}_tv{:.1f}_th{:.1f}_{}_som{}_'\
                           .format(args.lr, args.algo, args.taua, args.tauv, args.th, args.act, somv_info['id']) \
                       + str(int(time.time()))
+    hebbian_path = os.path.join(hebbian_path, str(date.today()))
+    if not os.path.exists(hebbian_path):
+        os.makedirs(hebbian_path)
     model_path = os.path.join(hebbian_path, exp_description)
 
     #audio data
@@ -242,4 +248,7 @@ if __name__ == '__main__':
     ax.set_xlabel('# presentations')
     ax.set_ylabel('Accuracy')
     plt.title('Model: {}'.format(os.path.basename(somv_path)))
-    plt.savefig(os.path.join(Constants.PLOT_FOLDER, 'hebbian/' + exp_description+'.png'), transparent=False)
+    plot_path = os.path.join(Constants.PLOT_FOLDER, str(date.today()), 'hebbian')
+    if not os.path.exists(plot_path):
+        os.makedirs(plot_path)
+    plt.savefig(os.path.join(plot_path, '{}.png'.format(exp_description)), transparent=False)
