@@ -75,32 +75,22 @@ def main():
             sampled_indices = np.random.choice(indices, size=samples, replace=False)
             data_subsample = np.concatenate((data_subsample, raw_data[sampled_indices]), axis=0)
 
-        #then extract the n most distant ones for each class
+        #then extract the n most closed ones for each class
         labels_subsample = data_subsample[:,-1]
         print('Subsampled data: {}'.format(data_subsample.shape))
         for i, (id, label_name) in enumerate(selected):
-            print('Selecting the best {} samples from "{}..."'.format(cfg.SAMPLES, label_name))
+            print('Selecting the closest {} samples from "{}..."'.format(cfg.SAMPLES, label_name))
             indices = np.where(labels_subsample == id)[0]
             xs_class = data_subsample[indices]
 
-            mask = np.ones(labels_subsample.shape, dtype=bool)
-            mask[indices] = False
-            other_sampled_indices = np.random.choice(np.where(mask)[0], size=100 * num_classes, replace=False)
-            xs_other = data_subsample[other_sampled_indices]
-
-            print('class xs: {}, other xs: {} . Calculating avg distances...'.format(xs_class.shape, xs_other.shape))
-            distances = np.zeros(len(xs_class))
-            for k, x in enumerate(xs_class):
-                print('{}/{}'.format(k, xs_class.shape[0]), end='\r')
-            
-            distances = np.array(distances).reshape(-1, 1)
-            xs_sorted = np.concatenate((xs_class, distances), axis=1)
-            print(distances.shape, xs_sorted.shape)
+            print('class xs: {}, calculating prototype and distances...'.format(xs_class))
+            prototype = np.mean(xs_class, axis=0)
+            distances = np.sum((xs_class - prototype)**2, axis=1)
+            print(distances.shape)
 
             print('Sorting...')
-            xs_sorted = np.array(sorted(xs_sorted, key=lambda x: x[-1], reverse=True))
-            best_samples = xs_sorted[:cfg.SAMPLES,:-1]
-
+            best_samples = [x for x,_ in np.array(sorted(zip(xs_class, distances), key=lambda x: x[1]))]
+            best_samples = np.array(best_samples)
             print('Samples: {}'.format(best_samples.shape))
             j = i * cfg.SAMPLES
             result[j:j + cfg.SAMPLES] = best_samples

@@ -9,7 +9,7 @@ import numpy as np
 import argparse
 
 
-audio_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio100classes.csv')
+audio_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_train.csv')
 synth_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_synth.npy')
 visual_data_path_a = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_a.npy')
 visual_data_path_b = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_b.npy')
@@ -24,12 +24,12 @@ TRANSFORMS = ['none', 'zscore', 'global', 'minmax']
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Train a Hebbian model.')
-    parser.add_argument('--sigma', metavar='sigma', type=float, default=10, help='The model neighborhood value')
-    parser.add_argument('--alpha', metavar='alpha', type=float, default=0.1, help='The SOM initial learning rate')
+    parser.add_argument('--sigma', metavar='sigma', type=float, default=8, help='The model neighborhood value')
+    parser.add_argument('--alpha', metavar='alpha', type=float, default=0.2, help='The SOM initial learning rate')
     parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Random generator seed')
     parser.add_argument('--neurons1', type=int, default=20,
                         help='Number of neurons for audio SOM, first dimension')
-    parser.add_argument('--neurons2', type=int, default=30,
+    parser.add_argument('--neurons2', type=int, default=20,
                         help='Number of neurons for audio SOM, second dimension')
     parser.add_argument('--epochs', type=int, default=1000,
                         help='Number of epochs the SOM will be trained for')
@@ -48,10 +48,14 @@ if __name__ == '__main__':
 
     if args.data == 'audio':
         print('Loading audio data...', end='')
-        # xs, ys, _ = from_csv_with_filenames(audio_data_path)
-        # ys = np.array(ys)
-        # xs = np.array(xs)
-        xs, ys = from_npy_audio_data(synth_data_path, classes=10)
+        if 'csv' not in audio_data_path:
+            xs, ys = from_npy_audio_data(synth_data_path, classes=10)
+        else:
+            print('Reading from csv...')
+            xs, ys, _ = from_csv_with_filenames(audio_data_path)
+            ys = [v - 1000 for v in ys]
+            ys = np.array(ys)
+            xs = np.array(xs)
         print('done, data: {} - labels: {}'.format(xs.shape, ys.shape))
     elif args.data == 'video':
         print('Loading visual data, group {}...'.format(args.group), end='')

@@ -62,3 +62,137 @@ Class Compactness:
 
 Avg Comp: 0.3222
 Variance: 0.0068
+--------------------
+MODEL: video_20x30_s10.0_b128_a0.1_group-a_seed42_1545208211_none - DATA: visual_10classes_train_a.npy
+Class Compactness:
+	sports ball         : 0.2456
+	banana              : 0.3334
+	umbrella            : 0.2280
+	cup                 : 0.2140
+	book                : 0.2057
+	dog                 : 0.4589
+	bird                : 0.7531
+	apple               : 0.2261
+	cat                 : 0.4224
+	dining table        : 0.2042
+
+Avg Comp: 0.3292
+Variance: 0.0277
+--------------------
+MODEL: video_20x30_s15.0_b128_a0.1_group-c2_seed42_1547388036_minmax - DATA: visual_10classes_train_c2.npy
+Class Compactness:
+	car                 : 0.2010
+	donut               : 0.1841
+	fork                : 0.3217
+	orange              : 0.1780
+	zebra               : 0.2937
+	dog                 : 0.2440
+	book                : 0.2418
+	stop sign           : 0.1923
+	baseball bat        : 0.1590
+	bottle              : 0.2989
+
+Avg Comp: 0.2314
+Variance: 0.0030
+--------------------
+MODEL: video_20x30_s15.0_b128_a0.1_group-c2_seed42_1547388036_minmax - DATA: visual_10classes_train_c2.npy
+Class Compactness:
+	bottle              : 0.2989
+	fork                : 0.3217
+	baseball bat        : 0.1590
+	orange              : 0.1780
+	zebra               : 0.2937
+	donut               : 0.1841
+	dog                 : 0.2440
+	book                : 0.2418
+	stop sign           : 0.1923
+	car                 : 0.2010
+
+Avg Comp: 0.2314
+Variance: 0.0030
+--------------------
+MODEL: video_60x80_s30.0_b128_a0.1_trsf_minmax_seed42_1547413093_final - DATA: visual_80classes_train.npy
+Class Compactness:
+	dining table        : 0.5985
+	tv                  : 0.1140
+	umbrella            : 0.8278
+	snowboard           : 0.4671
+	donut               : 0.3709
+	skis                : 0.4573
+	suitcase            : 0.6445
+	train               : 0.2398
+	bird                : 0.5646
+	baseball bat        : 0.1549
+	mouse               : 0.6489
+	book                : 0.6509
+	toothbrush          : 0.3226
+	motorcycle          : 1.0366
+	bottle              : 0.6388
+	baseball glove      : 0.7167
+	cake                : 0.6306
+	bus                 : 0.1919
+	bear                : 0.2191
+	giraffe             : 0.1680
+	horse               : 0.1933
+	kite                : 0.6050
+	bowl                : 0.5333
+	frisbee             : 0.2233
+	clock               : 0.1471
+	cup                 : 0.6072
+	keyboard            : 0.3531
+	broccoli            : 0.2292
+	cat                 : 0.6639
+	boat                : 0.6755
+	scissors            : 0.2071
+	oven                : 0.4172
+	traffic light       : 0.4223
+	cow                 : 0.3249
+	refrigerator        : 0.1115
+	person              : 0.4034
+	fork                : 0.2654
+	truck               : 0.1672
+	stop sign           : 0.4805
+	bed                 : 0.7346
+	skateboard          : 0.6235
+	hair drier          : 0.2316
+	pizza               : 0.1943
+	banana              : 0.6682
+	remote              : 0.4223
+	backpack            : 0.9040
+	hot dog             : 0.3112
+	couch               : 0.5504
+	tennis racket       : 0.5317
+	orange              : 0.2985
+	wine glass          : 1.0451
+	elephant            : 0.3569
+	toaster             : 0.1494
+	fire hydrant        : 0.4845
+	vase                : 0.9429
+	knife               : 0.4014
+	sheep               : 0.4698
+	dog                 : 0.3128
+	sports ball         : 0.4855
+	cell phone          : 0.3182
+	chair               : 0.6785
+	parking meter       : 0.7465
+	toilet              : 0.2707
+	carrot              : 0.2356
+	apple               : 0.2376
+	laptop              : 0.3260
+	surfboard           : 0.3414
+	car                 : 0.5223
+	potted plant        : 0.9903
+	microwave           : 0.3200
+	bench               : 0.6006
+	tie                 : 0.3352
+	zebra               : 0.5128
+	spoon               : 0.3746
+	bicycle             : 0.7962
+	sandwich            : 0.3170
+	airplane            : 0.7390
+	sink                : 0.6160
+	teddy bear          : 0.7841
+	handbag             : 0.7492
+
+Avg Comp: 0.4703
+Variance: 0.0539

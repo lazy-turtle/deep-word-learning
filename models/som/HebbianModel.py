@@ -2,14 +2,7 @@ import tensorflow as tf
 import numpy as np
 import os
 import sys
-import matplotlib
-import time
-
-matplotlib.use('Agg')
-matplotlib.rcParams.update({'font.size': 8})
 import matplotlib.pyplot as plt
-from experiments.distance_experiments import get_prototypes
-from sklearn.preprocessing import MinMaxScaler
 from utils.constants import Constants
 from utils.utils import softmax, get_plot_filename
 
@@ -19,7 +12,6 @@ class HebbianModel(object):
                  n_presentations=1, n_classes=10, threshold=.6,
                  checkpoint_dir=None, a_threshold=.6, v_threshold=.6,
                  a_tau=.6, v_tau=.6):
-        #assert som_a._m == som_v._m and som_a._n == som_v._n probably not needed
         self.num_neurons_a = som_a._m * som_a._n
         self.num_neurons_v = som_v._m * som_v._n
         self._graph = tf.Graph()
@@ -43,20 +35,16 @@ class HebbianModel(object):
             self.weights = tf.Variable(
                              tf.random_normal([self.num_neurons_a, self.num_neurons_v],
                              mean=1/n,
-                             stddev=1/np.sqrt(1000*n))
-                           )
+                             stddev=1/np.sqrt(1000*n)))
 
             self.activation_a = tf.placeholder(dtype=tf.float32, shape=[self.num_neurons_a])
             self.activation_v = tf.placeholder(dtype=tf.float32, shape=[self.num_neurons_v])
             self.assigned_weights = tf.placeholder(dtype=tf.float32, shape=[self.num_neurons_a, self.num_neurons_v])
-
             self.delta = 1 - tf.exp(-self.learning_rate * tf.matmul(tf.reshape(self.activation_a, (-1, 1)),
                                                                     tf.reshape(self.activation_v, (1, -1))))
             new_weights = tf.add(self.weights, self.delta)
             self.training = tf.assign(self.weights, new_weights)
-
             self.assign_op = tf.assign(self.weights, self.assigned_weights)
-
             self._sess  = tf.Session()
             init_op = tf.global_variables_initializer()
             self._sess.run(init_op)
