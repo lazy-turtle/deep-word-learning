@@ -24,9 +24,8 @@ video_model_list = [
     'video_20x30_s12.0_b128_a0.1_group-b_seed33_1547237808_minmax',
     'video_20x30_s15.0_b128_a0.1_group-c1_seed42_1547303679_minmax',
     'video_20x30_s15.0_b128_a0.1_group-c2_seed42_1547388036_minmax',
-    'video_20x30_s12.0_b128_a0.1_group-as_seed42_1547659811_minmax,'
+    'video_20x30_s12.0_b128_a0.1_group-as_seed42_1547659811_minmax',
     'video_20x30_s10.0_b128_a0.1_group-as_seed42_1547662883_global',
-
 ]
 
 audio_model_list = [
