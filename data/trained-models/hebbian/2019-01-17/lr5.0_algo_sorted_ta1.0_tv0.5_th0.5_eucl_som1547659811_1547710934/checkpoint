@@ -1,0 +1,2 @@
+model_checkpoint_path: "/usr/home/studenti/sp160362/project/deep-word-learning/data/trained-models/hebbian/2019-01-17/lr5.0_algo_sorted_ta1.0_tv0.5_th0.5_eucl_som1547659811_1547710934/model.ckpt-1"
+all_model_checkpoint_paths: "/usr/home/studenti/sp160362/project/deep-word-learning/data/trained-models/hebbian/2019-01-17/lr5.0_algo_sorted_ta1.0_tv0.5_th0.5_eucl_som1547659811_1547710934/model.ckpt-1"

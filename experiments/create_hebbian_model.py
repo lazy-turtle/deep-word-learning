@@ -33,12 +33,12 @@ audio_model_list = [
     'audio_20x30_s10.0_b128_a0.1_group-s_seed10_1547394149_minmax',
 ]
 
-video_model = video_model_list[-1]
-audio_model = audio_model_list[-1]
+video_model = video_model_list[0]
+audio_model = audio_model_list[0]
 soma_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', audio_model)
 somv_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'best', video_model)
 hebbian_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'hebbian')
-soma_data = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_synth.npy')
+soma_data = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_train.csv')
 
 video_data_paths = {
     'a': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_a.npy'),
@@ -143,6 +143,8 @@ if __name__ == '__main__':
     if '.npy' not in soma_data:
         a_xs, a_ys, _ = from_csv_with_filenames(soma_data)
         a_ys = [v - 1000 for v in a_ys]
+        a_xs = np.array(a_xs)
+        a_ys = np.array(a_ys)
     else:
         a_xs, a_ys = from_npy_audio_data(soma_data)
     #video data
