@@ -15,14 +15,14 @@ import matplotlib.pyplot as plt
 
 video_model_list = [
     'video_20x30_s10.0_b128_a0.1_group-a_seed42_1545208211_none',
-    'video_20x30_s10.0_b128_a0.2_group-b_seed42_1545208672_global',
     'video_20x20_s8.0_b128_a0.2_group-a_seed42_1545312173_global',
-    'video_20x20_s6.0_b128_a0.1_group-a_seed42_1547219065_minmax',
     'video_20x30_s15.0_b128_a0.2_group-a_seed42_1546936577_minmax',
+    'video_20x30_s10.0_b128_a0.2_group-b_seed42_1545208672_global',
     'video_20x30_s12.0_b128_a0.1_group-b_seed33_1547237808_minmax',
-    'video_20x30_s15.0_b128_a0.1_group-as_seed42_1547294638_minmax',
     'video_20x30_s15.0_b128_a0.1_group-c1_seed42_1547303679_minmax',
-    'video_20x30_s15.0_b128_a0.1_group-c2_seed42_1547388036_minmax'
+    'video_20x30_s15.0_b128_a0.1_group-c2_seed42_1547388036_minmax',
+    'video_20x30_s12.0_b128_a0.1_group-as_seed42_1547659811_minmax',
+    'video_20x30_s10.0_b128_a0.1_group-as_seed42_1547662883_global',
 ]
 
 audio_model_list = [
@@ -30,7 +30,7 @@ audio_model_list = [
     'audio_20x30_s10.0_b128_a0.1_group-s_seed10_1547394149_minmax'
 ]
 
-video_model = video_model_list[1]
+video_model = video_model_list[-2]
 audio_model = audio_model_list[-1]
 
 #uncomment the line needed, comment the other of course
@@ -83,6 +83,10 @@ if __name__ == '__main__':
     num_classes = 10
     args = parser.parse_args()
     som_info = extract_som_info(os.path.basename(args.som))
+    print('SOM info:')
+    for k,v in som_info.items():
+        print('{:<20s}: {:<40s}'.format(k, str(v)))
+
     som_path = args.som
     som_data = data_paths[som_info['group']]
     labels = None
@@ -121,7 +125,7 @@ if __name__ == '__main__':
     som.restore_trained(som_path)
 
     # get random samples for each class
-    num_samples = 1
+    num_samples = 10
     for id in range(num_classes):
         indices = np.where(ys == id)[0]
         sampled_indices = np.random.choice(indices, size=num_samples, replace=False)
@@ -130,7 +134,7 @@ if __name__ == '__main__':
 
         activation = np.zeros((som._m, som._n))
         for i in range(num_samples):
-            a,_ = som.get_activations_abs(xs_sampled[i])
+            a,_ = som.get_activations(xs_sampled[i])
             activation += a.reshape((som._m, som._n))
 
         plt.imshow(activation, cmap='plasma', origin='lower')
