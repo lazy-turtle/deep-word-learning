@@ -33,7 +33,7 @@ audio_model_list = [
     'audio_20x30_s10.0_b128_a0.1_group-s_seed10_1547394149_minmax',
 ]
 
-video_model = video_model_list[0]
+video_model = video_model_list[-3]
 audio_model = audio_model_list[0]
 soma_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', audio_model)
 somv_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'best', video_model)
