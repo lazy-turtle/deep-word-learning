@@ -142,6 +142,9 @@ def from_csv_with_filenames(path):
             xs.append(np.asfarray(l[1:-1]))
             ys.append(int(l[-1].strip('\n')))
             filenames.append(l[0])
+
+    if any(v > 1000 for v in ys):
+        ys = [v - 1000 for v in ys]
     return xs, ys, filenames
 
 def infer_label_10classes(label_string, labels_dict):

@@ -8,12 +8,12 @@ import os
 import json
 import argparse
 
-DATA_TYPE = 'video'
-visual_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_as.npy')
-#visual_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_train.csv')
+DATA_TYPE = 'audio'
+#visual_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_as.npy')
+visual_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio10classes25pca20t.csv')
 
-model_name = 'video_20x30_s10.0_b128_a0.1_trsf_global_group-as__seed42_1547662883_final'
-#model_name = 'audio_20x20_s8.0_b128_a0.2_trsf_minmax_seed42_1547562822_final'
+#model_name = 'video_20x30_s10.0_b128_a0.1_trsf_global_group-as__seed42_1547662883_final'
+model_name = 'audio_20x30_s10.0_b128_a0.1_trsf_minmax_group-as__seed42_1548150847_final'
 model_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, DATA_TYPE, model_name)
 label_path = os.path.join(Constants.LABELS_FOLDER, 'coco-labels.json')
 
@@ -37,7 +37,6 @@ if __name__ == '__main__':
 
     if 'csv' in visual_data_path:
         xs, ys, _ = from_csv_with_filenames(visual_data_path)
-        ys = [v - 1000 for v in ys]
         xs = np.array(xs)
         ys = np.array(ys)
         labels = ys
@@ -60,9 +59,9 @@ if __name__ == '__main__':
         xs = np.array(xs1).reshape((100, 2048))
         ys = np.array(ys1).reshape(100)
 
-    xs, _ = global_transform(xs)
+    #xs, _ = global_transform(xs)
     #xs, _ = transform_data(xs)
-    #xs = MinMaxScaler().fit_transform(xs)
+    xs = MinMaxScaler().fit_transform(xs)
     dim = xs.shape[1]
 
     #info = extract_som_info(model_name)
@@ -72,4 +71,4 @@ if __name__ == '__main__':
               batch_size=info['batch'], checkpoint_loc=args.model, data=DATA_TYPE)
     som.restore_trained(args.model)
 
-    show_som(som, xs, labels, 'Visual map', show=False, dark=True, suffix='group_as_trsf_global')
+    show_som(som, xs, labels, 'Visual map', show=False, dark=True, suffix='group_trsf_minmax')

@@ -9,8 +9,14 @@ import numpy as np
 import argparse
 
 
-audio_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_train.csv')
-synth_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_synth.npy')
+audio_data_list =[
+    os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio10classes25pca20t.csv'),
+    os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio10classes20pca25t.csv'),
+    os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio10classesnopca60t.csv'),
+    os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_synth.npy')
+]
+audio_data_path = audio_data_list[1]
+
 visual_data_path_a = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_a.npy')
 visual_data_path_b = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_b.npy')
 visual_data_path_c2 = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_c2.npy')
@@ -24,8 +30,8 @@ TRANSFORMS = ['none', 'zscore', 'global', 'minmax']
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Train a Hebbian model.')
-    parser.add_argument('--sigma', metavar='sigma', type=float, default=10, help='The model neighborhood value')
-    parser.add_argument('--alpha', metavar='alpha', type=float, default=0.2, help='The SOM initial learning rate')
+    parser.add_argument('--sigma', metavar='sigma', type=float, default=8, help='The model neighborhood value')
+    parser.add_argument('--alpha', metavar='alpha', type=float, default=0.3, help='The SOM initial learning rate')
     parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Random generator seed')
     parser.add_argument('--neurons1', type=int, default=20,
                         help='Number of neurons for audio SOM, first dimension')
@@ -49,11 +55,10 @@ if __name__ == '__main__':
     if args.data == 'audio':
         print('Loading audio data...', end='')
         if 'csv' not in audio_data_path:
-            xs, ys = from_npy_audio_data(synth_data_path, classes=10)
+            xs, ys = from_npy_audio_data(audio_data_path, classes=10)
         else:
             print('Reading from csv...')
             xs, ys, _ = from_csv_with_filenames(audio_data_path)
-            ys = [v - 1000 for v in ys]
             ys = np.array(ys)
             xs = np.array(xs)
         print('done, data: {} - labels: {}'.format(xs.shape, ys.shape))
@@ -81,7 +86,6 @@ if __name__ == '__main__':
     elif args.data == 'old':
         print('Loading old visual data...', end='')
         xs, ys = from_csv_visual_10classes(old_visual_path)
-        ys = [v - 1000 for v in ys]
         ys = np.array(ys)
         xs = np.array(xs)
         print('done. data: {} - labels: {}'.format(xs.shape, ys.shape))
@@ -94,7 +98,7 @@ if __name__ == '__main__':
     dim = xs.shape[1]
     som = SOM(args.neurons1, args.neurons2, dim, n_iterations=args.epochs, alpha=args.alpha,
                  tau=0.1, threshold=0.6, batch_size=args.batch, data=args.data, sigma=args.sigma,
-                 num_classes=args.classes, seed=args.seed, suffix='trsf_{}_group-{}_'.format(args.transform, args.group))
+                 num_classes=args.classes, seed=args.seed, suffix='trsf_{}_group-nopca'.format(args.transform))
 
     if args.subsample:
         xs, _, ys, _ = train_test_split(xs, ys, test_size=0.6, stratify=ys, random_state=args.seed)

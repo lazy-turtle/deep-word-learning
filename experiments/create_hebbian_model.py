@@ -110,7 +110,8 @@ if __name__ == '__main__':
     parser.add_argument('--lr', metavar='lr', type=float, default=10, help='The model learning rate')
     parser.add_argument('--taua', metavar='taua', type=float, default=1, help='Tau value audio som')
     parser.add_argument('--tauv', metavar='tauv', type=float, default=1, help='Tau value video som')
-    parser.add_argument('--th', metavar='th', type=float, default=0.5, help='Threshold to cut values from')
+    parser.add_argument('--tha', metavar='tha', type=float, default=0.5, help='Threshold to cut values from (audio)')
+    parser.add_argument('--thv', metavar='thv', type=float, default=0.5, help='Threshold to cut values from (video)')
     parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Random generator seed')
     parser.add_argument('--somv', metavar='somv', type=str, default=somv_path,
                         help='Video SOM model path')
@@ -169,10 +170,10 @@ if __name__ == '__main__':
     v_dim = len(v_xs[0])
     print('Data loaded and transformed, building SOMs...')
     som_a = SOM(20, 30, a_dim, checkpoint_loc=soma_path, n_iterations=10000,
-                tau=args.taua, threshold=args.th)
+                tau=args.taua, threshold=args.tha)
     dims = somv_info['dims']
     som_v = SOM(dims[0], dims[1], v_dim, checkpoint_loc=somv_path, n_iterations=10000,
-                tau=args.tauv, threshold=args.th)
+                tau=args.tauv, threshold=args.thv)
 
 
     a_xs_train, a_xs_test, a_ys_train, a_ys_test = train_test_split(a_xs, a_ys, test_size=0.2, random_state=args.seed)

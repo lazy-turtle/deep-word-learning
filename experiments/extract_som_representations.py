@@ -36,6 +36,9 @@ def main():
     parser.add_argument('--name', type=str, default=cfg.RESULT_NAME, help='Name of the resulting file.')
     parser.add_argument('--seed', type=int, default=42, help='Seed for deterministic results.')
     parser.add_argument('--sort', action='store_true', default=False)
+    parser.add_argument('--store', action='store_true', default=False)
+    parser.add_argument('--indices', type=str, default=None, help='Indices for the selection')
+
     args = parser.parse_args()
 
     cfg.DATA_PATH = args.data
@@ -103,6 +106,7 @@ def main():
         for i, (id, label_name) in enumerate(selected):
             indices = np.where(labels == id)[0]
             sampled_indices = np.random.choice(indices, size=cfg.SAMPLES, replace=False)
+            print(sampled_indices)
             j = i * cfg.SAMPLES
             result[j:j + cfg.SAMPLES] = raw_data[sampled_indices]
 

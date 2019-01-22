@@ -12,7 +12,7 @@ import argparse
 import seaborn as sb
 from sklearn.cluster import KMeans, AgglomerativeClustering
 
-random_seed = 42
+random_seed = 10
 
 
 def get_prototypes(xs, ys):
@@ -57,7 +57,44 @@ def examples_distance(xs, i1, i2):
     return np.linalg.norm(xs[i1]-xs[i2])
 
 
-def cluster_compactness(xs, ys, num_classes):
+def cluster_compactness(xs, ys):
+    """
+    Computes the compactness value for each class.
+    :param som: self organising map instance trained on xs data
+    :param xs:  input data for the SOM, shape (n_examples, n_dim)
+    :param ys:  labels for each xs value , shape (n_examples,_)
+    :return:    list of class compactness values
+    """
+    classes = np.unique(ys)
+    model = KMeans(num_classes, max_iter=10000, tol=1e-10, random_state=random_seed)
+    mapped = model.fit_predict(xs)
+
+    intra_class_dist = np.zeros(classes.size)
+    inter_class_dist = 0.0
+
+    #intra cluster distance
+    # avg of ||bmu(i) - bmu(j)|| for each i,j in C
+    for c in classes:
+        class_xs = xs[np.where(mapped == c)]
+        n = class_xs.shape[0]
+        iter_count = ((n-1) * n) / 2  # gauss n(n+1)/2
+        for i, x1 in enumerate(class_xs):
+            for x2 in class_xs[i+1:]:
+                intra_class_dist[c] += np.linalg.norm(x1 - x2)
+        intra_class_dist[c] /= iter_count
+
+    #inter cluster distance
+    # avg of ||bmu(i) - bmu(j)|| for each i,j in every C
+    iter_count = (len(mapped)-1) * len(mapped) / 2
+    for i, x1 in enumerate(xs):
+        for x2 in xs[i+1:]:
+            inter_class_dist += np.linalg.norm(x1 - x2)
+
+    inter_class_dist /= float(iter_count)
+    return intra_class_dist / inter_class_dist
+
+
+def show_compactness(xs, ys, num_classes):
     print('Fitting clustering model...')
     model = KMeans(num_classes, max_iter=10000, tol=1e-10, random_state=random_seed)
     #model = KMeans(n_clusters = num_classes,max_iter=100,n_init=50,algorithm='elkan') # giorgia
@@ -188,26 +225,34 @@ def similarity_matrix(xs, ys):
     return sim_matrix
 
 
-data_names = [
+video_data_names = [
     'visual_10classes_train_a.npy',
     'visual_10classes_train_b.npy',
     'visual_10classes_train_c2.npy',
-    'VisualInputTrainingSet.csv'
+    'VisualInputTrainingSet.csv',
 ]
-data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, data_names[1])
+audio_data_names = [
+    'audio10classes25pca20t.csv',
+    'audio10classesnopca60t.csv',
+    'audio_10classes_train.csv'
+]
+
+video_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, video_data_names[1])
+audio_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, audio_data_names[0])
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Analyze representation quality.')
-    parser.add_argument('--csv-path', metavar='csv_path', type=str, required=False,
+    parser.add_argument('--csv-path', metavar='csv_path', type=str, default=audio_data_path,
                         help='The csv file with the extracted representations.')
     parser.add_argument('--classes100', action='store_true',
                         help='Specify whether you are analyzing \
                         a file with representations from 100 classes, as the loading functions are different.',
                         default=False)
-    parser.add_argument('--is-audio', action='store_true', default=False,
+    parser.add_argument('--is-audio', action='store_true', default=True,
                         help='Specify whether the csv contains audio representations, as the loading functions are different.')
     parser.add_argument('--data', metavar='data', type=str, default='new', help='Use new data format or old')
-    parser.add_argument('--path', metavar='path', type=str, default=data_path,
+    parser.add_argument('--path', metavar='path', type=str, default=video_data_path,
                         help='Specify the file containing data')
     parser.add_argument('--op', metavar='op', type=str, default='cluster',
                         help='Specify the operation to launch')
@@ -229,13 +274,15 @@ if __name__ == '__main__':
             else:
                 print("Reading old data...")
                 xs, ys = utils.from_csv_visual_10classes(args.path)
-                ys = [val - 1000 for val in ys]
                 xs = np.array(xs)
                 ys = np.array(ys)
                 xs = MinMaxScaler().fit_transform(xs)
                 labels = np.unique(ys)
         else:
             xs, ys, _ = utils.from_csv_with_filenames(args.csv_path)
+            xs = np.array(xs)
+            ys = np.array(ys)
+            labels = np.unique(ys)
     else:
         num_classes = 100
         if not args.is_audio:
@@ -247,8 +294,13 @@ if __name__ == '__main__':
     if args.op == 'avg':
         average_prototype_distance_matrix(xs, ys)
     elif args.op == 'cluster':
-        #cluster_compactness(xs, ys, num_classes)
-        show_clustering(xs, ys, num_classes, labels, show_classes=True)
+        result = cluster_compactness(xs, ys)
+        print('Class compactness:')
+        for i, c in enumerate(result):
+            print('{} - {:.5f}'.format(i, c))
+        print('\nMean:     {:.5f}'.format(result.mean()))
+        print('Variance: {:.5f}'.format(result.var()))
+        show_clustering(xs, ys, num_classes, labels, show_classes=False)
     elif args.op == 'sim':
         m = similarity_matrix(xs, ys)
 
