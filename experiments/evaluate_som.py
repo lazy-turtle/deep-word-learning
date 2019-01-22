@@ -86,15 +86,15 @@ if __name__ == '__main__':
                         help='Specify whether you are analyzing \
                         a file with representations from 100 classes, as the loading functions are different.',
                         default=False)
-    parser.add_argument('--is-audio', action='store_true', default=False,
+    parser.add_argument('--is-audio', action='store_true', default=True,
                         help='Specify whether the csv contains audio representations, as the loading functions are different.')
     args = parser.parse_args()
 
     data_type = 'video' if not args.is_audio else 'audio'
-    data_group = 'visual_10classes_train_as.npy'
-    model_name = 'video_20x30_s12.0_b128_a0.1_group-as_seed42_1547659811_minmax'
+    data_group = 'new/audio10classes20pca25t.csv'
+    model_name = 'audio_20x30_s8.0_b128_a0.3_trsf_minmax_group-20pca25t_seed42_1548174190_final'
     data_path = os.path.join(Constants.DATA_FOLDER, data_type, data_group)
-    model_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, data_type, 'best', model_name)
+    model_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, data_type, model_name)
     out_path = os.path.join(Constants.OUTPUT_FOLDER, data_type, 'evaluate_som.txt')
     label_path = os.path.join(Constants.LABELS_FOLDER, 'coco-labels.json')
 
@@ -107,11 +107,10 @@ if __name__ == '__main__':
         num_classes = 10
         if not args.is_audio:
             xs, ys, id_dict = from_npy_visual_data(data_path, classes=num_classes)
-            #xs, _ = global_transform(xs)
-            xs = MinMaxScaler().fit_transform(xs)
         else:
-            xs, ys, _ = from_csv_with_filenames(args.csv_path)
-            ys = [int(y)-1000 for y in ys] # see comment in average_prototype_distance_matrix
+            xs, ys, _ = from_csv_with_filenames(data_path)
+            xs = np.array(xs)
+            ys = np.array(ys)
     else:
         num_classes = 100
         if not args.is_audio:
@@ -119,12 +118,16 @@ if __name__ == '__main__':
         else:
             xs, ys, _ =  from_csv_with_filenames(args.csv_path)
 
+    # xs, _ = global_transform(xs)
+    xs = MinMaxScaler().fit_transform(xs)
+
     som = SOM(20, 30, xs.shape[1], checkpoint_loc=model_path)
     som.restore_trained(model_path)
     #measure = class_compactness(som, xs, ys)
     measure = my_compactness(som, xs, ys)
-    labels = labels_dictionary(label_path)
-    cpt = {labels[id_dict[i]]: val for i, val in enumerate(measure)}
+    #labels = labels_dictionary(label_path)
+    labels = np.unique(ys)
+    cpt = {str(labels[i]): val for i, val in enumerate(measure)}
 
     f.write('-'*20 + '\n')
     f.write('MODEL: {} - DATA: {}\n'.format(model_name, data_group))

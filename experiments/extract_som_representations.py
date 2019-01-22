@@ -36,8 +36,6 @@ def main():
     parser.add_argument('--name', type=str, default=cfg.RESULT_NAME, help='Name of the resulting file.')
     parser.add_argument('--seed', type=int, default=42, help='Seed for deterministic results.')
     parser.add_argument('--sort', action='store_true', default=False)
-    parser.add_argument('--store', action='store_true', default=False)
-    parser.add_argument('--indices', type=str, default=None, help='Indices for the selection')
 
     args = parser.parse_args()
 

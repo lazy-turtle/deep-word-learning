@@ -1,5 +1,6 @@
 import numpy as np
 import os
+import glob
 
 from sklearn.preprocessing import MinMaxScaler
 
@@ -225,92 +226,39 @@ def similarity_matrix(xs, ys):
     return sim_matrix
 
 
-video_data_names = [
-    'visual_10classes_train_cs.npy',
-    'visual_10classes_train_cb.npy',
-]
-audio_data_names = [
-    'audio10classes25pca20t.csv',
-    'audio10classesnopca60t.csv',
-    'audio_10classes_train.csv'
-]
 
-video_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, video_data_names[1])
-audio_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, audio_data_names[0])
-
+DATA_PATH = os.path.join(Constants.AUDIO_DATA_FOLDER, 'new')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Analyze representation quality.')
-    parser.add_argument('--csv-path', metavar='csv_path', type=str, default=audio_data_path,
-                        help='The csv file with the extracted representations.')
-    parser.add_argument('--classes100', action='store_true',
-                        help='Specify whether you are analyzing \
-                        a file with representations from 100 classes, as the loading functions are different.',
-                        default=False)
-    parser.add_argument('--is-audio', action='store_true', default=False,
-                        help='Specify whether the csv contains audio representations, as the loading functions are different.')
-    parser.add_argument('--data', metavar='data', type=str, default='new', help='Use new data format or old')
-    parser.add_argument('--path', metavar='path', type=str, default=video_data_path,
+    parser.add_argument('--path', metavar='path', type=str, default=DATA_PATH,
                         help='Specify the file containing data')
     parser.add_argument('--op', metavar='op', type=str, default='cluster',
                         help='Specify the operation to launch')
 
     args = parser.parse_args()
 
-    if not args.classes100:
-        num_classes = 10
-        if not args.is_audio:
-            print("Clustering visual data for 10 classes...")
-            if args.data == 'new':
-                print('Reading new data...')
-                xs, ys, label_to_id = utils.from_npy_visual_data(args.path)
-                xs = MinMaxScaler().fit_transform(xs)
-                label_path = os.path.join(Constants.LABELS_FOLDER, 'coco-labels.json')
-                id_names_dict = utils.labels_dictionary(label_path)
-                vals = np.unique(ys)
-                labels = {v: id_names_dict[label_to_id[v]] for v in vals}
-            else:
-                print("Reading old data...")
-                xs, ys = utils.from_csv_visual_10classes(args.path)
-                xs = np.array(xs)
-                ys = np.array(ys)
-                xs = MinMaxScaler().fit_transform(xs)
-                labels = np.unique(ys)
-        else:
-            xs, ys, _ = utils.from_csv_with_filenames(args.csv_path)
-            xs = np.array(xs)
-            ys = np.array(ys)
-            labels = np.unique(ys)
-    else:
-        num_classes = 100
-        if not args.is_audio:
-            xs, ys = utils.from_csv_visual_100classes(args.csv_path)
-        else:
-            xs, ys, _ =  utils.from_csv_with_filenames(args.csv_path)
+    num_classes = 10
+    files = list(glob.glob(os.path.join(args.path, '*.csv')))
+    result = np.empty((len(files), num_classes))
+    print('{} files found in {}'.format(len(files), args.path))
+
+    for i, file in enumerate(files):
+        xs, ys, _ = utils.from_csv_with_filenames(file)
+        xs = np.array(xs)
+        ys = np.array(ys)
         labels = np.unique(ys)
+        compactness = cluster_compactness(xs, ys)
+        result[i] = compactness
 
-    if args.op == 'avg':
-        average_prototype_distance_matrix(xs, ys)
-    elif args.op == 'cluster':
-        result = cluster_compactness(xs, ys)
-        print('Class compactness:')
-        for i, c in enumerate(result):
-            print('{} - {:.5f}'.format(i, c))
-        print('\nMean:     {:.5f}'.format(result.mean()))
-        print('Variance: {:.5f}'.format(result.var()))
-        show_clustering(xs, ys, num_classes, labels, show_classes=False)
-    elif args.op == 'sim':
-        m = similarity_matrix(xs, ys)
+    means = result.mean(axis=-1)
+    vars  = result.var(axis=-1)
 
-        #print in latex format because i'm lazy
-        for row in m:
-            best = np.argmin(row)
-            for i, val in enumerate(row):
-                if i == best:
-                    print('\\textbf{{{:.4f}}}'.format(val), end='')
-                else:
-                    print('{:.4f}'.format(val), end='')
-                last = ' & ' if i < (row.size - 1) else ' \\\\\n'
-                print(last, end='')
-        print(np.argmin(m, axis=1))
-        print(labels)
+    # merge results and sort based on mean values
+    merged = zip(files, means, vars)
+    merged = sorted(merged, key=lambda x: x[1])
+    for f, m,v in merged:
+        print('{:<20s} - m: {:.5f}, v: {:.5f}'.format(f,m,v))
+
+    argmin = np.argmin(means)
+    print('\nBest result: {} (mean = {:.5f}, var = {:.5f}'.format(files[int(argmin)], means[argmin], vars[argmin]))

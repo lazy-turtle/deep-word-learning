@@ -10,8 +10,8 @@ import argparse
 
 
 audio_data_list =[
-    os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio10classes25pca20t.csv'),
-    os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio10classes20pca25t.csv'),
+    os.path.join(Constants.AUDIO_DATA_FOLDER, 'new', 'audio10classes25pca20t.csv'),
+    os.path.join(Constants.AUDIO_DATA_FOLDER, 'new', 'audio10classes20pca25t.csv'),
     os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio10classesnopca60t.csv'),
     os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_synth.npy')
 ]
@@ -42,7 +42,7 @@ if __name__ == '__main__':
     parser.add_argument('--classes', type=int, default=10,
                         help='Number of classes the model will be trained on')
     parser.add_argument('--subsample', action='store_true', default=False)
-    parser.add_argument('--data', metavar='data', type=str, default='video')
+    parser.add_argument('--data', metavar='data', type=str, default='audio')
     parser.add_argument('--group', metavar='group', type=str, default='as')
     parser.add_argument('--transform', metavar='transform', type=str, default='none')
     parser.add_argument('--logging', action='store_true', default=True)
@@ -98,7 +98,7 @@ if __name__ == '__main__':
     dim = xs.shape[1]
     som = SOM(args.neurons1, args.neurons2, dim, n_iterations=args.epochs, alpha=args.alpha,
                  tau=0.1, threshold=0.6, batch_size=args.batch, data=args.data, sigma=args.sigma,
-                 num_classes=args.classes, seed=args.seed, suffix='trsf_{}_group-nopca'.format(args.transform))
+                 num_classes=args.classes, seed=args.seed, suffix='trsf_{}_group-20pca25t'.format(args.transform))
 
     if args.subsample:
         xs, _, ys, _ = train_test_split(xs, ys, test_size=0.6, stratify=ys, random_state=args.seed)
