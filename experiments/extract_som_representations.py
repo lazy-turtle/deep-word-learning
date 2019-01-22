@@ -6,10 +6,10 @@ import os
 class ExtractConfig(object):
     DATA_PATH = '/usr/home/studenti/sp160362/data/representations/representations_train_raw.npy'
     DEST_PATH = '../data/video/'
-    RESULT_NAME ='visual_10classes_train_as.npy'
+    RESULT_NAME ='visual_10classes_train_cb.npy'
 
     LABELS_DICT = '../data/labels/coco-labels.json'
-    CLASSES_PATH = '../data/labels/coco_labels10classes_a.txt'
+    CLASSES_PATH = '../data/labels/coco_labels10classes_c.txt'
 
     SAMPLES = 100
     SAMPLES_SORT = 1000
@@ -36,6 +36,7 @@ def main():
     parser.add_argument('--name', type=str, default=cfg.RESULT_NAME, help='Name of the resulting file.')
     parser.add_argument('--seed', type=int, default=42, help='Seed for deterministic results.')
     parser.add_argument('--sort', action='store_true', default=False)
+
     args = parser.parse_args()
 
     cfg.DATA_PATH = args.data
@@ -103,6 +104,7 @@ def main():
         for i, (id, label_name) in enumerate(selected):
             indices = np.where(labels == id)[0]
             sampled_indices = np.random.choice(indices, size=cfg.SAMPLES, replace=False)
+            print(sampled_indices)
             j = i * cfg.SAMPLES
             result[j:j + cfg.SAMPLES] = raw_data[sampled_indices]
 
