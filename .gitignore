@@ -5,8 +5,6 @@ __*__*
 .vscode/*
 */plots/*
 */plots/temp/*
-data/trained-models/*/*ep/
-data/trained-models/*/*_epoch/
-data/trained-models/*/*60x60*/
+data/trained-models/*
 nohup.out
 data/video/*80classes*
