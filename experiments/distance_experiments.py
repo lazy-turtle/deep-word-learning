@@ -235,7 +235,7 @@ audio_data_names = [
     'audio_10classes_train.csv'
 ]
 
-video_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, video_data_names[1])
+video_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, video_data_names[0])
 audio_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, audio_data_names[0])
 
 
