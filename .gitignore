@@ -5,6 +5,7 @@ __*__*
 .vscode/*
 */plots/*
 */plots/temp/*
-data/trained-models/*
+data/trained-models/video/*
+data/trained-models/audio/*
 nohup.out
 data/video/*80classes*
