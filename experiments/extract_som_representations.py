@@ -1,23 +1,17 @@
+from utils.utils import labels_dictionary
 import numpy as np
 import argparse
-import json
 import os
 
 class ExtractConfig(object):
-    DATA_PATH = '/usr/home/studenti/sp160362/data/representations/representations_train_raw.npy'
+    DATA_PATH = '/usr/home/studenti/sp160362/data/representations/rep-imagenet-10classes.npy'
     DEST_PATH = '../data/video/'
-    RESULT_NAME ='visual_10classes_train_cb.npy'
+    RESULT_NAME ='visual-10classes-imagenet.npy'
 
-    LABELS_DICT = '../data/labels/coco-labels.json'
-    CLASSES_PATH = '../data/labels/coco_labels10classes_c.txt'
+    LABELS_PATH = '../data/labels/coco-imagenet-10-labels.json'
 
     SAMPLES = 100
     SAMPLES_SORT = 1000
-
-
-def read_selected_classes(path):
-    with open(path, 'r') as f:
-        return f.read().splitlines()
 
 
 def sqr_distance(v1, v2):
@@ -51,14 +45,8 @@ def main():
     print("Distance based selection: {}".format(args.sort))
 
     print("Loading labels...")
-    labels_dict = json.load(open(cfg.LABELS_DICT))
-    name_to_id = {v: k for k, v in labels_dict.items()}
-
-    class_names = read_selected_classes(cfg.CLASSES_PATH)
-    ids = [int(name_to_id[n]) for n in class_names]
-
-    selected = zip(ids, class_names)
-    selected = sorted(selected, key = lambda t: t[0])
+    selected = labels_dictionary(cfg.LABELS_PATH)
+    selected = sorted(selected.items(), key = lambda t: t[0])
     num_classes = len(selected)
     print("Selected labels: ", selected)
 

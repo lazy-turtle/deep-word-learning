@@ -337,6 +337,7 @@ def labels_dictionary(filename):
     :param str filename: string of the json dictionary
     :return:   dict <int, string> with ids and labels
     """
-    labels_dict = json.load(open(filename))
+    with open(filename) as f:
+        labels_dict = json.load(f)
     labels_dict = {int(k): v for k, v in labels_dict.items()}
     return labels_dict
