@@ -1,3 +1,4 @@
+from utils.constants import Constants
 from utils.utils import labels_dictionary
 import numpy as np
 import argparse
@@ -5,10 +6,10 @@ import os
 
 class ExtractConfig(object):
     DATA_PATH = '/usr/home/studenti/sp160362/data/representations/rep-imagenet-10classes.npy'
-    DEST_PATH = '../data/video/'
+    DEST_PATH = os.path.join(Constants.VIDEO_DATA_FOLDER)
     RESULT_NAME ='visual-10classes-imagenet.npy'
 
-    LABELS_PATH = '../data/labels/coco-imagenet-10-labels.json'
+    LABELS_PATH = os.path.join(Constants.LABELS_FOLDER, 'coco-imagenet-10-labels.json')
 
     SAMPLES = 100
     SAMPLES_SORT = 1000
