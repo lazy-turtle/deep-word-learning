@@ -10,9 +10,11 @@ class ExtractConfig(object):
     RESULT_NAME ='visual-10classes-imagenet.npy'
 
     LABELS_PATH = os.path.join(Constants.LABELS_FOLDER, 'coco-imagenet-10-labels.json')
+    COCO_LABELS = os.path.join(Constants.LABELS_FOLDER, 'coco-labels.json')
 
     SAMPLES = 100
     SAMPLES_SORT = 1000
+    USE_TRUE_IDS = True
 
 
 def sqr_distance(v1, v2):
@@ -47,6 +49,11 @@ def main():
 
     print("Loading labels...")
     selected = labels_dictionary(cfg.LABELS_PATH)
+    if cfg.USE_TRUE_IDS:
+        coco_labels = labels_dictionary(cfg.COCO_LABELS)
+        labels_ids = {v: k for k, v in coco_labels.items()}
+        selected = {labels_ids[v]: v for v in selected.values()}
+
     selected = sorted(selected.items(), key = lambda t: t[0])
     num_classes = len(selected)
     print("Selected labels: ", selected)
@@ -93,7 +100,6 @@ def main():
         for i, (id, label_name) in enumerate(selected):
             indices = np.where(labels == id)[0]
             sampled_indices = np.random.choice(indices, size=cfg.SAMPLES, replace=False)
-            print(sampled_indices)
             j = i * cfg.SAMPLES
             result[j:j + cfg.SAMPLES] = raw_data[sampled_indices]
 

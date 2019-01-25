@@ -12,9 +12,6 @@ import argparse
 import seaborn as sb
 from sklearn.cluster import KMeans, AgglomerativeClustering
 
-random_seed = 10
-
-
 def get_prototypes(xs, ys):
     prototype_dict = {unique_y: [] for unique_y in set(ys)}
     for i, x in enumerate(xs):
@@ -162,7 +159,7 @@ def show_clustering(xs, ys, num_classes, labels, show_classes=False):
 
     plt.figure(figsize=(15,10))
 
-    cols = sb.color_palette('muted', num_classes)
+    cols = sb.color_palette(n_colors=num_classes)
     bot = np.zeros(num_classes)
     for j in classes:
         freqs = occurrences[j]
@@ -228,6 +225,7 @@ def similarity_matrix(xs, ys):
 video_data_names = [
     'visual_10classes_train_cs.npy',
     'visual_10classes_train_cb.npy',
+    'visual-10classes-imagenet.npy'
 ]
 audio_data_names = [
     'audio10classes25pca20t.csv',
@@ -235,9 +233,10 @@ audio_data_names = [
     'audio_10classes_train.csv'
 ]
 
-video_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, video_data_names[0])
+video_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, video_data_names[2])
 audio_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, audio_data_names[0])
 
+random_seed = 42
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Analyze representation quality.')
@@ -265,10 +264,7 @@ if __name__ == '__main__':
                 print('Reading new data...')
                 xs, ys, label_to_id = utils.from_npy_visual_data(args.path)
                 xs = MinMaxScaler().fit_transform(xs)
-                label_path = os.path.join(Constants.LABELS_FOLDER, 'coco-labels.json')
-                id_names_dict = utils.labels_dictionary(label_path)
-                vals = np.unique(ys)
-                labels = {v: id_names_dict[label_to_id[v]] for v in vals}
+                labels = utils.labels_dictionary(os.path.join(Constants.LABELS_FOLDER, 'coco-imagenet-10-labels.json'))
             else:
                 print("Reading old data...")
                 xs, ys = utils.from_csv_visual_10classes(args.path)
@@ -295,7 +291,7 @@ if __name__ == '__main__':
         result = cluster_compactness(xs, ys)
         print('Class compactness:')
         for i, c in enumerate(result):
-            print('{} - {:.5f}'.format(i, c))
+            print('{:<20s} - {:.5f}'.format(labels[i], c))
         print('\nMean:     {:.5f}'.format(result.mean()))
         print('Variance: {:.5f}'.format(result.var()))
         show_clustering(xs, ys, num_classes, labels, show_classes=False)
