@@ -54,7 +54,6 @@ def main():
         labels_ids = {v: k for k, v in coco_labels.items()}
         selected = {labels_ids[v]: v for v in selected.values()}
 
-    selected = sorted(selected.items(), key = lambda t: t[0])
     num_classes = len(selected)
     print("Selected labels: ", selected)
 
