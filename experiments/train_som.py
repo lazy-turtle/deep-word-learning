@@ -21,8 +21,8 @@ visual_data_path_a = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes
 visual_data_path_b = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_b.npy')
 visual_data_path_c2 = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_c2.npy')
 visual_data_path_z = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_z.npy')
-visual_data_path_as = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_as.npy')
-visual_data_80classes = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_80classes_train.npy')
+visual_data_segment = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-10classes-segm.npy')
+visual_data_imagenet = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-10classes-imagenet.npy')
 old_visual_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'VisualInputTrainingSet.csv')
 
 TRANSFORMS = ['none', 'zscore', 'global', 'minmax']
@@ -30,8 +30,8 @@ TRANSFORMS = ['none', 'zscore', 'global', 'minmax']
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Train a Hebbian model.')
-    parser.add_argument('--sigma', metavar='sigma', type=float, default=8, help='The model neighborhood value')
-    parser.add_argument('--alpha', metavar='alpha', type=float, default=0.3, help='The SOM initial learning rate')
+    parser.add_argument('--sigma', metavar='sigma', type=float, default=10, help='The model neighborhood value')
+    parser.add_argument('--alpha', metavar='alpha', type=float, default=0.1, help='The SOM initial learning rate')
     parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Random generator seed')
     parser.add_argument('--neurons1', type=int, default=20,
                         help='Number of neurons for audio SOM, first dimension')
@@ -42,9 +42,9 @@ if __name__ == '__main__':
     parser.add_argument('--classes', type=int, default=10,
                         help='Number of classes the model will be trained on')
     parser.add_argument('--subsample', action='store_true', default=False)
-    parser.add_argument('--data', metavar='data', type=str, default='audio')
-    parser.add_argument('--group', metavar='group', type=str, default='as')
-    parser.add_argument('--transform', metavar='transform', type=str, default='none')
+    parser.add_argument('--data', metavar='data', type=str, default='video')
+    parser.add_argument('--group', metavar='group', type=str, default='imagenet')
+    parser.add_argument('--transform', metavar='transform', type=str, default='minmax')
     parser.add_argument('--logging', action='store_true', default=True)
     parser.add_argument('--use-gpu', action='store_true', default=True)
     parser.add_argument('--batch', type=int, default=128)
@@ -71,15 +71,15 @@ if __name__ == '__main__':
                 path = visual_data_path_b
             elif args.group == 'z':
                 path = visual_data_path_z
-            elif args.group == 'as':
-                path = visual_data_path_as
-            elif args.group == 'c2':
-                path = visual_data_path_c2
+            elif args.group == 'segm':
+                path = visual_data_segment
+            elif args.group == 'imagenet':
+                path = visual_data_imagenet
             else:
                 raise ValueError('Data group not recognised')
         else:
             print('Training on {} classes, good luck!'.format(args.classes))
-            path = visual_data_80classes
+            path = None
 
         xs, ys, _ = from_npy_visual_data(path, classes=args.classes)
         print('done. data: {} - labels: {}'.format(xs.shape, ys.shape))
@@ -98,7 +98,7 @@ if __name__ == '__main__':
     dim = xs.shape[1]
     som = SOM(args.neurons1, args.neurons2, dim, n_iterations=args.epochs, alpha=args.alpha,
                  tau=0.1, threshold=0.6, batch_size=args.batch, data=args.data, sigma=args.sigma,
-                 num_classes=args.classes, seed=args.seed, suffix='trsf_{}_group-20pca25t'.format(args.transform))
+                 num_classes=args.classes, seed=args.seed, suffix='trsf_{}_group-{}'.format(args.transform, args.group))
 
     if args.subsample:
         xs, _, ys, _ = train_test_split(xs, ys, test_size=0.6, stratify=ys, random_state=args.seed)
