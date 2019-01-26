@@ -65,7 +65,7 @@ def main():
         print('Sub-sampling data...')
         #first select a subsample from each class
         data_subsample = np.empty((0, raw_data.shape[1]))
-        for i, (id, label) in enumerate(selected):
+        for i, (id, label) in enumerate(selected.items()):
             indices = np.where(labels == id)[0]
             samples = min(cfg.SAMPLES_SORT, len(indices))
             sampled_indices = np.random.choice(indices, size=samples, replace=False)
@@ -74,7 +74,7 @@ def main():
         #then extract the n most closed ones for each class
         labels_subsample = data_subsample[:,-1]
         print('Subsampled data: {}'.format(data_subsample.shape))
-        for i, (id, label_name) in enumerate(selected):
+        for i, (id, label_name) in enumerate(selected.items()):
             print('Selecting the closest {} samples from "{}..."'.format(cfg.SAMPLES, label_name))
             indices = np.where(labels_subsample == id)[0]
             xs_class = data_subsample[indices]
@@ -96,7 +96,7 @@ def main():
     else:
         #otherwise simply select n random samples without replacement
         print("Selecting random samples...")
-        for i, (id, label_name) in enumerate(selected):
+        for i, (id, label_name) in enumerate(selected.items()):
             indices = np.where(labels == id)[0]
             sampled_indices = np.random.choice(indices, size=cfg.SAMPLES, replace=False)
             j = i * cfg.SAMPLES
