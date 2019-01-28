@@ -2,18 +2,18 @@ from models.som.SOM import SOM
 from models.som.SOMTest import show_som
 import numpy as np
 from utils.constants import Constants
-from utils.utils import from_npy_visual_data, transform_data, from_csv, global_transform, from_csv_with_filenames
+from utils.utils import from_npy_visual_data, transform_data, global_transform, from_csv_with_filenames, labels_dictionary
 from sklearn.preprocessing import MinMaxScaler
 import os
 import json
 import argparse
 
-DATA_TYPE = 'audio'
-#visual_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_as.npy')
-visual_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'new', 'audio10classes20pca25t.csv')
+DATA_TYPE = 'video'
+visual_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-10classes-imagenet.npy')
+#visual_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'new', 'audio10classes20pca25t.csv')
 
-#model_name = 'video_20x30_s10.0_b128_a0.1_trsf_global_group-as__seed42_1547662883_final'
-model_name = 'audio_20x30_s8.0_b128_a0.3_trsf_minmax_group-20pca25t_seed42_1548174190_final'
+model_name = 'video_20x30_s10.0_b128_a0.1_trsf_minmax_group-imagenet_seed42_1548495576_final'
+#model_name = 'audio_20x30_s8.0_b128_a0.3_trsf_minmax_group-20pca25t_seed42_1548174190_final'
 model_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, DATA_TYPE, model_name)
 label_path = os.path.join(Constants.LABELS_FOLDER, 'coco-labels.json')
 
@@ -44,7 +44,8 @@ if __name__ == '__main__':
         id_to_label = json.load(open(label_path))
         id_to_label = {int(k): v for k,v in id_to_label.items()}
         xs, ys, ids_dict = from_npy_visual_data(visual_data_path, classes=10)
-        labels = np.array([id_to_label[ids_dict[x]] for x in ys])
+        #labels = np.array([id_to_label[ids_dict[x]] for x in ys])
+        labels = labels_dictionary(os.path.join(Constants.LABELS_FOLDER, 'coco-imagenet-10-labels.json'))
 
     if args.subsample:
         np.random.seed(42)
@@ -71,4 +72,4 @@ if __name__ == '__main__':
               batch_size=info['batch'], checkpoint_loc=args.model, data=DATA_TYPE)
     som.restore_trained(args.model)
 
-    show_som(som, xs, labels, 'Visual map', show=False, dark=True, suffix='20pca25t_trsf_minmax')
+    show_som(som, xs, labels, 'Visual map', show=False, dark=True, suffix='imagenet_trsf_minmax')

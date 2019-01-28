@@ -54,7 +54,7 @@ def examples_distance(xs, i1, i2):
     return np.linalg.norm(xs[i1]-xs[i2])
 
 
-def cluster_compactness(xs, ys, iter=1000, toll=1e-6, seed=42):
+def cluster_compactness(xs, ys, iter=1000, tol=1e-6, seed=42):
     """
     Computes the compactness value for each class.
     :param som: self organising map instance trained on xs data
@@ -63,7 +63,7 @@ def cluster_compactness(xs, ys, iter=1000, toll=1e-6, seed=42):
     :return:    list of class compactness values
     """
     classes = np.unique(ys)
-    model = KMeans(num_classes, max_iter=iter, tol=toll, random_state=seed)
+    model = KMeans(num_classes, max_iter=iter, tol=tol, random_state=seed)
     mapped = model.fit_predict(xs)
 
     intra_class_dist = np.zeros(classes.size)
@@ -134,9 +134,9 @@ def show_compactness(xs, ys, num_classes):
     print('Mean\n{};\nVariance\n{}'.format(mean, var))
 
 
-def show_clustering(xs, ys, num_classes, labels, show_classes=False, iter=1000, toll=1e-6, seed=42):
+def show_clustering(xs, ys, num_classes, labels, show_classes=False, iter=1000, tol=1e-6, seed=42):
     print('Fitting clustering model...')
-    model = KMeans(num_classes, max_iter=iter, tol=toll, random_state=seed)
+    model = KMeans(num_classes, max_iter=iter, tol=tol, random_state=seed)
     #model = AgglomerativeClustering(n_clusters=num_classes)
     cluster_ys = model.fit_predict(xs)
     print('Done. Computing occurrences...')
@@ -226,7 +226,7 @@ video_data_names = [
     'visual_10classes_train_cs.npy',
     'visual_10classes_train_cb.npy',
     'visual-10classes-imagenet.npy',
-    'visual-10classes-segm.npy'
+    'visual-10classes-segm2.npy'
 ]
 audio_data_names = [
     'audio10classes25pca20t.csv',
@@ -234,7 +234,7 @@ audio_data_names = [
     'audio_10classes_train.csv'
 ]
 
-video_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, video_data_names[2])
+video_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, video_data_names[-1])
 audio_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, audio_data_names[0])
 
 if __name__ == '__main__':
@@ -288,13 +288,16 @@ if __name__ == '__main__':
     if args.op == 'avg':
         average_prototype_distance_matrix(xs, ys)
     elif args.op == 'cluster':
-        result = cluster_compactness(xs, ys, iter=500, toll=1e-6, seed=args.seed)
+        iterations = 1000
+        tolerance = 1e-10
+        result = cluster_compactness(xs, ys, iter=iterations, tol=tolerance, seed=args.seed)
         print('Class compactness:')
         for i, c in enumerate(result):
             print('{:<20s} - {:.5f}'.format(labels[i], c))
         print('\nMean:     {:.5f}'.format(result.mean()))
         print('Variance: {:.5f}'.format(result.var()))
-        show_clustering(xs, ys, num_classes, labels, show_classes=False, iter=500, toll=1e-6, seed=args.seed)
+        show_clustering(xs, ys, num_classes, labels, show_classes=False,
+                        iter=iterations, tol=tolerance, seed=args.seed)
     elif args.op == 'sim':
         m = similarity_matrix(xs, ys)
 
