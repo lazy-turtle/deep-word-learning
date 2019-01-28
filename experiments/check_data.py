@@ -5,7 +5,7 @@ from utils.utils import transform_data, global_transform
 from sklearn.preprocessing import MinMaxScaler
 import os
 
-DATA_PATH = '../data/video/visual-10classes-imagenet.npy'
+DATA_PATH = '../data/video/visual-10classes-bbox.npy'
 
 
 def from_csv_visual_10classes(path, labels='imagenet-labels.json'):

@@ -226,7 +226,8 @@ video_data_names = [
     'visual_10classes_train_cs.npy',
     'visual_10classes_train_cb.npy',
     'visual-10classes-imagenet.npy',
-    'visual-10classes-segm2.npy'
+    'visual-10classes-segm.npy',
+    'visual-10classes-bbox.npy'
 ]
 audio_data_names = [
     'audio10classes25pca20t.csv',

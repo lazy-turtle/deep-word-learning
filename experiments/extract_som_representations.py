@@ -1,6 +1,7 @@
 from utils.constants import Constants
 from utils.utils import labels_dictionary
 import numpy as np
+import pandas as pd
 import argparse
 import os
 
@@ -8,6 +9,7 @@ class ExtractConfig(object):
     DATA_PATH = '/usr/home/studenti/sp160362/data/representations/rep-imagenet-10classes.npy'
     DEST_PATH = os.path.join(Constants.VIDEO_DATA_FOLDER)
     RESULT_NAME ='visual-10classes-imagenet.npy'
+    FILE_LIST = '/usr/home/studenti/sp160362/data/representations/selection.csv'
 
     LABELS_PATH = os.path.join(Constants.LABELS_FOLDER, 'coco-imagenet-10-labels.json')
     COCO_LABELS = os.path.join(Constants.LABELS_FOLDER, 'coco-labels.json')
@@ -31,6 +33,7 @@ def main():
     parser.add_argument('--data', type=str, default=cfg.DATA_PATH, help='Raw data matrix location.')
     parser.add_argument('--dest', type=str, default=cfg.DEST_PATH, help='Destination folder.')
     parser.add_argument('--name', type=str, default=cfg.RESULT_NAME, help='Name of the resulting file.')
+    parser.add_argument('--list', type=str, default=cfg.FILE_LIST, help='csv containing the original filenames.')
     parser.add_argument('--seed', type=int, default=42, help='Seed for deterministic results.')
     parser.add_argument('--sort', action='store_true', default=False)
 
@@ -44,6 +47,13 @@ def main():
     print("Loading data...")
     raw_data = np.load(cfg.DATA_PATH)
     labels = raw_data[:,-1].astype(int)
+    selection = pd.read_csv(args.list, index_col=0)
+    selection.sort_values('filenames', inplace=True)
+
+    assert selection.shape[0] == raw_data.shape[0], "Data with different amount of rows!"
+    assert selection['labels'].values == labels, "Not the same labels!"
+
+    filenames = selection['filenames'].values
     print("Data loaded, shape: {}".format(raw_data.shape))
     print("Distance based selection: {}".format(args.sort))
 
@@ -58,6 +68,7 @@ def main():
     print("Selected labels: ", selected)
 
     result = np.empty((num_classes * cfg.SAMPLES, raw_data.shape[1]))
+    result_files = np.empty(num_classes * cfg.SAMPLES)
 
     if args.sort:
         # sort by distance from the other instances, descending
@@ -102,10 +113,14 @@ def main():
             sampled_indices = np.random.choice(indices, size=cfg.SAMPLES, replace=False)
             j = i * cfg.SAMPLES
             result[j:j + cfg.SAMPLES] = raw_data[sampled_indices]
+            result_files[j:j + cfg.SAMPLES] = filenames[sampled_indices]
 
     print("Data selected, shape: {}".format(result.shape))
     print("Saving result to {}...".format(cfg.DEST_PATH))
     np.save(os.path.join(cfg.DEST_PATH, cfg.RESULT_NAME), result)
+    print("Saving corresponding files to {}...".format(cfg.DEST_PATH))
+    df = pd.DataFrame({'filenames': result_files.tolist()})
+    df.to_csv(os.path.join(cfg.DEST_PATH, '{}_files.csv'.format(cfg.RESULT_NAME.replace('.npy', ''))))
     print("Done!")
 
 
