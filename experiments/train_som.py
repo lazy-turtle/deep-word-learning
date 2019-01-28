@@ -15,7 +15,7 @@ audio_data_list =[
     os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio10classesnopca60t.csv'),
     os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_synth.npy')
 ]
-audio_data_path = audio_data_list[1]
+audio_data_path = audio_data_list[-1]
 
 visual_data_path_a = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_a.npy')
 visual_data_path_b = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_b.npy')
@@ -42,12 +42,12 @@ if __name__ == '__main__':
     parser.add_argument('--classes', type=int, default=10,
                         help='Number of classes the model will be trained on')
     parser.add_argument('--subsample', action='store_true', default=False)
-    parser.add_argument('--data', metavar='data', type=str, default='video')
-    parser.add_argument('--group', metavar='group', type=str, default='imagenet')
+    parser.add_argument('--data', metavar='data', type=str, default='audio')
+    parser.add_argument('--group', metavar='group', type=str, default='s')
     parser.add_argument('--transform', metavar='transform', type=str, default='minmax')
     parser.add_argument('--logging', action='store_true', default=True)
     parser.add_argument('--use-gpu', action='store_true', default=True)
-    parser.add_argument('--batch', type=int, default=128)
+    parser.add_argument('--batch', type=int, default=64)
 
     args = parser.parse_args()
 

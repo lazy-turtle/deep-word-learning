@@ -14,7 +14,7 @@ class ExtractConfig(object):
 
     SAMPLES = 100
     SAMPLES_SORT = 1000
-    USE_TRUE_IDS = True
+    USE_TRUE_IDS = False
 
 
 def sqr_distance(v1, v2):
@@ -43,7 +43,7 @@ def main():
 
     print("Loading data...")
     raw_data = np.load(cfg.DATA_PATH)
-    labels = raw_data[:,-1]
+    labels = raw_data[:,-1].astype(int)
     print("Data loaded, shape: {}".format(raw_data.shape))
     print("Distance based selection: {}".format(args.sort))
 

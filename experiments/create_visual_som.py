@@ -8,12 +8,12 @@ import os
 import json
 import argparse
 
-DATA_TYPE = 'video'
-visual_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-10classes-imagenet.npy')
-#visual_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'new', 'audio10classes20pca25t.csv')
+DATA_TYPE = 'audio'
+#visual_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-10classes-segm.npy')
+visual_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_synth.npy')
 
-model_name = 'video_20x30_s10.0_b128_a0.1_trsf_minmax_group-imagenet_seed42_1548495576_final'
-#model_name = 'audio_20x30_s8.0_b128_a0.3_trsf_minmax_group-20pca25t_seed42_1548174190_final'
+#model_name = 'video_20x30_s10.0_b128_a0.1_trsf_minmax_group-segm_seed42_1548493017_final'
+model_name = 'audio_20x30_s10.0_b64_a0.1_trsf_minmax_group-s_seed42_1548662731_final'
 model_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, DATA_TYPE, model_name)
 label_path = os.path.join(Constants.LABELS_FOLDER, 'coco-labels.json')
 
@@ -45,7 +45,8 @@ if __name__ == '__main__':
         id_to_label = {int(k): v for k,v in id_to_label.items()}
         xs, ys, ids_dict = from_npy_visual_data(visual_data_path, classes=10)
         #labels = np.array([id_to_label[ids_dict[x]] for x in ys])
-        labels = labels_dictionary(os.path.join(Constants.LABELS_FOLDER, 'coco-imagenet-10-labels.json'))
+        labels = labels_dictionary(os.path.join(Constants.LABELS_FOLDER, 'coco-labels.json'))
+        labels = np.array([labels[ids_dict[v]] for v in ys])
 
     if args.subsample:
         np.random.seed(42)
@@ -66,10 +67,10 @@ if __name__ == '__main__':
     dim = xs.shape[1]
 
     #info = extract_som_info(model_name)
-    info = {'shape':[20,30], 'alpha':0.3, 'sigma':8.0, 'batch':128}
+    info = {'shape':[20,30], 'alpha':0.1, 'sigma':10.0, 'batch':128}
     som_shape = info['shape']
     som = SOM(som_shape[0], som_shape[1], dim, alpha=info['alpha'], sigma=info['sigma'],
               batch_size=info['batch'], checkpoint_loc=args.model, data=DATA_TYPE)
     som.restore_trained(args.model)
 
-    show_som(som, xs, labels, 'Visual map', show=False, dark=True, suffix='imagenet_trsf_minmax')
+    show_som(som, xs, labels, 'Audio map (synthetic)', show=False, dark=True, suffix='synth_trsf_minmax')

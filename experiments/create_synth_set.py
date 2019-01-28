@@ -8,7 +8,7 @@ class SynthConfig(object):
     NUM_CLASSES = 10
     NUM_SAMPLES = 100
     MEAN_VAL = 1.0
-    VARIANCE = 0.01
+    VARIANCE = 0.0
     SAVE = True
     DEST_PATH = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_synth.npy')
 
