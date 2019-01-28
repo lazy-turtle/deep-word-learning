@@ -228,3 +228,51 @@ Class Compactness:
 
 Avg Comp: 0.2492
 Variance: 0.0069
+--------------------
+MODEL: video_20x30_s15.0_b64_a0.1_trsf_minmax_group-segm_seed42_1548706607_final - DATA: visual-10classes-segm.npy
+Class Compactness:
+	dog                 : 0.2995
+	wine glass          : 0.1759
+	banana              : 0.4037
+	bottle              : 0.2985
+	teddy bear          : 0.2166
+	elephant            : 0.2051
+	zebra               : 0.1307
+	bench               : 0.1151
+	dining table        : 0.1620
+	clock               : 0.2477
+
+Avg Comp: 0.2255
+Variance: 0.0071
+--------------------
+MODEL: best/video_20x30_s12.0_b128_a0.1_group-bbox_seed42_1548704755_global - DATA: visual-10classes-bbox.npy
+Class Compactness:
+	wine glass          : 0.2341
+	elephant            : 0.3205
+	dog                 : 0.4481
+	teddy bear          : 0.2722
+	bottle              : 0.3590
+	clock               : 0.2698
+	banana              : 0.8230
+	bench               : 0.2938
+	dining table        : 0.4914
+	zebra               : 0.2219
+
+Avg Comp: 0.3734
+Variance: 0.0294
+--------------------
+MODEL: best/video_20x30_s12.0_b64_a0.1_group-segm_seed42_1548697994_minmax - DATA: visual-10classes-segm.npy
+Class Compactness:
+	bottle              : 0.2070
+	clock               : 0.3893
+	teddy bear          : 0.1501
+	elephant            : 0.1636
+	banana              : 0.2867
+	zebra               : 0.3103
+	dining table        : 0.1818
+	wine glass          : 0.2277
+	dog                 : 0.2349
+	bench               : 0.1286
+
+Avg Comp: 0.2280
+Variance: 0.0059

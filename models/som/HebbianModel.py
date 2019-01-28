@@ -50,7 +50,7 @@ class HebbianModel(object):
             init_op = tf.global_variables_initializer()
             self._sess.run(init_op)
 
-    def train(self, input_a, input_v, step=1, tau_a=0.2, tau_v=0.1, th=0.2):
+    def train(self, input_a, input_v, step=1):
         '''
         input_a: list containing a number of training examples equal to
                  self.n_presentations

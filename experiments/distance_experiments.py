@@ -12,6 +12,9 @@ import argparse
 import seaborn as sb
 from sklearn.cluster import KMeans, AgglomerativeClustering
 
+from utils.utils import global_transform
+
+
 def get_prototypes(xs, ys):
     prototype_dict = {unique_y: [] for unique_y in set(ys)}
     for i, x in enumerate(xs):
@@ -235,7 +238,7 @@ audio_data_names = [
     'audio_10classes_train.csv'
 ]
 
-video_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, video_data_names[-1])
+video_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, video_data_names[-2])
 audio_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, audio_data_names[0])
 
 if __name__ == '__main__':
@@ -252,7 +255,7 @@ if __name__ == '__main__':
     parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Seed for deterministic results')
     parser.add_argument('--path', metavar='path', type=str, default=video_data_path,
                         help='Specify the file containing data')
-    parser.add_argument('--op', metavar='op', type=str, default='sim',
+    parser.add_argument('--op', metavar='op', type=str, default='cluster',
                         help='Specify the operation to launch')
 
     args = parser.parse_args()
@@ -265,6 +268,7 @@ if __name__ == '__main__':
                 print('Reading new data...')
                 xs, ys, label_to_id = utils.from_npy_visual_data(args.path)
                 xs = MinMaxScaler().fit_transform(xs)
+                #xs, _ = global_transform(xs)
                 labels = utils.labels_dictionary(os.path.join(Constants.LABELS_FOLDER, 'coco-imagenet-10-labels.json'))
             else:
                 print("Reading old data...")

@@ -3,7 +3,6 @@ from models.som.HebbianModel import HebbianModel
 from utils.constants import Constants
 from utils.utils import from_csv_with_filenames, from_npy_visual_data, global_transform, min_max_scale, \
     from_npy_audio_data
-from sklearn.utils import shuffle
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 import os
@@ -16,6 +15,9 @@ import matplotlib.ticker as tkr
 from datetime import date
 import time
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+
+
 video_model_list = [
     'video_20x30_s10.0_b128_a0.1_group-a_seed42_1545208211_none',
     'video_20x20_s8.0_b128_a0.2_group-a_seed42_1545312173_global',
@@ -26,19 +28,23 @@ video_model_list = [
     'video_20x30_s15.0_b128_a0.1_group-c2_seed42_1547388036_minmax',
     'video_20x30_s12.0_b128_a0.1_group-as_seed42_1547659811_minmax',
     'video_20x30_s10.0_b128_a0.1_group-as_seed42_1547662883_global',
+
+    'video_20x30_s12.0_b64_a0.1_group-segm_seed42_1548697994_minmax',
+    'video_20x30_s12.0_b128_a0.1_group-bbox_seed42_1548704755_global'
 ]
 
 audio_model_list = [
     'audio_20x30_s10.0_b128_a0.1_group-x_seed42_1145208211_minmax',
     'audio_20x30_s10.0_b128_a0.1_group-s_seed10_1547394149_minmax',
+    'audio_20x30_s10.0_b64_a0.1_group-s_seed42_1548662731_minmax'
 ]
 
-video_model = video_model_list[-3]
-audio_model = audio_model_list[0]
+video_model = video_model_list[-1]
+audio_model = audio_model_list[-1]
 soma_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', audio_model)
 somv_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'best', video_model)
 hebbian_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'hebbian')
-soma_data = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_train.csv')
+soma_data = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_synth.npy')
 
 video_data_paths = {
     'a': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_a.npy'),
@@ -47,6 +53,8 @@ video_data_paths = {
     'c1': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_c1.npy'),
     'c2': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_c2.npy'),
     'as':os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_as.npy'),
+    'segm': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-10classes-segm.npy'),
+    'bbox': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-10classes-bbox.npy')
 }
 num_presentations = 15
 
@@ -107,11 +115,11 @@ def create_folds(a_xs, v_xs, a_ys, v_ys, n_folds=1, n_classes=10):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Train a Hebbian model.')
-    parser.add_argument('--lr', metavar='lr', type=float, default=10, help='The model learning rate')
+    parser.add_argument('--lr', metavar='lr', type=float, default=1, help='The model learning rate')
     parser.add_argument('--taua', metavar='taua', type=float, default=1, help='Tau value audio som')
-    parser.add_argument('--tauv', metavar='tauv', type=float, default=1, help='Tau value video som')
-    parser.add_argument('--tha', metavar='tha', type=float, default=0.5, help='Threshold to cut values from (audio)')
-    parser.add_argument('--thv', metavar='thv', type=float, default=0.5, help='Threshold to cut values from (video)')
+    parser.add_argument('--tauv', metavar='tauv', type=float, default=2, help='Tau value video som')
+    parser.add_argument('--tha', metavar='tha', type=float, default=0.0, help='Threshold to cut values from (audio)')
+    parser.add_argument('--thv', metavar='thv', type=float, default=0.0, help='Threshold to cut values from (video)')
     parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Random generator seed')
     parser.add_argument('--somv', metavar='somv', type=str, default=somv_path,
                         help='Video SOM model path')
@@ -132,8 +140,8 @@ if __name__ == '__main__':
     for k, v in somv_info.items():
         print('{:<20s}: {:<40s}'.format(k, str(v)))
 
-    exp_description = 'lr{}_algo_{}_ta{:.1f}_tv{:.1f}_th{:.1f}_{}_som{}_'\
-                          .format(args.lr, args.algo, args.taua, args.tauv, args.th, args.act, somv_info['id']) \
+    exp_description = 'lr{}_algo_{}_ta{:.1f}_tv{:.1f}_{}_som{}_'\
+                          .format(args.lr, args.algo, args.taua, args.tauv, args.act, somv_info['id']) \
                       + str(int(time.time()))
     hebbian_path = os.path.join(hebbian_path, str(date.today()))
     if not os.path.exists(hebbian_path):
@@ -222,7 +230,7 @@ if __name__ == '__main__':
         som_v.memorize_examples_by_class(v_xs_train, v_ys_train)
 
         print('Training...')
-        hebbian_model.train(a_xs_fold, v_xs_fold, step=n, tau_a=args.taua, tau_v=args.tauv, th=args.th)
+        hebbian_model.train(a_xs_fold, v_xs_fold, step=n)
         print('Evaluating...')
 
         accuracy_a = hebbian_model.evaluate(a_xs_test, v_xs_test, a_ys_test, v_ys_test, source='a',
@@ -250,7 +258,7 @@ if __name__ == '__main__':
     ax.set_xlabel('# presentations')
     ax.set_ylabel('Accuracy')
     plt.title('Model: {}'.format(os.path.basename(somv_path)))
-    plot_path = os.path.join(Constants.PLOT_FOLDER, str(date.today()), 'hebbian')
+    plot_path = os.path.join(Constants.PLOT_FOLDER, 'hebbian', str(date.today()))
     if not os.path.exists(plot_path):
         os.makedirs(plot_path)
     plt.savefig(os.path.join(plot_path, '{}.png'.format(exp_description)), transparent=False)

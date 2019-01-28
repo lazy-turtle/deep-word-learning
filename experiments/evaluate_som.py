@@ -86,18 +86,18 @@ if __name__ == '__main__':
                         help='Specify whether you are analyzing \
                         a file with representations from 100 classes, as the loading functions are different.',
                         default=False)
-    parser.add_argument('--is-audio', action='store_true', default=True,
+    parser.add_argument('--is-audio', action='store_true', default=False,
                         help='Specify whether the csv contains audio representations, as the loading functions are different.')
     args = parser.parse_args()
 
     data_type = 'video' if not args.is_audio else 'audio'
-    data_group = 'new/audio10classes20pca25t.csv'
-    model_name = 'audio_20x30_s8.0_b128_a0.3_trsf_minmax_group-20pca25t_seed42_1548174190_final'
+    data_group = 'visual-10classes-segm.npy'
+    model_name = 'best/video_20x30_s12.0_b64_a0.1_group-segm_seed42_1548697994_minmax'
     data_path = os.path.join(Constants.DATA_FOLDER, data_type, data_group)
     model_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, data_type, model_name)
     out_path = os.path.join(Constants.OUTPUT_FOLDER, data_type, 'evaluate_som.txt')
-    label_path = os.path.join(Constants.LABELS_FOLDER, 'coco-labels.json')
-
+    label_path = os.path.join(Constants.LABELS_FOLDER, 'coco-imagenet-10-labels.json')
+    labels_dict = labels_dictionary(label_path)
 
     #create or open output file
     f = open(out_path, 'a+')
@@ -118,7 +118,7 @@ if __name__ == '__main__':
         else:
             xs, ys, _ =  from_csv_with_filenames(args.csv_path)
 
-    # xs, _ = global_transform(xs)
+    #xs, _ = global_transform(xs)
     xs = MinMaxScaler().fit_transform(xs)
 
     som = SOM(20, 30, xs.shape[1], checkpoint_loc=model_path)
@@ -126,8 +126,7 @@ if __name__ == '__main__':
     #measure = class_compactness(som, xs, ys)
     measure = my_compactness(som, xs, ys)
     #labels = labels_dictionary(label_path)
-    labels = np.unique(ys)
-    cpt = {str(labels[i]): val for i, val in enumerate(measure)}
+    cpt = {labels_dict[id_dict[i]]: val for i, val in enumerate(measure)}
 
     f.write('-'*20 + '\n')
     f.write('MODEL: {} - DATA: {}\n'.format(model_name, data_group))

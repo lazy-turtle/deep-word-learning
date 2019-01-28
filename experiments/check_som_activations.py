@@ -23,19 +23,24 @@ video_model_list = [
     'video_20x30_s15.0_b128_a0.1_group-c2_seed42_1547388036_minmax',
     'video_20x30_s12.0_b128_a0.1_group-as_seed42_1547659811_minmax',
     'video_20x30_s10.0_b128_a0.1_group-as_seed42_1547662883_global',
+
+    'video_20x30_s12.0_b64_a0.1_group-segm_seed42_1548697994_minmax',
+    'video_20x30_s12.0_b128_a0.1_group-bbox_seed42_1548704755_global'
 ]
 
 audio_model_list = [
     'audio_20x30_s10.0_b128_a0.1_group-x_seed42_1145208211_minmax',
-    'audio_20x30_s10.0_b128_a0.1_group-s_seed10_1547394149_minmax'
+    'audio_20x30_s10.0_b128_a0.1_group-s_seed10_1547394149_minmax',
+
+    'audio_20x30_s10.0_b64_a0.1_group-s_seed42_1548662731_minmax'
 ]
 
-video_model = video_model_list[-3]
-audio_model = audio_model_list[0]
+video_model = video_model_list[-1]
+audio_model = audio_model_list[-1]
 
 #uncomment the line needed, comment the other of course
-som_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', audio_model)
-#som_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'best', video_model)
+#som_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', audio_model)
+som_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'best', video_model)
 
 data_paths = {
     'a': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_a.npy'),
@@ -45,7 +50,9 @@ data_paths = {
     'z': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_z.npy'),
     'as':os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_as.npy'),
     'x': os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_train.csv'),
-    's': os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_synth.npy')
+    's': os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_synth.npy'),
+    'segm': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-10classes-segm.npy'),
+    'bbox': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-10classes-bbox.npy')
 }
 
 def extract_som_info(filename):
@@ -66,8 +73,8 @@ def extract_som_info(filename):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Check SOM activations.')
     parser.add_argument('--lr', metavar='lr', type=float, default=10, help='The model learning rate')
-    parser.add_argument('--tau', metavar='tau', type=float, default=0.5, help='Tau value audio som')
-    parser.add_argument('--th', metavar='th', type=float, default=0.5, help='Threshold to cut values from')
+    parser.add_argument('--tau', metavar='tau', type=float, default=2, help='Tau value audio som')
+    parser.add_argument('--th', metavar='th', type=float, default=0.0, help='Threshold to cut values from')
     parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Random generator seed')
     parser.add_argument('--som', metavar='som', type=str, default=som_path,
                         help='Video SOM model path')
@@ -99,7 +106,7 @@ if __name__ == '__main__':
             xs, ys = from_npy_audio_data(som_data)
     else:
         xs, ys, index_to_id = from_npy_visual_data(som_data)
-        id_to_label = labels_dictionary(os.path.join(Constants.LABELS_FOLDER, 'coco-labels.json'))
+        id_to_label = labels_dictionary(os.path.join(Constants.LABELS_FOLDER, 'coco-imagenet-10-labels.json'))
         labels = [id_to_label[index_to_id[v]] for v in np.unique(ys)]
 
     # transform.
@@ -124,7 +131,7 @@ if __name__ == '__main__':
     som.restore_trained(som_path)
 
     # get random samples for each class
-    num_samples = 10
+    num_samples = 1
     for id in range(num_classes):
         indices = np.where(ys == id)[0]
         sampled_indices = np.random.choice(indices, size=num_samples, replace=False)
