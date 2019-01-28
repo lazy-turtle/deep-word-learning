@@ -97,6 +97,7 @@ def main():
         #otherwise simply select n random samples without replacement
         print("Selecting random samples...")
         for i, (id, label_name) in enumerate(selected.items()):
+            print('Processing class "{}",id: {}, index: {}'.format(label_name, id, i))
             indices = np.where(labels == id)[0]
             sampled_indices = np.random.choice(indices, size=cfg.SAMPLES, replace=False)
             j = i * cfg.SAMPLES
