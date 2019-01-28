@@ -252,7 +252,7 @@ if __name__ == '__main__':
     parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Seed for deterministic results')
     parser.add_argument('--path', metavar='path', type=str, default=video_data_path,
                         help='Specify the file containing data')
-    parser.add_argument('--op', metavar='op', type=str, default='cluster',
+    parser.add_argument('--op', metavar='op', type=str, default='sim',
                         help='Specify the operation to launch')
 
     args = parser.parse_args()

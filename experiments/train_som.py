@@ -21,7 +21,8 @@ visual_data_path_a = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes
 visual_data_path_b = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_b.npy')
 visual_data_path_c2 = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_c2.npy')
 visual_data_path_z = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_z.npy')
-visual_data_segment = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-10classes-segm.npy')
+visual_data_segm = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-10classes-segm.npy')
+visual_data_bbox = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-10classes-bbox.npy')
 visual_data_imagenet = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-10classes-imagenet.npy')
 old_visual_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'VisualInputTrainingSet.csv')
 
@@ -42,8 +43,8 @@ if __name__ == '__main__':
     parser.add_argument('--classes', type=int, default=10,
                         help='Number of classes the model will be trained on')
     parser.add_argument('--subsample', action='store_true', default=False)
-    parser.add_argument('--data', metavar='data', type=str, default='audio')
-    parser.add_argument('--group', metavar='group', type=str, default='s')
+    parser.add_argument('--data', metavar='data', type=str, default='video')
+    parser.add_argument('--group', metavar='group', type=str, default='a')
     parser.add_argument('--transform', metavar='transform', type=str, default='minmax')
     parser.add_argument('--logging', action='store_true', default=True)
     parser.add_argument('--use-gpu', action='store_true', default=True)
@@ -72,7 +73,9 @@ if __name__ == '__main__':
             elif args.group == 'z':
                 path = visual_data_path_z
             elif args.group == 'segm':
-                path = visual_data_segment
+                path = visual_data_segm
+            elif args.group == 'bbox':
+                path = visual_data_bbox
             elif args.group == 'imagenet':
                 path = visual_data_imagenet
             else:
