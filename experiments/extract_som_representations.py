@@ -67,7 +67,7 @@ def main():
     print("Selected labels: ", selected)
 
     result = np.empty((num_classes * cfg.SAMPLES, raw_data.shape[1]))
-    result_files = np.empty(num_classes * cfg.SAMPLES)
+    result_files = []
 
     if args.sort:
         # sort by distance from the other instances, descending
@@ -112,13 +112,13 @@ def main():
             sampled_indices = np.random.choice(indices, size=cfg.SAMPLES, replace=False)
             j = i * cfg.SAMPLES
             result[j:j + cfg.SAMPLES] = raw_data[sampled_indices]
-            result_files[j:j + cfg.SAMPLES] = filenames[sampled_indices]
+            result_files.extend(filenames[sampled_indices])
 
     print("Data selected, shape: {}".format(result.shape))
     print("Saving result to {}...".format(cfg.DEST_PATH))
     np.save(os.path.join(cfg.DEST_PATH, cfg.RESULT_NAME), result)
     print("Saving corresponding files to {}...".format(cfg.DEST_PATH))
-    df = pd.DataFrame({'filenames': result_files.tolist()})
+    df = pd.DataFrame({'filenames': result_files})
     df.to_csv(os.path.join(cfg.DEST_PATH, '{}_files.csv'.format(cfg.RESULT_NAME.replace('.npy', ''))))
     print("Done!")
 
