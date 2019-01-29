@@ -20,25 +20,28 @@ video_model_list = [
     'video_20x30_s10.0_b128_a0.2_group-b_seed42_1545208672_global',
     'video_20x30_s12.0_b128_a0.1_group-b_seed33_1547237808_minmax',
     'video_20x30_s15.0_b128_a0.1_group-c1_seed42_1547303679_minmax',
-    'video_20x30_s15.0_b128_a0.1_group-c2_seed42_1547388036_minmax',
     'video_20x30_s12.0_b128_a0.1_group-as_seed42_1547659811_minmax',
     'video_20x30_s10.0_b128_a0.1_group-as_seed42_1547662883_global',
 
     'video_20x30_s12.0_b64_a0.1_group-segm_seed42_1548697994_minmax',
-    'video_20x30_s12.0_b128_a0.1_group-bbox_seed42_1548704755_global'
+    'video_20x30_s12.0_b128_a0.1_group-bbox_seed42_1548704755_global',
+    'video_20x30_s15.0_b128_a0.1_group-c2_seed42_1547388036_minmax',
 ]
 
 audio_model_list = [
     'audio_20x30_s10.0_b128_a0.1_group-x_seed42_1145208211_minmax',
     'audio_20x30_s10.0_b128_a0.1_group-s_seed10_1547394149_minmax',
 
-    'audio_20x30_s10.0_b64_a0.1_group-s_seed42_1548662731_minmax'
+    'audio_20x30_s10.0_b64_a0.1_group-s_seed42_1548662731_minmax',
+    'audio_20x20_s8.0_b128_a0.01_group-last_seed42_2020_std',
+    'audio_20x30_s8.0_b128_a0.3_group-20pca25t_seed42_pca_minmax',
+    'audio_20x30_s10.0_b128_a0.1_group-old_seed42_old_minmax'
 ]
 
-video_model = video_model_list[-2]
-audio_model = audio_model_list[-1]
+video_model = video_model_list[-3]
+audio_model = audio_model_list[-2]
 
-#uncomment the line needed, comment the other of course
+#uncomment the line needed, comment  the other of course
 som_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', audio_model)
 #som_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'best', video_model)
 
@@ -52,7 +55,9 @@ data_paths = {
     'x': os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_train.csv'),
     's': os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_synth.npy'),
     'segm': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-10classes-segm.npy'),
-    'bbox': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-10classes-bbox.npy')
+    'bbox': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-10classes-bbox.npy'),
+    'old': os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio10classes_old.csv'),
+    '20pca25t': os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio10classes20pca25t.csv'),
 }
 
 def extract_som_info(filename):
@@ -99,15 +104,14 @@ if __name__ == '__main__':
     if som_info['data'] == 'audio':
         if som_info['group'] != 's':
             xs, ys, _ = from_csv_with_filenames(som_data)
-            ys = [v - 1000 for v in ys]
             xs = np.array(xs)
-            ys = np.array(ys)
+            ys = np.array(ys).astype(int)
         else:
             xs, ys = from_npy_audio_data(som_data)
     else:
         xs, ys, index_to_id = from_npy_visual_data(som_data)
         id_to_label = labels_dictionary(os.path.join(Constants.LABELS_FOLDER, 'coco-imagenet-10-labels.json'))
-        labels = [id_to_label[index_to_id[v]] for v in np.unique(ys)]
+        labels = [id_to_label[v] for v in np.unique(ys)]
 
     # transform.
     # for video SOM uncomment the required transformation, if needed

@@ -2,8 +2,8 @@ from models.som.SOM import SOM
 from models.som.HebbianModel import HebbianModel
 from utils.constants import Constants
 from utils.utils import from_csv_with_filenames, from_npy_visual_data, global_transform, min_max_scale, \
-    from_npy_audio_data
-from sklearn.preprocessing import MinMaxScaler
+    from_npy_audio_data, from_csv
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.model_selection import train_test_split
 import os
 import numpy as np
@@ -36,15 +36,17 @@ video_model_list = [
 audio_model_list = [
     'audio_20x30_s10.0_b128_a0.1_group-x_seed42_1145208211_minmax',
     'audio_20x30_s10.0_b128_a0.1_group-s_seed10_1547394149_minmax',
-    'audio_20x30_s10.0_b64_a0.1_group-s_seed42_1548662731_minmax'
+    'audio_20x30_s10.0_b64_a0.1_group-s_seed42_1548662731_minmax',
+
+    'audio_20x20_tau0.1_thrsh0.6_sigma8.0_batch128_alpha0.01_final',
 ]
 
-video_model = video_model_list[-2]
+video_model = video_model_list[-1]
 audio_model = audio_model_list[-1]
 soma_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', audio_model)
 somv_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'best', video_model)
 hebbian_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'hebbian')
-soma_data = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_synth.npy')
+soma_data = os.path.join(Constants.AUDIO_DATA_FOLDER, 'none')
 
 video_data_paths = {
     'a': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_a.npy'),
@@ -123,6 +125,8 @@ if __name__ == '__main__':
     parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Random generator seed')
     parser.add_argument('--somv', metavar='somv', type=str, default=somv_path,
                         help='Video SOM model path')
+    parser.add_argument('--soma', metavar='soma', type=str, default=soma_path,
+                        help='Audio SOM model path')
     parser.add_argument('--algo', metavar='algo', type=str, default='sorted',
                         help='Algorithm choice')
     parser.add_argument('--act', metavar='act', type=str, default='eucl',
@@ -140,9 +144,10 @@ if __name__ == '__main__':
     for k, v in somv_info.items():
         print('{:<20s}: {:<40s}'.format(k, str(v)))
 
+    suffix = "real-audio"
     exp_description = 'lr{}_algo_{}_ta{:.1f}_tv{:.1f}_{}_som{}_'\
                           .format(args.lr, args.algo, args.taua, args.tauv, args.act, somv_info['id']) \
-                      + str(int(time.time()))
+                      + suffix
     hebbian_path = os.path.join(hebbian_path, str(date.today()))
     if not os.path.exists(hebbian_path):
         os.makedirs(hebbian_path)
@@ -150,17 +155,21 @@ if __name__ == '__main__':
 
     #audio data
     if '.npy' not in soma_data:
-        a_xs, a_ys, _ = from_csv_with_filenames(soma_data)
-        a_ys = [v - 1000 for v in a_ys]
-        a_xs = np.array(a_xs)
-        a_ys = np.array(a_ys)
+        a_xs_train, a_ys_train, = from_csv(os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes-20x20_train.csv'))
+        a_xs_test, a_ys_test = from_csv(os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes-20x20_test.csv'))
+        a_xs_train = np.array(a_xs_train)
+        a_ys_train = np.array(a_ys_train).astype(int)
+        a_xs_test = np.array(a_xs_test)
+        a_ys_test = np.array(a_ys_test).astype(int)
+        scaler = StandardScaler().fit(a_xs_train)
+        a_xs_train = scaler.transform(a_xs_train)
+        a_xs_test = scaler.transform(a_xs_test)
     else:
         a_xs, a_ys = from_npy_audio_data(soma_data)
     #video data
     v_xs, v_ys, _ = from_npy_visual_data(somv_data)
 
     # transform.
-    a_xs = MinMaxScaler().fit_transform(a_xs)
     trasf = somv_info['trsf']
     if trasf == 'minmax':
         print('Using MinMaxScaler...')
@@ -171,30 +180,22 @@ if __name__ == '__main__':
     elif trasf != 'none':
         raise ValueError('Normalization not recognised, please check som filename.')
 
-    #a_xs = np.array(a_xs)
-    #a_ys = np.array(a_ys)
 
-    a_dim = len(a_xs[0])
+    a_dim = len(a_xs_train[0])
     v_dim = len(v_xs[0])
     print('Data loaded and transformed, building SOMs...')
-    som_a = SOM(20, 30, a_dim, checkpoint_loc=soma_path, n_iterations=10000,
+    som_a = SOM(20, 20, a_dim, checkpoint_loc=soma_path, n_iterations=10000,
                 tau=args.taua, threshold=args.tha)
     dims = somv_info['dims']
     som_v = SOM(dims[0], dims[1], v_dim, checkpoint_loc=somv_path, n_iterations=10000,
                 tau=args.tauv, threshold=args.thv)
 
 
-    a_xs_train, a_xs_test, a_ys_train, a_ys_test = train_test_split(a_xs, a_ys, test_size=0.2, random_state=args.seed)
+    #a_xs_train, a_xs_test, a_ys_train, a_ys_test = train_test_split(a_xs, a_ys, test_size=0.2, random_state=args.seed)
     v_xs_train, v_xs_test, v_ys_train, v_ys_test = train_test_split(v_xs, v_ys, test_size=0.2, random_state=args.seed)
-    a_xs_train, a_xs_dev, a_ys_train, a_ys_dev = train_test_split(a_xs, a_ys, test_size=0.2, random_state=args.seed)
-    v_xs_train, v_xs_dev, v_ys_train, v_ys_dev = train_test_split(v_xs, v_ys, test_size=0.2, random_state=args.seed)
 
-    if args.train:
-        som_a.train(a_xs_train, input_classes=a_ys_train, test_vects=a_xs_dev, test_classes=a_ys_dev)
-        som_v.train(v_xs_train, input_classes=v_ys_train, test_vects=v_xs_dev, test_classes=v_ys_dev)
-    else:
-        som_a.restore_trained(soma_path)
-        som_v.restore_trained(somv_path)
+    som_a.restore_trained(soma_path)
+    som_v.restore_trained(somv_path)
 
     acc_a_list = []
     acc_v_list = []

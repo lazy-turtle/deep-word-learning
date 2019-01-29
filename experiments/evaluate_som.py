@@ -10,8 +10,8 @@ import argparse
 from models.som.SOM import SOM
 from utils.constants import Constants
 from utils.utils import from_npy_visual_data, from_csv_visual_100classes, from_csv_with_filenames, labels_dictionary, \
-    global_transform
-from sklearn.preprocessing import MinMaxScaler
+    global_transform, from_csv
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 import os
 
 
@@ -86,13 +86,13 @@ if __name__ == '__main__':
                         help='Specify whether you are analyzing \
                         a file with representations from 100 classes, as the loading functions are different.',
                         default=False)
-    parser.add_argument('--is-audio', action='store_true', default=False,
+    parser.add_argument('--is-audio', action='store_true', default=True,
                         help='Specify whether the csv contains audio representations, as the loading functions are different.')
     args = parser.parse_args()
 
     data_type = 'video' if not args.is_audio else 'audio'
-    data_group = 'visual-10classes-segm.npy'
-    model_name = 'best/video_20x30_s12.0_b64_a0.1_group-segm_seed42_1548697994_minmax'
+    data_group = 'audio10classes-coco-imagenet_train.csv'
+    model_name = 'audio_20x20_s8.0_b128_a0.01_group-last_seed42_2020_std'
     data_path = os.path.join(Constants.DATA_FOLDER, data_type, data_group)
     model_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, data_type, model_name)
     out_path = os.path.join(Constants.OUTPUT_FOLDER, data_type, 'evaluate_som.txt')
@@ -108,9 +108,10 @@ if __name__ == '__main__':
         if not args.is_audio:
             xs, ys, id_dict = from_npy_visual_data(data_path, classes=num_classes)
         else:
-            xs, ys, _ = from_csv_with_filenames(data_path)
+            xs, ys = from_csv(data_path)
             xs = np.array(xs)
-            ys = np.array(ys)
+            ys = np.array(ys).astype(int)
+            id_dict = {v: v for v in np.unique(ys)}
     else:
         num_classes = 100
         if not args.is_audio:
@@ -119,9 +120,10 @@ if __name__ == '__main__':
             xs, ys, _ =  from_csv_with_filenames(args.csv_path)
 
     #xs, _ = global_transform(xs)
-    xs = MinMaxScaler().fit_transform(xs)
+    #xs = MinMaxScaler().fit_transform(xs)
+    xs = StandardScaler().fit_transform(xs)
 
-    som = SOM(20, 30, xs.shape[1], checkpoint_loc=model_path)
+    som = SOM(20, 20, xs.shape[1], checkpoint_loc=model_path)
     som.restore_trained(model_path)
     #measure = class_compactness(som, xs, ys)
     measure = my_compactness(som, xs, ys)

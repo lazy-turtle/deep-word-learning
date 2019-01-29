@@ -232,7 +232,7 @@ class HebbianModel(object):
             source_som = self.som_a
             target_som = self.som_v
         else:
-            hebbian_weights = self.weights[source_bmu][:]
+            hebbian_weights = self.weights[target_bmu][:]
             source_som = self.som_v
             target_som = self.som_a
 
@@ -378,9 +378,10 @@ class HebbianModel(object):
         for i in range(len(target_activation)):
             hebbian_bmu_index = np.argmax(target_activation)
             bmu_class_list = target_som.bmu_class_dict[hebbian_bmu_index]
-            if len(bmu_class_list) == 1:
+            bmu_set = set(bmu_class_list)
+            if len(bmu_set) == 1:
                 return bmu_class_list[0]
-            elif len(bmu_class_list) > 1:
+            elif len(bmu_set) > 1:
                 return self.bmu_max_count(bmu_class_list)
             if target_activation[hebbian_bmu_index] == -1:
                 print('Error: make_prediction_sort failed.')
