@@ -201,8 +201,8 @@ def iterate(path_som_video, path_som_audio, lr, taua, tauv, tha, thv, seed=42, n
     som_v.restore_trained(path_som_video)
 
     # HEBBIAN MODEL
-    exp_description = 'lr{}_al-{}_ta{:.1f}_tv{:.1f}_{}_somv-{}_soma-{}' \
-                          .format(lr, algo, taua, tauv, "eucl", somv_info['id'], soma_info['id'])
+    exp_description = 'lr{}_al-{}_ta{:.1f}_tv{:.1f}_tha{:.1f}_thv{:.1f}_{}_somv-{}_soma-{}' \
+                          .format(lr, algo, taua, tauv, tha, thv, "eucl", somv_info['id'], soma_info['id'])
     main_path = os.path.join(hebbian_path, str(date.today()))
     if not os.path.exists(main_path):
         os.makedirs(main_path)
