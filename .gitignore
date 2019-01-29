@@ -6,6 +6,6 @@ __*__*
 */plots/*
 */plots/temp/*
 data/trained-models/video/*
-data/trained-models/audio/*
+data/trained-models/audio/*
 nohup.out
 data/video/*80classes*
