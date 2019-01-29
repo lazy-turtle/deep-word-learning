@@ -200,8 +200,6 @@ class HebbianModel(object):
             if yi == yj:
                 correct += 1
         print('source: {}, correct: {} out of {}' .format(source, correct, len(y_pred)))
-        print(y_source.tolist())
-        print(y_pred)
         return correct/len(y_pred)
 
     def make_prediction(self, x, y, source_som, target_som, X_target, y_target, source):
