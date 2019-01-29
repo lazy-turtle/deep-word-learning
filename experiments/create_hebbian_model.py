@@ -39,7 +39,7 @@ audio_model_list = [
     'audio_20x30_s10.0_b64_a0.1_group-s_seed42_1548662731_minmax'
 ]
 
-video_model = video_model_list[-1]
+video_model = video_model_list[-2]
 audio_model = audio_model_list[-1]
 soma_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', audio_model)
 somv_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'best', video_model)
@@ -123,7 +123,7 @@ if __name__ == '__main__':
     parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Random generator seed')
     parser.add_argument('--somv', metavar='somv', type=str, default=somv_path,
                         help='Video SOM model path')
-    parser.add_argument('--algo', metavar='algo', type=str, default='regular',
+    parser.add_argument('--algo', metavar='algo', type=str, default='sorted',
                         help='Algorithm choice')
     parser.add_argument('--act', metavar='act', type=str, default='eucl',
                         help='Activation function choice')
@@ -241,8 +241,10 @@ if __name__ == '__main__':
         acc_a_list.append(accuracy_a * 100)
         acc_v_list.append(accuracy_v * 100)
         # make a plot - placeholder
-        hebbian_model.make_plot(a_xs_test[0], v_xs_test[0], v_ys_test[0], v_xs_fold[0], source='a', step=n)
-        hebbian_model.make_plot(v_xs_test[0], a_xs_test[0], a_ys_test[0], a_xs_fold[0], source='v', step=n)
+        hebbian_model.make_plot(a_xs_test[0], v_xs_test[0], v_ys_test[0], v_xs_fold[0],
+                                source='a', step=n, experiment_name=exp_description)
+        hebbian_model.make_plot(v_xs_test[0], a_xs_test[0], a_ys_test[0], a_xs_fold[0],
+                                source='v', step=n, experiment_name=exp_description)
 
     fig = plt.figure(figsize=(8,6))
     ax = fig.add_subplot(1,1,1)

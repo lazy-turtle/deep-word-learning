@@ -18,6 +18,12 @@ model_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, DATA_TYPE, model_name
 label_path = os.path.join(Constants.LABELS_FOLDER, 'coco-imagenet-10-labels.json')
 
 
+def read_labels(path):
+    with open(path) as f:
+        labels = json.load(f)
+    labels = {int(k): v for k, v in labels.items()}
+    return labels
+
 def extract_som_info(model_name):
     model_info = model_name.split('_')[1:-1]
     info = dict()
@@ -35,16 +41,16 @@ if __name__ == '__main__':
     parser.add_argument('--subsample', action='store_true', default=False)
     args = parser.parse_args()
 
+    labels_dict = read_labels(label_path)
     if 'csv' in visual_data_path:
         xs, ys = from_csv(visual_data_path)
         xs = np.array(xs)
-        ys = np.array(ys)
-        labels = ys
+        ys = np.array(ys).astype(int)
     else:
         id_to_label = json.load(open(label_path))
         id_to_label = {int(k): v for k,v in id_to_label.items()}
         xs, ys, ids_dict = from_npy_visual_data(visual_data_path, classes=10)
-        labels = np.array([id_to_label[v] for v in ys])
+    labels = np.array([labels_dict[v] for v in ys])
 
     if args.subsample:
         np.random.seed(42)

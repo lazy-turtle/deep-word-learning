@@ -224,7 +224,7 @@ class HebbianModel(object):
         yi_pred = y_target[yi_pred_idx]
         return yi_pred
 
-    def make_plot(self, x_source, x_target, y_target, X_target_all, source, step, show=False):
+    def make_plot(self, x_source, x_target, y_target, X_target_all, source, step, experiment_name, show=False):
         source_bmu, target_bmu = self.get_bmus_propagate(x_source, source_som=source)
         cmap = 'viridis' if source == 'a' else 'plasma'
         if source == 'a':
@@ -272,7 +272,7 @@ class HebbianModel(object):
         if show:
             plt.show()
         else:
-            save_loc = os.path.join(Constants.PLOT_FOLDER, 'hebbian', str(date.today()))
+            save_loc = os.path.join(Constants.PLOT_FOLDER, 'hebbian', str(date.today()), experiment_name)
             if not os.path.exists(save_loc):
                 os.makedirs(save_loc)
             plt.savefig(os.path.join(save_loc, filename))
@@ -378,16 +378,23 @@ class HebbianModel(object):
         for i in range(len(target_activation)):
             hebbian_bmu_index = np.argmax(target_activation)
             bmu_class_list = target_som.bmu_class_dict[hebbian_bmu_index]
-            if bmu_class_list != []:
-                # TODO: note that this ignores superpositions, which might give
-                # trouble in the future.
+            if len(bmu_class_list) == 1:
                 return bmu_class_list[0]
+            elif len(bmu_class_list) > 1:
+                return self.bmu_max_count(bmu_class_list)
             if target_activation[hebbian_bmu_index] == -1:
                 print('Error: make_prediction_sort failed.')
                 return
             # discard this activation so that argmax does not find it again next
             # iteration
             target_activation[hebbian_bmu_index] = -1
+
+    def bmu_max_count(self, bmu_class_dict):
+        count_arr = np.array([0 for i in range(self.n_classes)])
+        for c in bmu_class_dict:
+            count_arr[c] += 1
+        return np.argmax(count_arr)
+
 
     def threshold_activation(self, x):
         idx = x < self.threshold

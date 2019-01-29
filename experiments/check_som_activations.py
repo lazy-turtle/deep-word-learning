@@ -35,7 +35,7 @@ audio_model_list = [
     'audio_20x30_s10.0_b64_a0.1_group-s_seed42_1548662731_minmax'
 ]
 
-video_model = video_model_list[-1]
+video_model = video_model_list[-2]
 audio_model = audio_model_list[-1]
 
 #uncomment the line needed, comment the other of course
@@ -73,8 +73,8 @@ def extract_som_info(filename):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Check SOM activations.')
     parser.add_argument('--lr', metavar='lr', type=float, default=10, help='The model learning rate')
-    parser.add_argument('--tau', metavar='tau', type=float, default=0.5, help='Tau value audio som')
-    parser.add_argument('--th', metavar='th', type=float, default=0.2, help='Threshold to cut values from')
+    parser.add_argument('--tau', metavar='tau', type=float, default=0.2, help='Tau value audio som')
+    parser.add_argument('--th', metavar='th', type=float, default=0.0, help='Threshold to cut values from')
     parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Random generator seed')
     parser.add_argument('--som', metavar='som', type=str, default=som_path,
                         help='Video SOM model path')
