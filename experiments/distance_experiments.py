@@ -1,7 +1,7 @@
 import numpy as np
 import os
 
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 from utils import utils
 from utils.constants import Constants
@@ -255,6 +255,8 @@ if __name__ == '__main__':
     parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Seed for deterministic results')
     parser.add_argument('--path', metavar='path', type=str, default=video_data_path,
                         help='Specify the file containing data')
+    parser.add_argument('--trsf', metavar='path', type=str, default='std',
+                        help='Specify the data normalization technique')
     parser.add_argument('--op', metavar='op', type=str, default='cluster',
                         help='Specify the operation to launch')
 
@@ -267,15 +269,12 @@ if __name__ == '__main__':
             if args.data == 'new':
                 print('Reading new data...')
                 xs, ys, label_to_id = utils.from_npy_visual_data(args.path)
-                xs = MinMaxScaler().fit_transform(xs)
-                #xs, _ = global_transform(xs)
                 labels = utils.labels_dictionary(os.path.join(Constants.LABELS_FOLDER, 'coco-imagenet-10-labels.json'))
             else:
                 print("Reading old data...")
                 xs, ys = utils.from_csv_visual_10classes(args.path)
                 xs = np.array(xs)
                 ys = np.array(ys)
-                xs = MinMaxScaler().fit_transform(xs)
                 labels = np.unique(ys)
         else:
             xs, ys, _ = utils.from_csv_with_filenames(args.csv_path)
@@ -289,6 +288,13 @@ if __name__ == '__main__':
         else:
             xs, ys, _ =  utils.from_csv_with_filenames(args.csv_path)
         labels = np.unique(ys)
+
+    if args.trsf == 'minmax':
+        xs = MinMaxScaler().fit_transform(xs)
+    elif args.trsf == 'std':
+        xs = StandardScaler().fit_transform(xs)
+    elif args.trsf == 'global':
+        xs, _ = global_transform(xs)
 
     if args.op == 'avg':
         average_prototype_distance_matrix(xs, ys)

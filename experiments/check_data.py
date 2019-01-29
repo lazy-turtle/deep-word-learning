@@ -2,10 +2,10 @@ import numpy as np
 from matplotlib import pyplot as plt
 import seaborn as sb
 from utils.utils import transform_data, global_transform
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 import os
 
-DATA_PATH = '../data/video/visual-10classes-bbox.npy'
+DATA_PATH = '../data/video/visual-10classes-segm.npy'
 
 
 def from_csv_visual_10classes(path, labels='imagenet-labels.json'):
@@ -51,7 +51,8 @@ print('Var: {}'.format(data_x.var()))
 # normalize data somehow
 #data_x, _ = transform_data(data_x)
 #data_x, _ = global_transform(data_x)
-scaler = MinMaxScaler()
+#scaler = MinMaxScaler()
+scaler = StandardScaler()
 data_x = scaler.fit_transform(data_x)
 #m = data_x.min()
 #M = data_x.max()

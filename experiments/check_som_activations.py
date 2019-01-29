@@ -39,8 +39,8 @@ video_model = video_model_list[-1]
 audio_model = audio_model_list[-1]
 
 #uncomment the line needed, comment the other of course
-#som_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', audio_model)
-som_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'best', video_model)
+som_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', audio_model)
+#som_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'best', video_model)
 
 data_paths = {
     'a': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_a.npy'),
@@ -73,8 +73,8 @@ def extract_som_info(filename):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Check SOM activations.')
     parser.add_argument('--lr', metavar='lr', type=float, default=10, help='The model learning rate')
-    parser.add_argument('--tau', metavar='tau', type=float, default=2, help='Tau value audio som')
-    parser.add_argument('--th', metavar='th', type=float, default=0.0, help='Threshold to cut values from')
+    parser.add_argument('--tau', metavar='tau', type=float, default=0.5, help='Tau value audio som')
+    parser.add_argument('--th', metavar='th', type=float, default=0.2, help='Threshold to cut values from')
     parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Random generator seed')
     parser.add_argument('--som', metavar='som', type=str, default=som_path,
                         help='Video SOM model path')

@@ -3,7 +3,7 @@ from utils.constants import Constants
 from utils.utils import from_csv_with_filenames, from_npy_visual_data, from_csv_visual_10classes, from_npy_audio_data
 from sklearn.model_selection import train_test_split
 from utils.utils import transform_data, global_transform
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 import os
 import numpy as np
 import argparse
@@ -26,7 +26,7 @@ visual_data_bbox = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-10classes-b
 visual_data_imagenet = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-10classes-imagenet.npy')
 old_visual_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'VisualInputTrainingSet.csv')
 
-TRANSFORMS = ['none', 'zscore', 'global', 'minmax']
+TRANSFORMS = ['none', 'zscore', 'global', 'minmax', 'std']
 
 
 if __name__ == '__main__':
@@ -117,6 +117,12 @@ if __name__ == '__main__':
     elif args.transform == TRANSFORMS[3]:
         print('Normalizing with MinMaxScaler...')
         scaler = MinMaxScaler()
+        scaler.fit(xs)
+        xs_train = scaler.transform(xs_train)
+        xs_test = scaler.transform(xs_test)
+    elif args.transform == TRANSFORMS[4]:
+        print('Normalizing with standard scaler')
+        scaler = StandardScaler()
         scaler.fit(xs)
         xs_train = scaler.transform(xs_train)
         xs_test = scaler.transform(xs_test)

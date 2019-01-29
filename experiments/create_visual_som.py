@@ -3,17 +3,17 @@ from models.som.SOMTest import show_som
 import numpy as np
 from utils.constants import Constants
 from utils.utils import from_npy_visual_data, transform_data, labels_dictionary, from_csv, global_transform
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 import os
 import json
 import argparse
 
-DATA_TYPE = 'video'
-visual_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-10classes-bbox.npy')
-#visual_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes-30x30_train.csv')
+DATA_TYPE = 'audio'
+#visual_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-10classes-bbox.npy')
+visual_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes-30x30_train.csv')
 
-model_name = 'best/video_20x30_s12.0_b128_a0.1_group-bbox_seed42_1548704755_global'
-#model_name = 'audio_30x30_tau0.1_thrsh0.6_sigma10.0_batch128_alpha0.01_final'
+#model_name = 'best/video_20x30_s12.0_b128_a0.1_group-bbox_seed42_1548704755_global'
+model_name = 'audio_30x30_tau0.1_thrsh0.6_sigma10.0_batch128_alpha0.01_final'
 model_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, DATA_TYPE, model_name)
 label_path = os.path.join(Constants.LABELS_FOLDER, 'coco-imagenet-10-labels.json')
 
@@ -59,13 +59,14 @@ if __name__ == '__main__':
         xs = np.array(xs1).reshape((100, 2048))
         ys = np.array(ys1).reshape(100)
 
-    xs, _ = global_transform(xs)
+    #xs, _ = global_transform(xs)
     #xs, _ = transform_data(xs)
     #xs = MinMaxScaler().fit_transform(xs)
+    xs = StandardScaler().fit_transform(xs)
     dim = xs.shape[1]
 
     #info = extract_som_info(model_name)
-    info = {'shape':[20,30], 'alpha':0.1, 'sigma':15.0, 'batch':128}
+    info = {'shape':[30,30], 'alpha':0.1, 'sigma':15.0, 'batch':128}
     som_shape = info['shape']
     som = SOM(som_shape[0], som_shape[1], dim, alpha=info['alpha'], sigma=info['sigma'],
               batch_size=info['batch'], checkpoint_loc=args.model, data=DATA_TYPE)
