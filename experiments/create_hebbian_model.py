@@ -219,7 +219,8 @@ if __name__ == '__main__':
     exp_description = 'lr{}_al-{}_ta{:.1f}_tv{:.1f}_tha{:.1f}_thv{:.1f}_{}_somv-{}_soma-{}'\
                           .format(args.lr, args.algo, args.taua, args.tauv,
                                   args.tha, args.thv, args.act, somv_info['id'], soma_info['id'])
-    main_path = os.path.join(hebbian_path, str(date.today()))
+    subfolder = str(date.today())
+    main_path = os.path.join(hebbian_path, subfolder)
     if not os.path.exists(main_path):
         os.makedirs(main_path)
     model_path = os.path.join(main_path, exp_description)
@@ -279,7 +280,7 @@ if __name__ == '__main__':
     ax.set_xlabel('# presentations')
     ax.set_ylabel('Accuracy')
     plt.title('Model: {}'.format(os.path.basename(somv_path)))
-    dest_path = os.path.join(Constants.PLOT_FOLDER, 'hebbian', str(date.today()), exp_description)
+    dest_path = os.path.join(Constants.PLOT_FOLDER, 'hebbian', subfolder, exp_description)
     if not os.path.exists(dest_path):
         os.makedirs(dest_path)
 
