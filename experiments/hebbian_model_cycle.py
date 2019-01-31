@@ -171,7 +171,7 @@ def transform_data(train, test, transform_type):
 
 
 # Main block: train a complete hebbian model with the given parameters
-def iterate(path_som_video, path_som_audio, lr, taua, tauv, tha, thv, seed=42, n_present=15, algo="sorted"):
+def iterate(path_som_video, path_som_audio, lr, taua, tauv, tha, thv, seed=42, it=-1, n_present=15, algo="sorted"):
     global hebbian_path
     path_som_video = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'best', path_som_video)
     path_som_audio = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', path_som_audio)
@@ -252,8 +252,9 @@ def iterate(path_som_video, path_som_audio, lr, taua, tauv, tha, thv, seed=42, n
         os.makedirs(dest_path)
 
     results = pd.DataFrame({'acc_a': acc_a_list, 'acc_v': acc_v_list})
-    results.to_csv(os.path.join(dest_path, 'results.csv'))
-    plt.savefig(os.path.join(dest_path, '{}.png'.format(exp_description)), transparent=False)
+    suffix = str(it) if it >= 0 else ""
+    results.to_csv(os.path.join(dest_path, 'results_{}.csv'.format(suffix)))
+    plt.savefig(os.path.join(dest_path, '{}_{}.png'.format(exp_description, suffix)), transparent=False)
 
 
 if __name__ == '__main__':
@@ -291,4 +292,4 @@ if __name__ == '__main__':
 
     for i, t in enumerate(combinations[start_index:end_index]):
         for j in range(args.iter):
-            iterate(*t, seed=j)
+            iterate(*t, seed=j, it=j)

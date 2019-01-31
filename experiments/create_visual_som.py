@@ -10,11 +10,12 @@ import json
 import argparse
 
 DATA_TYPE = 'video'
-visual_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-10classes-bbox.npy')
+visual_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-10classes-segm_test.npy')
 #visual_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio-10classes-coco-imagenet_train.csv')
 
 #model_name = 'audio_20x20_s8.0_b128_a0.01_group-last_seed42_2020_std'
-model_name = 'best/video_20x30_s12.0_b128_a0.1_group-bbox_seed42_1548704755_global'
+model_name = 'best/video_20x30_s12.0_b64_a0.1_group-segm_seed42_1548697994_minmax'
+#model_name = 'best/video_20x30_s12.0_b128_a0.1_group-bbox_seed42_1548704755_global'
 model_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, DATA_TYPE, model_name)
 label_path = os.path.join(Constants.LABELS_FOLDER, 'coco-imagenet-10-labels.json')
 
@@ -70,9 +71,9 @@ if __name__ == '__main__':
         xs = np.array(xs1).reshape((100, 2048))
         ys = np.array(ys1).reshape(100)
 
-    xs, _ = global_transform(xs)
+    #xs, _ = global_transform(xs)
     #xs, _ = transform_data(xs)
-    #xs = MinMaxScaler().fit_transform(xs)
+    xs = MinMaxScaler().fit_transform(xs)
     #xs = StandardScaler().fit_transform(xs)
     dim = xs.shape[1]
 
@@ -84,4 +85,4 @@ if __name__ == '__main__':
     som.restore_trained(args.model)
 
     show_som(som, xs, ys, labels, 'Video SOM (bounding boxes)',
-             show=False, dark=False, scatter=True, legend=True, point_size=160, suffix='_segm_trsf_minmax')
+             show=True, dark=False, scatter=True, legend=True, point_size=60, suffix='_segm_trsf_minmax')
