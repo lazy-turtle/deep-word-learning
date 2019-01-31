@@ -1,0 +1,3 @@
+,somv,soma,lr,taua,tauv,tha,thv
+0,video_20x30_s12.0_b64_a0.1_group-segm_seed42_1548697994_minmax,audio_20x30_s8.0_b128_a0.3_group-20pca25t_seed42_pca_minmax,5,0.2,0.2,0.0,0.0
+1,video_20x30_s12.0_b128_a0.1_group-bbox_seed42_1548704755_global,audio_20x30_s8.0_b128_a0.3_group-20pca25t_seed42_pca_minmax,5,0.2,0.4,0.0,0.0

@@ -21,11 +21,8 @@ import math
 import os
 import matplotlib
 import sys
-matplotlib.use('Agg')
-matplotlib.rcParams.update({'font.size': 8})
 import matplotlib.pyplot as plt
 from utils.constants import Constants
-from matplotlib import colors
 from scipy.stats import f as fisher_f
 from scipy.stats import norm
 import time

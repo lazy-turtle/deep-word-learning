@@ -1,6 +1,7 @@
+import argparse
 import sys
 
-from models.som.SOM import SOM
+from models.som.som import SOM
 from models.som.HebbianModel import HebbianModel
 from utils.constants import Constants
 from utils.utils import from_csv_with_filenames, from_npy_visual_data, global_transform, min_max_scale, \
@@ -38,10 +39,10 @@ video_data_paths = {
 }
 
 audio_data_paths = {
-    'old': os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio10classes_old.csv'),
-    '20pca25t': os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio10classes20pca25t.csv'),
-    'last': [os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio10classes-coco-imagenet_train.csv'),
-             os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio10classes-coco-imagenet_test.csv')]
+    'old': os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio-10classes-old.csv'),
+    '20pca25t': os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio10-classes-20pca25t.csv'),
+    'last': [os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio-10classes-coco-imagenet_train.csv'),
+             os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio-10classes-coco-imagenet_test.csv')]
 }
 
 lr_values = [5, 10, 20]
@@ -256,18 +257,38 @@ def iterate(path_som_video, path_som_audio, lr, taua, tauv, tha, thv, seed=42, n
 
 
 if __name__ == '__main__':
-    iterator = itertools.product(video_model_list, audio_model_list,lr_values,
-                                     taua_values, tauv_values,
-                                     tha_values, thv_values)
-    combinations = list(iterator)
-    print('Total combinations: {}'.format(len(combinations)))
-    n_slices = int(sys.argv[1])
-    slice_index = int(sys.argv[2])
-    slice_size = int(np.ceil(len(combinations) / float(n_slices)))
+    parser = argparse.ArgumentParser(description="Automation of the hebbian model training.")
+    parser.add_argument('--combine', action='store_true', default=False, help='Generate all combinations or not.')
+    parser.add_argument('--slices', metavar='slices', type=int, default=2, help='How many combination blocks to generate.')
+    parser.add_argument('--index', metavar='index', type=int, default=1, help='Which slice to process.')
+    parser.add_argument('--iter', metavar='iter', type=int, default=1, help='How many iterations for each combination.')
+    parser.add_argument('--param-csv', metavar='param_csv', type=str, default=None, help='File containing parameters')
+    args = parser.parse_args()
 
+
+
+    if args.combine:
+        print('Generating all possible combinations')
+        iterator = itertools.product(video_model_list, audio_model_list,lr_values,
+                                         taua_values, tauv_values,
+                                         tha_values, thv_values)
+        combinations = list(iterator)
+    else:
+        print('Loading combinations from {}'.format(args.param_csv))
+        df = pd.read_csv(args.param_csv, index_col=0)
+        combinations = []
+        for row in df.values:
+            combinations.append(tuple(row))
+
+    print(combinations)
+    print('Total combinations: {}'.format(len(combinations)))
+    n_slices = args.slices
+    slice_index = args.index
+    slice_size = int(np.ceil(len(combinations) / float(n_slices)))
     print("# slice: {}, slice size: {}".format(slice_index, slice_size))
     start_index = slice_index * slice_size
     end_index = (slice_index + 1) * slice_size
 
     for i, t in enumerate(combinations[start_index:end_index]):
-        iterate(*t)
+        for j in range(args.iter):
+            iterate(*t, seed=j)

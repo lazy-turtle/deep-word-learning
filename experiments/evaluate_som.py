@@ -7,10 +7,13 @@
 
 import numpy as np
 import argparse
+
+import sys
+
 from models.som.SOM import SOM
 from utils.constants import Constants
 from utils.utils import from_npy_visual_data, from_csv_visual_100classes, from_csv_with_filenames, labels_dictionary, \
-    global_transform, from_csv
+    global_transform, from_csv, from_csv_visual_10classes
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 import os
 
@@ -86,21 +89,19 @@ if __name__ == '__main__':
                         help='Specify whether you are analyzing \
                         a file with representations from 100 classes, as the loading functions are different.',
                         default=False)
+    parser.add_argument('--write', action='store_true', help='', default=False)
     parser.add_argument('--is-audio', action='store_true', default=True,
                         help='Specify whether the csv contains audio representations, as the loading functions are different.')
     args = parser.parse_args()
 
-    data_type = 'video' if not args.is_audio else 'audio'
-    data_group = 'audio10classes-coco-imagenet_train.csv'
-    model_name = 'audio_20x20_s8.0_b128_a0.01_group-last_seed42_2020_std'
-    data_path = os.path.join(Constants.DATA_FOLDER, data_type, data_group)
+    data_type = 'old' #'video' if not args.is_audio else 'audio'
+    data_group = 'VisualInputTrainingSet.csv'
+    model_name = 'old_20x30_s12.0_b64_a0.3_trsf_std_group-a_seed42_1548880436_final'
+    data_path = os.path.join(Constants.DATA_FOLDER, 'video', data_group)
     model_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, data_type, model_name)
     out_path = os.path.join(Constants.OUTPUT_FOLDER, data_type, 'evaluate_som.txt')
-    label_path = os.path.join(Constants.LABELS_FOLDER, 'coco-imagenet-10-labels.json')
+    label_path = os.path.join(Constants.LABELS_FOLDER, 'imagenet-10-labels.json')
     labels_dict = labels_dictionary(label_path)
-
-    #create or open output file
-    f = open(out_path, 'a+')
 
     id_dict = dict()
     if not args.classes100:
@@ -108,7 +109,11 @@ if __name__ == '__main__':
         if not args.is_audio:
             xs, ys, id_dict = from_npy_visual_data(data_path, classes=num_classes)
         else:
-            xs, ys = from_csv(data_path)
+            if data_type == 'audio':
+                xs, ys,_ = from_csv_with_filenames(data_path)
+            else:
+                xs, ys = from_csv_visual_10classes(data_path)
+                ys = [v - 1000 for v in ys]
             xs = np.array(xs)
             ys = np.array(ys).astype(int)
             id_dict = {v: v for v in np.unique(ys)}
@@ -123,13 +128,14 @@ if __name__ == '__main__':
     #xs = MinMaxScaler().fit_transform(xs)
     xs = StandardScaler().fit_transform(xs)
 
-    som = SOM(20, 20, xs.shape[1], checkpoint_loc=model_path)
+    som = SOM(20, 30, xs.shape[1], checkpoint_loc=model_path)
     som.restore_trained(model_path)
     #measure = class_compactness(som, xs, ys)
     measure = my_compactness(som, xs, ys)
     #labels = labels_dictionary(label_path)
     cpt = {labels_dict[id_dict[i]]: val for i, val in enumerate(measure)}
 
+    f = open(out_path, 'a+') if args.write else sys.stdout
     f.write('-'*20 + '\n')
     f.write('MODEL: {} - DATA: {}\n'.format(model_name, data_group))
     f.write('Class Compactness:\n')

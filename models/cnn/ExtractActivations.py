@@ -18,7 +18,6 @@
 # along with NNsTaxonomicResponding.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from InceptionNet import InceptionPrototipi
 from datetime import datetime
 import glob
 import hashlib
@@ -32,12 +31,10 @@ import numpy as np
 from six.moves import urllib
 import tensorflow as tf
 
-from tensorflow.python.client import graph_util
 from tensorflow.python.framework import tensor_shape
 from tensorflow.python.platform import gfile
 from tensorflow.python.platform import flags
 
-import Image
 import datetime
 
 
@@ -437,15 +434,15 @@ def handleWeights(softmax_weight):
 		for i in range(0,c):
 			for j in range(i+1,c):
 				if i!=j:
-					print 'weights in common classes '+str(i)+' and '+str(j)
-					print len(np.intersect1d(indexRemain[i],indexRemain[j]))
+					print('weights in common classes ' + str(i) + ' and ' + str(j))
+					print(len(np.intersect1d(indexRemain[i], indexRemain[j])))
 
-		print '-------------- \n Number of remaining elements'
-		print countRemain
-		print '-------------- \n Indexes of remaining elements'
-		print indexRemain
-		print '-------------- \n Remaining values'
-		print valueRemain
+		print('-------------- \n Number of remaining elements')
+		print(countRemain)
+		print('-------------- \n Indexes of remaining elements')
+		print(indexRemain)
+		print('-------------- \n Remaining values')
+		print(valueRemain)
 
 
 def getAllInputClass(className,fileInput):

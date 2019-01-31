@@ -7,5 +7,6 @@ __*__*
 */plots/temp/*
 data/trained-models/video/*
 data/trained-models/audio/*
+data/trained-models/old/*
 nohup.out
 data/video/*80classes*

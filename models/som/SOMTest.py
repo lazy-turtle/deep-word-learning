@@ -17,7 +17,7 @@
 
 from matplotlib import pyplot as plt
 import numpy as np
-from .SOM import SOM
+from .som import SOM
 import os
 import matplotlib
 import matplotlib.patches as m_patches
@@ -61,80 +61,87 @@ def printToFileCSV(prototipi,file):
             f.write(st+'\n')
     f.close()
 
-def show_som(som, inputs, labels, title, filenames=None, show=False, dark=True, scatter=True, suffix=''):
+def show_som(som, xs, ys, labels, title, files=None, show=False, dark=True, scatter=True, point_size=48, legend=True, suffix=''):
     """
     Generates a plot displaying the SOM with its active BMUs and the relative examples
     associated with them. Each class is associated with a different color.
     :param SOM som:     SOM instance initialized with the wanted parameters (possibly already trained)
-    :param arr inputs:  np array (n, dims) containing data to be displayed on the map
+    :param arr xs:  np array (n, dims) containing data to be displayed on the map
     :param arr labels:  np array (n,) containing a label for each example
     :param str title:   title for the plot
-    :param arr filenames:   actually no clue
+    :param arr files:   actually no clue
     :param bool show:   whether to call show() or save to file
     """
     matplotlib.use('TkAgg') #in order to print something
+    matplotlib.rcParams.update({'font.size': 16})
     print('Building graph "{}"...'.format(title))
-    _, indices = np.unique(labels, return_index=True)
-    classes = labels[np.sort(indices)] #otherwise np.unique orders the values alphabetically
-    mapped = np.array(som.map_vects(inputs))
+    classes = np.unique(ys)
+    mapped = np.array(som.map_vects(xs))
 
     bmu_list = []
     for c in classes:
-        class_bmu = mapped[np.where(labels == c)]
+        class_bmu = mapped[np.where(ys == c)]
         bmu_list.append(np.unique(class_bmu, axis=0, return_counts=True))
     print('Done mapping inputs, preparing canvas...')
 
-    palette = 'colorblind'
-    if dark:
-        plt.style.use('dark_background')
-        palette = 'bright'
+    palette = 'bright' if dark else 'deep'
 
     #for 80 classes readability
     if len(classes) > 10:
         palette = 'cubehelix'
 
-    plt.figure(figsize=(som._n/3.0, som._m/3.0))
+    fig = plt.figure(figsize=(10, 6.5))
+    if dark:
+        plt.gca().set_facecolor((0.15,0.15,0.15))
+
     plt.xlim([-1, som._n])
     plt.ylim([-1, som._m])
     plt.gca().set_xticks(np.arange(-1, som._n, 1))
     plt.gca().set_yticks(np.arange(-1, som._m, 1))
-    plt.gca().grid(alpha=0.2, linestyle=':')
-    plt.title(title)
+    plt.gca().set_xticklabels([])
+    plt.gca().set_yticklabels([])
+    plt.gca().tick_params(axis=u'both', which=u'both', length=0)
+    plt.gca().grid(alpha=0.2, linestyle=':', color='white' if dark else 'black')
+    #plt.title(title)
 
     #generate colors based on the # of classes
     np.random.seed(42)
-    colors = sb.color_palette(palette, n_colors=len(classes))
+    #colors = ['white', 'red', 'blue', 'cyan', 'yellow', 'green', 'gray', 'brown', 'orange', 'magenta']
+    colors = sb.color_palette(n_colors=len(classes))
     color_dict = {label: col for label, col in zip(classes, colors)}
 
     print('Adding labels for each mapped input...', end='')
-    if filenames == None:
+    if files == None:
         if scatter:
             for i, (bmu, counts) in enumerate(bmu_list):
                 xx = [m[1] for m in bmu]
                 yy = [m[0] for m in bmu]
-                plt.scatter(xx, yy, s=counts*16, color=colors[i], alpha=0.6)
+                size = point_size/2 + np.log( 1 + counts**2) * point_size
+                plt.scatter(xx, yy, s=size, color=colors[i], alpha=0.6 if dark else 0.9)
         else:
             for i, m in enumerate(mapped):
-                plt.text(m[1], m[0], str('__'), ha='center', va='center', color=color_dict[labels[i]],alpha=0.5,
-                         bbox=dict(facecolor=color_dict[labels[i]], alpha=0.6, lw=0, boxstyle='round4'))
+                plt.text(m[1], m[0], str('__'), ha='center', va='center', color=color_dict[ys[i]],alpha=0.5,
+                         bbox=dict(facecolor=color_dict[ys[i]], alpha=0.8, lw=0, boxstyle='round4'))
     else:
       for i, m in enumerate(mapped):
-        plt.text(m[1], m[0], str('_{:03d}_'.format(i)), ha='center', va='center', color=color_dict[labels[i]],
+        plt.text(m[1], m[0], str('_{:03d}_'.format(i)), ha='center', va='center', color=color_dict[ys[i]],
                  alpha=0.5,
-                 bbox=dict(facecolor=color_dict[labels[i]], alpha=0.6, lw=0, boxstyle='round4'))
-        print('{}: {}'.format(i, filenames[i]))
+                 bbox=dict(facecolor=color_dict[ys[i]], alpha=0.8, lw=0, boxstyle='round4'))
+        print('{}: {}'.format(i, files[i]))
     print('done.')
 
     print('Drawing legend...')
     patch_list = []
     for i in range(len(classes)):
-      patch = m_patches.Patch(color=colors[i], label=classes[i])
+      patch = m_patches.Patch(color=colors[i], label=labels[i])
       patch_list.append(patch)
-    plt.legend(handles=patch_list, loc='center left',bbox_to_anchor=(1, 0.5))
 
+    if legend:
+        plt.legend(handles=patch_list, loc='center left',bbox_to_anchor=(1, 0.5))
     img_name = 'som_{}x{}_s{}_a{}_{}.png'.format(som._m, som._n, som.sigma, som.alpha, suffix)
-    img_path = os.path.join(Constants.PLOT_FOLDER, som.data, img_name)
+    img_path = os.path.join(Constants.PLOT_FOLDER, 'temp', img_name)
     print('Saving file: {} ...'.format(img_path))
+    fig.tight_layout()
     if show:
       plt.show()
     else:
