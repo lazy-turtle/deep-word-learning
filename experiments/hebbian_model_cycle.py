@@ -40,7 +40,7 @@ video_data_paths = {
 
 audio_data_paths = {
     'old': os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio-10classes-old.csv'),
-    '20pca25t': os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio10-classes-20pca25t.csv'),
+    '20pca25t': os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio-10classes-20pca25t.csv'),
     'last': [os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio-10classes-coco-imagenet_train.csv'),
              os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio-10classes-coco-imagenet_test.csv')]
 }
