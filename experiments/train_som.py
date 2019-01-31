@@ -89,6 +89,7 @@ if __name__ == '__main__':
     elif args.data == 'old':
         print('Loading old visual data...', end='')
         xs, ys = from_csv_visual_10classes(old_visual_path)
+        ys = [v - 1000 for v in ys]
         ys = np.array(ys)
         xs = np.array(xs)
         print('done. data: {} - labels: {}'.format(xs.shape, ys.shape))
