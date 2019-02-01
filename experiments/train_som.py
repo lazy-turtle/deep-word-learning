@@ -1,4 +1,4 @@
-from models.som.SOM import SOM
+from models.som.som import SOM
 from utils.constants import Constants
 from utils.utils import from_csv_with_filenames, from_npy_visual_data, from_csv_visual_10classes, from_npy_audio_data
 from sklearn.model_selection import train_test_split
