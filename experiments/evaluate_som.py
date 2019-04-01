@@ -90,6 +90,7 @@ if __name__ == '__main__':
                         a file with representations from 100 classes, as the loading functions are different.',
                         default=False)
     parser.add_argument('--write', action='store_true', help='', default=False)
+    parser.add_argument('--subsample', action='store_true', help='', default=True)
     parser.add_argument('--is-audio', action='store_true', default=False,
                         help='Specify whether the csv contains audio representations, as the loading functions are different.')
     args = parser.parse_args()
