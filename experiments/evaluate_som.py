@@ -96,7 +96,7 @@ if __name__ == '__main__':
 
     data_type = 'video' if not args.is_audio else 'audio'
     data_group = 'visual-80classes-segm.npy' if not args.is_audio else "audio-10classes-20pca25t.csv"
-    video_model_name = 'video_60x60_s30.0_b256_a0.1_group-big_seed10_1545471476_minmax'
+    video_model_name = 'best/video_60x60_s30.0_b256_a0.1_group-big_seed10_1545471476_minmax'
     audio_model_name = 'audio_20x30_s8.0_b128_a0.3_group-20pca25t_seed42_pca_minmax'
     model_name = audio_model_name if args.is_audio else video_model_name
     data_path = os.path.join(Constants.DATA_FOLDER, data_type, data_group)
