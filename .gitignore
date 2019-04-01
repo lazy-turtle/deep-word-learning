@@ -8,6 +8,5 @@ __*__*
 data/trained-models/video/*
 data/trained-models/audio/*
 data/trained-models/old/*
-data/trained-models/*
 nohup.out
 data/video/*80classes*

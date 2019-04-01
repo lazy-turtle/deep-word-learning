@@ -21,35 +21,35 @@ import itertools
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 video_model_list = [
-    'video_20x30_s12.0_b64_a0.1_group-segm_seed42_1548697994_minmax',
-    'video_20x30_s12.0_b128_a0.1_group-bbox_seed42_1548704755_global',
+    'video_60x60_s30.0_b256_a0.1_group-big_seed10_6060_minmax',
+    'video_60x80_s30.0_b128_a0.1_group-big_seed42_6080_minmax',
 ]
 
 audio_model_list = [
-    'audio_20x20_s8.0_b128_a0.01_group-last_seed42_2020_std',
-    'audio_20x30_s8.0_b128_a0.3_group-20pca25t_seed42_pca_minmax',
-    'audio_20x30_s10.0_b128_a0.1_group-old_seed42_old_minmax',
+    'audio_10x8_s1.0_b64_a0.1_group-synth_seed42_fake_std'
 ]
 
 hebbian_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'hebbian')
 
 video_data_paths = {
     'segm': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-10classes-segm.npy'),
-    'bbox': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-10classes-bbox.npy')
+    'bbox': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-10classes-bbox.npy'),
+    'big': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-80classes-segm.npy')
 }
 
 audio_data_paths = {
     'old': os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio-10classes-old.csv'),
     '20pca25t': os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio-10classes-20pca25t.csv'),
+    'synth': os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio-80classes-synth.npy'),
     'last': [os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio-10classes-coco-imagenet_train.csv'),
              os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio-10classes-coco-imagenet_test.csv')]
 }
 
-lr_values = [5, 10, 20]
-tauv_values = [0.2, 0.5, 1.0]
-taua_values = [0.2, 0.5, 1.0]
-thv_values = [0.0, 0.2, 0.5]
-tha_values = [0.0, 0.2, 0.5]
+lr_values = [5, 10]
+tauv_values = [0.2]
+taua_values = [0.2]
+thv_values = [0.0, 0.2]
+tha_values = [0.0, 0.2]
 
 
 #################
@@ -71,7 +71,7 @@ def extract_som_info(filename):
     return info
 
 
-def create_folds(a_xs, v_xs, a_ys, v_ys, n_folds=1, n_classes=10):
+def create_folds(a_xs, v_xs, a_ys, v_ys, n_folds=1, n_classes=80):
     '''
     In this context, a fold is an array of data that has n_folds examples
     from each class.
@@ -132,9 +132,12 @@ def load_audio_data(data, seed):
         a_xs_test = np.array(a_xs_test)
         a_ys_test = np.array(a_ys_test).astype(int)
     elif isinstance(data, str):
-        a_xs, a_ys, _ = from_csv_with_filenames(data)
-        a_xs = np.array(a_xs)
-        a_ys = np.array(a_ys).astype(int)
+        if "csv" in data:
+            a_xs, a_ys, _ = from_csv_with_filenames(data)
+            a_xs = np.array(a_xs)
+            a_ys = np.array(a_ys).astype(int)
+        else:
+            a_xs, a_ys, = from_npy_audio_data(data)
         a_xs_train, a_xs_test, a_ys_train, a_ys_test = train_test_split(a_xs, a_ys, test_size=0.2,
                                                                    random_state=seed)
     else:
@@ -143,8 +146,8 @@ def load_audio_data(data, seed):
 
 
 # loads video data and splits it
-def load_video_data(data, seed):
-    v_xs, v_ys, _ = from_npy_visual_data(data)
+def load_video_data(data, seed, n_classes=80):
+    v_xs, v_ys, _ = from_npy_visual_data(data, classes=n_classes)
     v_xs_train, v_xs_test, v_ys_train, v_ys_test = train_test_split(v_xs, v_ys, test_size=0.2,
                                                                     random_state=seed)
     return v_xs_train, v_xs_test, v_ys_train, v_ys_test
@@ -171,7 +174,7 @@ def transform_data(train, test, transform_type):
 
 
 # Main block: train a complete hebbian model with the given parameters
-def iterate(path_som_video, path_som_audio, lr, taua, tauv, tha, thv, seed=42, it=-1, n_present=15, algo="sorted"):
+def iterate(path_som_video, path_som_audio, lr, taua, tauv, tha, thv, seed=42, it=-1, n_present=15, algo="sorted", n_classes=80):
     global hebbian_path
     path_som_video = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'best', path_som_video)
     path_som_audio = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', path_som_audio)
@@ -185,7 +188,7 @@ def iterate(path_som_video, path_som_audio, lr, taua, tauv, tha, thv, seed=42, i
     audio_data = audio_data_paths[soma_info['group']]
 
     a_xs_train, a_xs_test, a_ys_train, a_ys_test = load_audio_data(audio_data, seed=seed)
-    v_xs_train, v_xs_test, v_ys_train, v_ys_test = load_video_data(video_data, seed= seed)
+    v_xs_train, v_xs_test, v_ys_train, v_ys_test = load_video_data(video_data, seed=seed, n_classes=n_classes)
     a_xs_train, a_xs_test = transform_data(a_xs_train, a_xs_test, soma_info['trsf'])
     v_xs_train, v_xs_test = transform_data(v_xs_train, v_xs_test, somv_info['trsf'])
 
@@ -217,7 +220,8 @@ def iterate(path_som_video, path_som_audio, lr, taua, tauv, tha, thv, seed=42, i
                                      v_dim=v_data_dim, n_presentations=n,
                                      checkpoint_dir=model_path,
                                      learning_rate=lr)
-        a_xs_fold, v_xs_fold, a_ys_fold, v_ys_fold = create_folds(a_xs_train, v_xs_train, a_ys_train, v_ys_train, n_folds=n)
+        a_xs_fold, v_xs_fold, a_ys_fold, v_ys_fold = create_folds(a_xs_train, v_xs_train, a_ys_train, v_ys_train,
+                                                                  n_folds=n, n_classes=n_classes)
         som_a.memorize_examples_by_class(a_xs_train, a_ys_train)
         som_v.memorize_examples_by_class(v_xs_train, v_ys_train)
 
@@ -259,9 +263,9 @@ def iterate(path_som_video, path_som_audio, lr, taua, tauv, tha, thv, seed=42, i
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Automation of the hebbian model training.")
-    parser.add_argument('--combine', action='store_true', default=False, help='Generate all combinations or not.')
-    parser.add_argument('--slices', metavar='slices', type=int, default=10, help='How many combination blocks to generate.')
-    parser.add_argument('--index', metavar='index', type=int, default=1, help='Which slice to process.')
+    parser.add_argument('--combine', action='store_true', default=True, help='Generate all combinations or not.')
+    parser.add_argument('--slices', metavar='slices', type=int, default=1, help='How many combination blocks to generate.')
+    parser.add_argument('--index', metavar='index', type=int, default=0, help='Which slice to process.')
     parser.add_argument('--iter', metavar='iter', type=int, default=1, help='How many iterations for each combination.')
     parser.add_argument('--param-csv', metavar='param_csv', type=str, default=None, help='File containing parameters')
     args = parser.parse_args()
@@ -283,13 +287,15 @@ if __name__ == '__main__':
 
     print(combinations)
     print('Total combinations: {}'.format(len(combinations)))
+
     n_slices = args.slices
     slice_index = args.index
     slice_size = int(np.ceil(len(combinations) / float(n_slices)))
     print("# slice: {}, slice size: {}".format(slice_index, slice_size))
     start_index = slice_index * slice_size
     end_index = (slice_index + 1) * slice_size
+    print(start_index, end_index, slice_index)
 
     for i, t in enumerate(combinations[start_index:end_index]):
         for j in range(args.iter):
-            iterate(*t, seed=j, it=j)
+            iterate(*t, seed=j, it=j, n_classes=80)

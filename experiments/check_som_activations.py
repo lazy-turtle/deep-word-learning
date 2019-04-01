@@ -36,15 +36,16 @@ audio_model_list = [
     'audio_20x30_s10.0_b64_a0.1_group-syn_seed42_syn_minmax',
     'audio_20x20_s8.0_b128_a0.01_group-last_seed42_2020_std',
     'audio_20x30_s8.0_b128_a0.3_group-20pca25t_seed42_pca_minmax',
-    'audio_20x30_s10.0_b128_a0.1_group-old_seed42_old_minmax'
+    'audio_20x30_s10.0_b128_a0.1_group-old_seed42_old_minmax',
+    'audio_10x8_s1.0_b64_a0.1_group-synth_seed42_fake_std'
 ]
 
 video_model = video_model_list[-1]
-audio_model = audio_model_list[-3]
+audio_model = audio_model_list[-1]
 
 #uncomment the line needed, comment  the other of course
-#som_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', audio_model)
-som_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'best', video_model)
+som_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', audio_model)
+#som_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'best', video_model)
 
 data_paths = {
     'a': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_a.npy'),
@@ -54,7 +55,7 @@ data_paths = {
     'z': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_z.npy'),
     'as':os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_as.npy'),
     'x': os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_train.csv'),
-    'syn': os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_synth.npy'),
+    'synth': os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio-80classes-synth.npy'),
     'segm': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-10classes-segm.npy'),
     'bbox': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-10classes-bbox.npy'),
     'old': os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio10classes_old.csv'),
@@ -80,8 +81,8 @@ def extract_som_info(filename):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Check SOM activations.')
     parser.add_argument('--lr', metavar='lr', type=float, default=10, help='The model learning rate')
-    parser.add_argument('--tau', metavar='tau', type=float, default=1, help='Tau value audio som')
-    parser.add_argument('--th', metavar='th', type=float, default=0.5, help='Threshold to cut values from')
+    parser.add_argument('--tau', metavar='tau', type=float, default=0.2, help='Tau value audio som')
+    parser.add_argument('--th', metavar='th', type=float, default=0.0, help='Threshold to cut values from')
     parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Random generator seed')
     parser.add_argument('--som', metavar='som', type=str, default=som_path,
                         help='Video SOM model path')
@@ -106,7 +107,7 @@ if __name__ == '__main__':
     som_data = data_paths[som_info['group']]
     labels = None
     if som_info['data'] == 'audio':
-        if som_info['group'] != 'syn':
+        if som_info['group'] != 'synth':
             xs, ys = from_csv(som_data)
             xs = np.array(xs)
             ys = np.array(ys).astype(int)
