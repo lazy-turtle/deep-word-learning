@@ -307,7 +307,7 @@ class SOM(object):
                 self._weightages = list(self._sess.run(self._weightage_vects))
                 self._locations = list(self._sess.run(self._location_vects))
 
-                if iter_no % log_every == 0:
+                if iter_no % log_every == 0 and iter_no > 0:
                     if logging == True:
                     #Run summaries
                         if input_classes is not None:
@@ -340,21 +340,12 @@ class SOM(object):
                         summary = self._sess.run(self.summaries,
                                                  feed_dict={self._train_compactness: train_comp,
                                                             self._test_compactness: test_comp,
-                                                            self._train_population_convergence: train_conv,
-                                                            self._test_population_convergence: test_conv,
                                                             self._train_mean_convergence: train_mean_conv,
                                                             self._test_mean_convergence: test_mean_conv,
-                                                            self._train_var_convergence: train_var_conv,
-                                                            self._test_var_convergence: test_var_conv,
                                                             self._avg_delta: avg_delta,
-                                                            self._train_confusion: train_confusion,
                                                             self._test_confusion: test_confusion,
-                                                            self._train_quant_error: train_quant_error,
                                                             self._test_quant_error: test_quant_error,
-                                                            self._train_usage_rate: train_usage_rate,
                                                             self._test_usage_rate: test_usage_rate,
-                                                            self._train_worst_confusion: train_worst_confusion,
-                                                            self._test_worst_confusion: test_worst_confusion
                                                             })
                         summary_writer.add_summary(summary, global_step=iter_no)
 

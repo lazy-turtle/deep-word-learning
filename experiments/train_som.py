@@ -15,9 +15,9 @@ audio_data_list =[
     os.path.join(Constants.AUDIO_DATA_FOLDER, 'new', 'audio10classes20pca25t.csv'),
     os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio-10classes-coco-imagenet_train.csv'),
     os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio-10classes-coco-imagenet_test.csv'),
-    os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_synth.npy')
+    os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio-80classes-synth.npy')
 ]
-audio_data_path = audio_data_list[-3]
+audio_data_path = audio_data_list[-1]
 
 visual_data_path_a = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_a.npy')
 visual_data_path_b = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_b.npy')
@@ -35,20 +35,20 @@ TRANSFORMS = ['none', 'zscore', 'global', 'minmax', 'std']
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Train a Hebbian model.')
-    parser.add_argument('--sigma', metavar='sigma', type=float, default=8, help='The model neighborhood value')
+    parser.add_argument('--sigma', metavar='sigma', type=float, default=20, help='The model neighborhood value')
     parser.add_argument('--alpha', metavar='alpha', type=float, default=0.1, help='The SOM initial learning rate')
     parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Random generator seed')
-    parser.add_argument('--neurons1', type=int, default=20,
+    parser.add_argument('--neurons1', type=int, default=40,
                         help='Number of neurons for audio SOM, first dimension')
-    parser.add_argument('--neurons2', type=int, default=20,
+    parser.add_argument('--neurons2', type=int, default=40,
                         help='Number of neurons for audio SOM, second dimension')
-    parser.add_argument('--epochs', type=int, default=1000,
+    parser.add_argument('--epochs', type=int, default=500,
                         help='Number of epochs the SOM will be trained for')
-    parser.add_argument('--classes', type=int, default=10,
+    parser.add_argument('--classes', type=int, default=80,
                         help='Number of classes the model will be trained on')
     parser.add_argument('--subsample', action='store_true', default=False)
     parser.add_argument('--data', metavar='data', type=str, default='audio')
-    parser.add_argument('--group', metavar='group', type=str, default='coco')
+    parser.add_argument('--group', metavar='group', type=str, default='synth')
     parser.add_argument('--transform', metavar='transform', type=str, default='std')
     parser.add_argument('--logging', action='store_true', default=True)
     parser.add_argument('--use-gpu', action='store_true', default=True)
@@ -135,8 +135,8 @@ if __name__ == '__main__':
         xs_train = scaler.transform(xs_train)
         xs_test = scaler.transform(xs_test)
 
-    xs_train, xs_val, ys_train, ys_val = train_test_split(xs_train, ys_train, test_size=0.2, stratify=ys_train, random_state=args.seed)
+    xs_train, xs_val, ys_train, ys_val = train_test_split(xs_train, ys_train, test_size=0.4, stratify=ys_train, random_state=args.seed)
 
     som.init_toolbox(xs)
     som.train(xs_train, input_classes=ys_train, test_vects=xs_val, test_classes=ys_val,
-              logging=args.logging, save_every=100, log_every=50)
+              logging=args.logging, save_every=100, log_every=100)
