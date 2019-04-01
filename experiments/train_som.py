@@ -28,6 +28,8 @@ visual_data_bbox = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-10classes-b
 visual_data_imagenet = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-10classes-imagenet.npy')
 old_visual_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'VisualInputTrainingSet.csv')
 
+big_visual_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-80classes-segm.npy')
+
 TRANSFORMS = ['none', 'zscore', 'global', 'minmax', 'std']
 
 
@@ -87,7 +89,7 @@ if __name__ == '__main__':
                 raise ValueError('Data group not recognised')
         else:
             print('Training on {} classes, good luck!'.format(args.classes))
-            path = None
+            path = big_visual_data_path
 
         xs, ys, _ = from_npy_visual_data(path, classes=args.classes)
         print('done. data: {} - labels: {}'.format(xs.shape, ys.shape))
@@ -133,8 +135,8 @@ if __name__ == '__main__':
         xs_train = scaler.transform(xs_train)
         xs_test = scaler.transform(xs_test)
 
-    xs_train, xs_val, ys_train, ys_val = train_test_split(xs_train, ys_train, test_size=0.5, stratify=ys_train, random_state=args.seed)
+    xs_train, xs_val, ys_train, ys_val = train_test_split(xs_train, ys_train, test_size=0.2, stratify=ys_train, random_state=args.seed)
 
     som.init_toolbox(xs)
     som.train(xs_train, input_classes=ys_train, test_vects=xs_val, test_classes=ys_val,
-              logging=args.logging, save_every=10, log_every=10)
+              logging=args.logging, save_every=100, log_every=50)
