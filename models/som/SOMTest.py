@@ -29,6 +29,22 @@ N = 1000
 lenExample = 2048
 NumXClass = 10
 
+
+def material_palette():
+    cols = [
+        (229, 57, 53), #red
+        (171, 71, 188), #purple
+        (63, 81, 181), #indigo
+        (3, 155, 229), #blue
+        (0, 137, 123), #teal
+        (124, 179, 66), #lighgreen
+        (240, 98, 146), #pink
+        (255, 152, 0), #orange
+        (109, 76, 65), #brown
+        (96, 125, 139) #grey
+        ]
+    return [tuple([v/float(255) for v in c]) for c in cols]
+
 def create_color_dict(ys, colors):
     unique_y = len(set(ys))
     d = {}
@@ -83,14 +99,11 @@ def show_som(som, xs, ys, labels, title, files=None, show=False, dark=True, scat
         class_bmu = mapped[np.where(ys == c)]
         bmu_list.append(np.unique(class_bmu, axis=0, return_counts=True))
     print('Done mapping inputs, preparing canvas...')
-
-    palette = 'bright' if dark else 'deep'
-
     #for 80 classes readability
     if len(classes) > 10:
         palette = 'cubehelix'
 
-    fig = plt.figure(figsize=(10, 6.5))
+    fig = plt.figure(figsize=(11, 6.5))
     if dark:
         plt.gca().set_facecolor((0.15,0.15,0.15))
 
@@ -107,7 +120,7 @@ def show_som(som, xs, ys, labels, title, files=None, show=False, dark=True, scat
     #generate colors based on the # of classes
     np.random.seed(42)
     #colors = ['white', 'red', 'blue', 'cyan', 'yellow', 'green', 'gray', 'brown', 'orange', 'magenta']
-    colors = sb.color_palette(n_colors=len(classes))
+    colors = material_palette()
     color_dict = {label: col for label, col in zip(classes, colors)}
 
     print('Adding labels for each mapped input...', end='')
@@ -117,6 +130,8 @@ def show_som(som, xs, ys, labels, title, files=None, show=False, dark=True, scat
                 xx = [m[1] for m in bmu]
                 yy = [m[0] for m in bmu]
                 size = point_size/2 + np.log( 1 + counts**2) * point_size
+                #size = counts * point_size
+                print("point size: {}".format(size))
                 plt.scatter(xx, yy, s=size, color=colors[i], alpha=0.6 if dark else 0.9)
         else:
             for i, m in enumerate(mapped):
@@ -146,6 +161,40 @@ def show_som(som, xs, ys, labels, title, files=None, show=False, dark=True, scat
       plt.show()
     else:
       plt.savefig(img_path)
+
+
+def show_confusion(som, xs, ys, title = "SOM confusion", palette="viridis"):
+    matplotlib.use('TkAgg')  # in order to print something
+    matplotlib.rcParams.update({'font.size': 16})
+    print('Building graph "{}"...'.format(title))
+    classes = np.unique(ys)
+    mapped = np.array(som.map_vects(xs))
+    confusion_map = np.zeros((som._m, som._n))
+    scaler = len(classes) / float(len(classes)-1) #max confusion when n out of n are different, so reverse
+
+    #create a grid of lists, one for each node (in order to count the class freqs for each node)
+    distributions_map = [[ [] for j in range(som._n)] for i in range(som._m)]
+
+    for y, bmu in zip(ys, mapped):
+        distributions_map[bmu[0]][bmu[1]].append(y)
+
+    for x in range(som._m):
+        for y in range(som._n):
+            vals = distributions_map[x][y]
+            if len(vals) == 0:
+                continue #continue if the node is empty (is not a bmu)
+            classes, counts = np.unique(vals, return_counts=True)
+            if len(classes) <= 1:
+                confusion_map[x,y] = 0
+            else:
+                counts = np.sort(-counts)
+                confusion_map[x,y] = np.sum(counts[1:]) / np.sum(counts)
+
+    print('Done mapping inputs, preparing canvas...')
+    plt.imshow(confusion_map*scaler, cmap=palette, origin="lower", clim=(0.0, 1.0))
+    plt.axis('off')
+    plt.colorbar()
+    plt.show()
 
 
 def classPrototype(inputs,nameInputs):

@@ -1,6 +1,7 @@
 from models.som.som import SOM
 from utils.constants import Constants
-from utils.utils import from_csv_with_filenames, from_npy_visual_data, from_csv_visual_10classes, from_npy_audio_data
+from utils.utils import from_csv_with_filenames, from_npy_visual_data, from_csv_visual_10classes, from_npy_audio_data, \
+    from_csv
 from sklearn.model_selection import train_test_split
 from utils.utils import transform_data, global_transform
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
@@ -12,10 +13,11 @@ import argparse
 audio_data_list =[
     os.path.join(Constants.AUDIO_DATA_FOLDER, 'new', 'audio10classes25pca20t.csv'),
     os.path.join(Constants.AUDIO_DATA_FOLDER, 'new', 'audio10classes20pca25t.csv'),
-    os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio10classesnopca60t.csv'),
+    os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio-10classes-coco-imagenet_train.csv'),
+    os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio-10classes-coco-imagenet_test.csv'),
     os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_synth.npy')
 ]
-audio_data_path = audio_data_list[-1]
+audio_data_path = audio_data_list[-3]
 
 visual_data_path_a = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_a.npy')
 visual_data_path_b = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_b.npy')
@@ -31,21 +33,21 @@ TRANSFORMS = ['none', 'zscore', 'global', 'minmax', 'std']
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Train a Hebbian model.')
-    parser.add_argument('--sigma', metavar='sigma', type=float, default=10, help='The model neighborhood value')
-    parser.add_argument('--alpha', metavar='alpha', type=float, default=0.3, help='The SOM initial learning rate')
+    parser.add_argument('--sigma', metavar='sigma', type=float, default=8, help='The model neighborhood value')
+    parser.add_argument('--alpha', metavar='alpha', type=float, default=0.1, help='The SOM initial learning rate')
     parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Random generator seed')
     parser.add_argument('--neurons1', type=int, default=20,
                         help='Number of neurons for audio SOM, first dimension')
-    parser.add_argument('--neurons2', type=int, default=30,
+    parser.add_argument('--neurons2', type=int, default=20,
                         help='Number of neurons for audio SOM, second dimension')
     parser.add_argument('--epochs', type=int, default=1000,
                         help='Number of epochs the SOM will be trained for')
     parser.add_argument('--classes', type=int, default=10,
                         help='Number of classes the model will be trained on')
     parser.add_argument('--subsample', action='store_true', default=False)
-    parser.add_argument('--data', metavar='data', type=str, default='video')
-    parser.add_argument('--group', metavar='group', type=str, default='a')
-    parser.add_argument('--transform', metavar='transform', type=str, default='minmax')
+    parser.add_argument('--data', metavar='data', type=str, default='audio')
+    parser.add_argument('--group', metavar='group', type=str, default='coco')
+    parser.add_argument('--transform', metavar='transform', type=str, default='std')
     parser.add_argument('--logging', action='store_true', default=True)
     parser.add_argument('--use-gpu', action='store_true', default=True)
     parser.add_argument('--batch', type=int, default=64)
@@ -59,9 +61,12 @@ if __name__ == '__main__':
             xs, ys = from_npy_audio_data(audio_data_path, classes=10)
         else:
             print('Reading from csv...')
-            xs, ys, _ = from_csv_with_filenames(audio_data_path)
-            ys = np.array(ys)
-            xs = np.array(xs)
+            xs_train, ys_train = from_csv(audio_data_path)
+            xs_test, ys_test = from_csv(audio_data_list[-2])
+            xs = np.array(xs_train + xs_test)
+            ys = np.array(ys_train + ys_test, dtype=int)
+            print(xs.shape, ys.shape)
+
         print('done, data: {} - labels: {}'.format(xs.shape, ys.shape))
     elif args.data == 'video':
         print('Loading visual data, group {}...'.format(args.group), end='')

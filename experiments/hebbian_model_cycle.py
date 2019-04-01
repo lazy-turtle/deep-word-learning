@@ -260,7 +260,7 @@ def iterate(path_som_video, path_som_audio, lr, taua, tauv, tha, thv, seed=42, i
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Automation of the hebbian model training.")
     parser.add_argument('--combine', action='store_true', default=False, help='Generate all combinations or not.')
-    parser.add_argument('--slices', metavar='slices', type=int, default=2, help='How many combination blocks to generate.')
+    parser.add_argument('--slices', metavar='slices', type=int, default=10, help='How many combination blocks to generate.')
     parser.add_argument('--index', metavar='index', type=int, default=1, help='Which slice to process.')
     parser.add_argument('--iter', metavar='iter', type=int, default=1, help='How many iterations for each combination.')
     parser.add_argument('--param-csv', metavar='param_csv', type=str, default=None, help='File containing parameters')

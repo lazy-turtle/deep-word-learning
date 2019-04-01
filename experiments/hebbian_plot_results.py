@@ -25,7 +25,66 @@ def smooth(scalars, weight=0.0):  # Weight between 0 and 1
     return smoothed
 
 
+def plot_single_result(folder):
+    dataframes = []
+    dir = os.path.join(folder, "data")
+    for f in glob.glob(os.path.join(dir, 'results_*.csv')):
+        dataframes.append(pd.read_csv(f, index_col=0))
+
+    audio_acc = np.empty((len(dataframes), 15))
+    video_acc = np.empty((len(dataframes), 15))
+
+    for i, df in enumerate(dataframes):
+        audio_acc[i] = dataframes[i]['acc_a'].values
+        video_acc[i] = dataframes[i]['acc_v'].values
+
+    avg_audio = audio_acc.mean(axis=0)
+    avg_video = video_acc.mean(axis=0)
+    tax_fact = np.concatenate((avg_audio, avg_video)).reshape((2, 15))
+
+    xx = np.arange(1, 16)
+    tax_fact = np.mean(tax_fact, axis=0)
+
+    matplotlib.rcParams.update({'font.size': 14})
+    fig = plt.figure(figsize=(9, 7))
+    ax = fig.add_subplot(1, 1, 1)
+    ax.set_xticks(np.arange(1, 16, 2))
+    ax.set_yticks(np.arange(0, 101, 5))
+    ax.set_ylim([50, 101])
+    ax.yaxis.set_major_formatter(tkr.PercentFormatter())
+    ax.grid(True, axis='y', linestyle=':')
+
+    cols = sb.color_palette('deep', n_colors=5)
+    styles = [':', '--']
+    m = None
+    # add the 80% line
+    ax.plot(xx, np.full(xx.shape, 80), color='k', linestyle=':', linewidth=1)
+    ax.plot(xx, smooth(avg_audio, weight=SMOOTH), color=cols[0], marker=m, label='Audio segm', linestyle=styles[1])
+    ax.plot(xx, smooth(avg_video, weight=SMOOTH), color=cols[1], marker=m, label='Video segm', linestyle=styles[1])
+    ax.plot(xx, smooth(tax_fact, weight=SMOOTH), color=cols[-2], marker=m, linewidth=3)
+
+    legend_items = [
+        lines.Line2D([0], [0], color=cols[0], lw=4, linestyle=':'),
+        lines.Line2D([0], [0], color=cols[1], lw=4, linestyle=':'),
+        lines.Line2D([0], [0], color=cols[-2], lw=4, linestyle='-'),
+    ]
+
+    legend_labels = [
+        'Production',
+        'Comprehension',
+        'Taxonomic factor',
+    ]
+    ax.legend(legend_items, legend_labels, loc="lower right")
+    ax.set_xlim([1, 15])
+    ax.set_xlabel('Number of joint presentations', fontsize=14)
+    ax.set_ylabel('Accuracy', fontsize=14)
+    plt.show()
+
+
 def main():
+    plot_single_result("C:\\Users\\Edoardo\\Desktop\\results\\segm+synth_audio")
+    exit(0)
+
     dataframes_segm = []
     for f in glob.glob(os.path.join(RESULTS_DIR_SEGM, 'results_*.csv')):
         dataframes_segm.append(pd.read_csv(f, index_col=0))

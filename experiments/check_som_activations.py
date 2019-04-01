@@ -2,9 +2,9 @@ from models.som.som import SOM
 from models.som.HebbianModel import HebbianModel
 from utils.constants import Constants
 from utils.utils import from_csv_with_filenames, from_npy_visual_data, global_transform, min_max_scale, \
-    labels_dictionary, from_npy_audio_data
+    labels_dictionary, from_npy_audio_data, from_csv
 from sklearn.utils import shuffle
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.model_selection import train_test_split
 import os
 import numpy as np
@@ -26,6 +26,7 @@ video_model_list = [
     'video_20x30_s12.0_b64_a0.1_group-segm_seed42_1548697994_minmax',
     'video_20x30_s12.0_b128_a0.1_group-bbox_seed42_1548704755_global',
     'video_20x30_s15.0_b128_a0.1_group-c2_seed42_1547388036_minmax',
+    'video_20x30_s15.0_b64_a0.1_group-segm_seed42_1548706607_minmax'
 ]
 
 audio_model_list = [
@@ -38,12 +39,12 @@ audio_model_list = [
     'audio_20x30_s10.0_b128_a0.1_group-old_seed42_old_minmax'
 ]
 
-video_model = video_model_list[-2]
-audio_model = audio_model_list[-2]
+video_model = video_model_list[-1]
+audio_model = audio_model_list[-3]
 
 #uncomment the line needed, comment  the other of course
-som_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', audio_model)
-#som_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'best', video_model)
+#som_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', audio_model)
+som_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'best', video_model)
 
 data_paths = {
     'a': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_a.npy'),
@@ -57,6 +58,7 @@ data_paths = {
     'segm': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-10classes-segm.npy'),
     'bbox': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-10classes-bbox.npy'),
     'old': os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio10classes_old.csv'),
+    'last': os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio-10classes-coco-imagenet_train.csv'),
     '20pca25t': os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio-10classes-20pca25t.csv'),
 }
 
@@ -78,14 +80,14 @@ def extract_som_info(filename):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Check SOM activations.')
     parser.add_argument('--lr', metavar='lr', type=float, default=10, help='The model learning rate')
-    parser.add_argument('--tau', metavar='tau', type=float, default=0.2, help='Tau value audio som')
-    parser.add_argument('--th', metavar='th', type=float, default=0.0, help='Threshold to cut values from')
+    parser.add_argument('--tau', metavar='tau', type=float, default=1, help='Tau value audio som')
+    parser.add_argument('--th', metavar='th', type=float, default=0.5, help='Threshold to cut values from')
     parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Random generator seed')
     parser.add_argument('--som', metavar='som', type=str, default=som_path,
                         help='Video SOM model path')
     parser.add_argument('--algo', metavar='algo', type=str, default='sorted',
                         help='Algorithm choice')
-    parser.add_argument('--act', metavar='act', type=str, default='abs',
+    parser.add_argument('--act', metavar='act', type=str, default='eucl',
                         help='Activation function choice')
     parser.add_argument('--source', metavar='source', type=str, default='v',
                         help='Source SOM')
@@ -93,6 +95,8 @@ if __name__ == '__main__':
 
     num_classes = 10
     args = parser.parse_args()
+    np.random.seed(args.seed)
+
     som_info = extract_som_info(os.path.basename(args.som))
     print('SOM info:')
     for k,v in som_info.items():
@@ -103,7 +107,7 @@ if __name__ == '__main__':
     labels = None
     if som_info['data'] == 'audio':
         if som_info['group'] != 'syn':
-            xs, ys, _ = from_csv_with_filenames(som_data)
+            xs, ys = from_csv(som_data)
             xs = np.array(xs)
             ys = np.array(ys).astype(int)
         else:
@@ -122,6 +126,9 @@ if __name__ == '__main__':
     elif trasf == 'global':
         print('Using z-score with global stats...')
         xs,_ = global_transform(xs)
+    elif trasf == 'std':
+        print('Using standard scaler...')
+        xs = StandardScaler().fit_transform(xs)
     elif trasf != 'none':
         raise ValueError('Normalization not recognised, please check som filename.')
 
@@ -135,7 +142,7 @@ if __name__ == '__main__':
     som.restore_trained(som_path)
 
     # get random samples for each class
-    num_samples = 15
+    num_samples = 1
     for id in range(num_classes):
         indices = np.where(ys == id)[0]
         sampled_indices = np.random.choice(indices, size=num_samples, replace=False)
@@ -147,6 +154,12 @@ if __name__ == '__main__':
             a,_ = som.get_activations(xs_sampled[i])
             activation += a.reshape((som._m, som._n))
 
-        plt.imshow(activation, cmap='plasma', origin='lower')
-        plt.title('Class: {}'.format(id if labels is None else labels[id]))
+        plt.figure(figsize=(9,4))
+        plt.imshow(activation, cmap='inferno', origin='lower')
+        #plt.title('Class: {}'.format(id if labels is None else labels[id]))
+        plt.subplots_adjust(left=0.04, right=0.96, top=0.96, bottom=0.04)
+        plt.setp(plt.gca().get_xticklabels(), visible=False)
+        plt.setp(plt.gca().get_yticklabels(), visible=False)
+        plt.tick_params(axis='both', which='both', length=0)
+        plt.colorbar()
         plt.show()

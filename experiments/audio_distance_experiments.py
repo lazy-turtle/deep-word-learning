@@ -227,7 +227,7 @@ def similarity_matrix(xs, ys):
 
 
 
-DATA_PATH = os.path.join(Constants.AUDIO_DATA_FOLDER, 'new')
+DATA_PATH = os.path.join(Constants.AUDIO_DATA_FOLDER, "pca")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Analyze representation quality.')
@@ -238,6 +238,34 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
+    # # just to plot results
+    # csv_path = os.path.join(args.path, "pca-results.csv")
+    # data = []
+    # filenames = []
+    # with open(csv_path) as f:
+    #     for line in f:
+    #         l = line.split(',')
+    #         data.append(np.asfarray(l[1:]))
+    #         filenames.append(l[0])
+    #
+    # data = np.array(data)
+    # xs = np.arange(0, len(data))
+    # ys = data[:,0]
+    #
+    # sb.set()
+    # plt.figure(figsize=(10, 5))
+    # plt.plot(xs, ys, color="red")
+    # plt.gca().set_ylim([0.6, 0.85])
+    # plt.scatter([xs[0], xs[-1]], [ys[0], ys[-1]], c="red")
+    # plt.annotate("20pca25t", (xs[0], ys[0]), xytext=(xs[0], ys[0] - 0.02))
+    # plt.annotate("no-pca100t", (xs[-1], ys[-1]), xytext=(xs[-1], ys[-1] + 0.01))
+    # plt.tick_params(axis='x', which='both', bottom=False, labelbottom=False)
+    #
+    # plt.show()
+    # exit(0)
+
+
+
     num_classes = 10
     files = list(glob.glob(os.path.join(args.path, '*.csv')))
     result = np.empty((len(files), num_classes))
@@ -247,18 +275,21 @@ if __name__ == '__main__':
         xs, ys, _ = utils.from_csv_with_filenames(file)
         xs = np.array(xs)
         ys = np.array(ys)
+        print(os.path.basename(file), xs.shape)
+        continue
         labels = np.unique(ys)
         compactness = cluster_compactness(xs, ys)
         result[i] = compactness
 
+    exit(0)
     means = result.mean(axis=-1)
     vars  = result.var(axis=-1)
 
     # merge results and sort based on mean values
     merged = zip(files, means, vars)
     merged = sorted(merged, key=lambda x: x[1])
-    for f, m,v in merged:
-        print('{:<20s} - m: {:.5f}, v: {:.5f}'.format(f,m,v))
+    for f,m,v in merged:
+        print('{},{},{}'.format(f,m,v))
 
     argmin = np.argmin(means)
-    print('\nBest result: {} (mean = {:.5f}, var = {:.5f}'.format(files[int(argmin)], means[argmin], vars[argmin]))
+    print('\n\nBest result: {} (mean = {:.5f}, var = {:.5f}'.format(files[int(argmin)], means[argmin], vars[argmin]))

@@ -10,7 +10,7 @@ import argparse
 
 import sys
 
-from models.som.SOM import SOM
+from models.som.som import SOM
 from utils.constants import Constants
 from utils.utils import from_npy_visual_data, from_csv_visual_100classes, from_csv_with_filenames, labels_dictionary, \
     global_transform, from_csv, from_csv_visual_10classes
@@ -94,13 +94,15 @@ if __name__ == '__main__':
                         help='Specify whether the csv contains audio representations, as the loading functions are different.')
     args = parser.parse_args()
 
-    data_type = 'old' #'video' if not args.is_audio else 'audio'
-    data_group = 'VisualInputTrainingSet.csv'
-    model_name = 'old_20x30_s12.0_b64_a0.3_trsf_std_group-a_seed42_1548880436_final'
-    data_path = os.path.join(Constants.DATA_FOLDER, 'video', data_group)
+    data_type = 'video' if not args.is_audio else 'audio'
+    data_group = 'visual-10classes-segm.npy' if not args.is_audio else "audio-10classes-20pca25t.csv"
+    video_model_name = 'video_20x30_s15.0_b64_a0.1_trsf_minmax_group-segm_seed42_1548706607_final'
+    audio_model_name = 'audio_20x30_s8.0_b128_a0.3_group-20pca25t_seed42_pca_minmax'
+    model_name = audio_model_name if args.is_audio else video_model_name
+    data_path = os.path.join(Constants.DATA_FOLDER, data_type, data_group)
     model_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, data_type, model_name)
     out_path = os.path.join(Constants.OUTPUT_FOLDER, data_type, 'evaluate_som.txt')
-    label_path = os.path.join(Constants.LABELS_FOLDER, 'imagenet-10-labels.json')
+    label_path = os.path.join(Constants.LABELS_FOLDER, 'coco-10-labels-c.json')
     labels_dict = labels_dictionary(label_path)
 
     id_dict = dict()
@@ -128,7 +130,7 @@ if __name__ == '__main__':
     #xs = MinMaxScaler().fit_transform(xs)
     xs = StandardScaler().fit_transform(xs)
 
-    som = SOM(20, 30, xs.shape[1], checkpoint_loc=model_path)
+    som = SOM(20, 30, xs.shape[1], checkpoint_loc=model_path, data=data_type)
     som.restore_trained(model_path)
     #measure = class_compactness(som, xs, ys)
     measure = my_compactness(som, xs, ys)

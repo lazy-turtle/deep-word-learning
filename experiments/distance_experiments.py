@@ -9,7 +9,7 @@ import argparse
 import seaborn as sb
 from sklearn.cluster import KMeans
 from utils.utils import global_transform
-matplotlib.rcParams.update({'font.size': 14})
+matplotlib.rcParams.update({'font.size': 12})
 
 
 
@@ -158,7 +158,7 @@ def show_clustering(xs, ys, num_classes, labels, name, show_classes=False, iter=
 
     occurrences = occurrences.T if show_classes else occurrences
 
-    plt.figure(figsize=(10,6))
+    plt.figure(figsize=(12,6))
 
     cols = sb.color_palette('muted', n_colors=num_classes)
     bot = np.zeros(num_classes)
@@ -179,7 +179,8 @@ def show_clustering(xs, ys, num_classes, labels, name, show_classes=False, iter=
     plt.gca().yaxis.grid(True, linestyle=':')
     plt.legend([p[0] for p in plots], cluster_labels if show_classes else classes_labels, loc='center left', bbox_to_anchor=(1, 0.5))
     plt.tight_layout()
-    plt.savefig('C:\\Users\\Edoardo\\Desktop\\results\\cluster\\{}.png'.format(name))
+    plt.show()
+    #plt.savefig('C:\\Users\\Edoardo\\Desktop\\results\\{}.png'.format(name))
 
 
 def class_prototype(xs, ys, c):
@@ -238,9 +239,9 @@ audio_data_names = [
     'audio-10classes-old.csv'
 ]
 
-video_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, video_data_names[-1])
-audio_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, audio_data_names[2])
-labels_path = os.path.join(Constants.LABELS_FOLDER, 'coco-imagenet-10-labels.json')
+video_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, video_data_names[-2])
+audio_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, audio_data_names[0])
+labels_path = os.path.join(Constants.LABELS_FOLDER, 'coco-10-labels-c.json')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Analyze representation quality.')
@@ -250,13 +251,13 @@ if __name__ == '__main__':
                         help='Specify whether you are analyzing \
                         a file with representations from 100 classes, as the loading functions are different.',
                         default=False)
-    parser.add_argument('--is-audio', action='store_true', default=False,
+    parser.add_argument('--is-audio', action='store_true', default=True,
                         help='Specify whether the csv contains audio representations, as the loading functions are different.')
     parser.add_argument('--data', metavar='data', type=str, default='new', help='Use new data format or old')
-    parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Seed for deterministic results')
+    parser.add_argument('--seed', metavar='seed', type=int, default=10, help='Seed for deterministic results')
     parser.add_argument('--path', metavar='path', type=str, default=video_data_path,
                         help='Specify the file containing data')
-    parser.add_argument('--trsf', metavar='path', type=str, default='minmax',
+    parser.add_argument('--trsf', metavar='path', type=str, default='std',
                         help='Specify the data normalization technique')
     parser.add_argument('--op', metavar='op', type=str, default='cluster',
                         help='Specify the operation to launch')
@@ -300,17 +301,18 @@ if __name__ == '__main__':
     if args.op == 'avg':
         average_prototype_distance_matrix(xs, ys)
     elif args.op == 'cluster':
-        iterations = 400
+        iterations = 10000
         tolerance = 1e-10
         result = cluster_compactness(xs, ys, iter=iterations, tol=tolerance, seed=args.seed)
         print('Class compactness:')
         for i, c in enumerate(result):
-            print('{:<20s} - {:.5f}'.format(str(labels[i]), c))
+            print('{} & {:.5f}'.format("c{}".format(i), c))
         print('\nMean:     {:.5f}'.format(result.mean()))
         print('Variance: {:.5f}'.format(result.var()))
         show_clustering(xs, ys, num_classes, labels, show_classes=False,
-                        iter=iterations, tol=tolerance, seed=args.seed, name="cluster_video_bbox")
+                        iter=iterations, tol=tolerance, seed=args.seed, name="cluster_video_segm_b")
     elif args.op == 'sim':
+        print(xs.shape)
         m = similarity_matrix(xs, ys)
 
         #print in latex format because i'm lazy
