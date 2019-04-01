@@ -11,14 +11,14 @@ import argparse
 
 DATA_TYPE = 'audio'
 #visual_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-10classes-bbox_test.npy')
-visual_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio-10classes-20pca25t.csv')
+visual_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio-80classes-synth.npy')
 
-model_name = 'audio_20x30_s8.0_b128_a0.3_group-20pca25t_seed42_pca_minmax'
+model_name = 'audio_40x40_s20.0_b64_a0.1_trsf_std_group-synth_seed42_1554134547_final'
 #model_name = 'old_20x30_s10.0_b64_a0.3_trsf_std_group-a_seed42_1549010820_final'
 #model_name = 'video_20x30_s12.0_b64_a0.1_trsf_minmax_group-bbox_seed42_1548698406_final'
 #model_name = 'best/video_20x30_s12.0_b64_a0.1_group-segm_seed42_1548697994_minmax'
 model_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, DATA_TYPE, model_name)
-label_path = os.path.join(Constants.LABELS_FOLDER, 'coco-10-labels-c.json')
+label_path = os.path.join(Constants.LABELS_FOLDER, 'coco-labels.json')
 
 
 def read_labels(path):
@@ -41,10 +41,12 @@ def extract_som_info(model_name):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Visualise a Self Organising Map.')
     parser.add_argument('--model', metavar='model', type=str, default=model_path, help='The model neighborhood value')
-    parser.add_argument('--subsample', action='store_true', default=False)
+    parser.add_argument('--subsample', action='store_true', default=True)
     args = parser.parse_args()
 
     labels_dict = read_labels(label_path)
+    n_classes = len(labels_dict)
+
     if 'csv' in visual_data_path:
         if DATA_TYPE == 'audio':
             xs, ys, _ = from_csv_with_filenames(visual_data_path)
@@ -56,21 +58,23 @@ if __name__ == '__main__':
     else:
         id_to_label = json.load(open(label_path))
         id_to_label = {int(k): v for k,v in id_to_label.items()}
-        xs, ys, ids_dict = from_npy_visual_data(visual_data_path, classes=10)
+        xs, ys, ids_dict = from_npy_visual_data(visual_data_path, classes=n_classes)
+        print(xs.shape)
     labels = list(labels_dict.values())
 
     if args.subsample:
         np.random.seed(42)
         xs1 = []
         ys1 = []
-        classes = np.arange(10)
+        classes = np.arange(n_classes)
+        sample_size = 10
         for i in classes:
             idx = np.where(ys == i)[0]
-            idx = np.random.choice(idx, size=10)
+            idx = np.random.choice(idx, size=sample_size)
             xs1.append(xs[idx])
             ys1.append(ys[idx])
-        xs = np.array(xs1).reshape((100, 2048))
-        ys = np.array(ys1).reshape(100)
+        xs = np.array(xs1).reshape((sample_size*n_classes, xs.shape[1]))
+        ys = np.array(ys1).reshape(sample_size*n_classes)
 
     #xs, _ = global_transform(xs)
     #xs, _ = transform_data(xs)
@@ -79,7 +83,7 @@ if __name__ == '__main__':
     dim = xs.shape[1]
 
     #info = extract_som_info(model_name)
-    info = {'shape':[20,30], 'alpha':0.1, 'sigma':15.0, 'batch':128}
+    info = {'shape':[40,40], 'alpha':0.1, 'sigma':20.0, 'batch':128}
     som_shape = info['shape']
     som = SOM(som_shape[0], som_shape[1], dim, alpha=info['alpha'], sigma=info['sigma'],
               batch_size=info['batch'], checkpoint_loc=args.model, data=DATA_TYPE)

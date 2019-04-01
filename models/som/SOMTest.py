@@ -100,8 +100,7 @@ def show_som(som, xs, ys, labels, title, files=None, show=False, dark=True, scat
         bmu_list.append(np.unique(class_bmu, axis=0, return_counts=True))
     print('Done mapping inputs, preparing canvas...')
     #for 80 classes readability
-    if len(classes) > 10:
-        palette = 'cubehelix'
+    palette = 'cubehelix' if len(classes) > 10 else "dark"
 
     fig = plt.figure(figsize=(11, 6.5))
     if dark:
@@ -120,7 +119,7 @@ def show_som(som, xs, ys, labels, title, files=None, show=False, dark=True, scat
     #generate colors based on the # of classes
     np.random.seed(42)
     #colors = ['white', 'red', 'blue', 'cyan', 'yellow', 'green', 'gray', 'brown', 'orange', 'magenta']
-    colors = material_palette()
+    colors = sb.color_palette(palette, n_colors=len(classes))
     color_dict = {label: col for label, col in zip(classes, colors)}
 
     print('Adding labels for each mapped input...', end='')
@@ -131,7 +130,6 @@ def show_som(som, xs, ys, labels, title, files=None, show=False, dark=True, scat
                 yy = [m[0] for m in bmu]
                 size = point_size/2 + np.log( 1 + counts**2) * point_size
                 #size = counts * point_size
-                print("point size: {}".format(size))
                 plt.scatter(xx, yy, s=size, color=colors[i], alpha=0.6 if dark else 0.9)
         else:
             for i, m in enumerate(mapped):
@@ -151,7 +149,7 @@ def show_som(som, xs, ys, labels, title, files=None, show=False, dark=True, scat
       patch = m_patches.Patch(color=colors[i], label=labels[i])
       patch_list.append(patch)
 
-    if legend:
+    if legend & len(classes) <= 10:
         plt.legend(handles=patch_list, loc='center left',bbox_to_anchor=(1, 0.5))
     img_name = 'som_{}x{}_s{}_a{}_{}.png'.format(som._m, som._n, som.sigma, som.alpha, suffix)
     img_path = os.path.join(Constants.PLOT_FOLDER, 'temp', img_name)

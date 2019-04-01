@@ -120,43 +120,21 @@ class SOM(object):
             #Summaries placeholder
             self._train_compactness = tf.placeholder("float")
             self._test_compactness = tf.placeholder("float")
-            self._train_population_convergence = tf.placeholder("float")
-            self._test_population_convergence = tf.placeholder("float")
-            self._train_mean_convergence = tf.placeholder("float")
             self._test_mean_convergence = tf.placeholder("float")
-            self._train_var_convergence = tf.placeholder("float")
-            self._test_var_convergence = tf.placeholder("float")
             self._avg_delta = tf.placeholder("float")
-            self._train_quant_error = tf.placeholder("float")
             self._test_quant_error = tf.placeholder("float")
-            self._train_confusion = tf.placeholder("float")
             self._test_confusion = tf.placeholder("float")
-            self._train_usage_rate = tf.placeholder("float")
             self._test_usage_rate = tf.placeholder("float")
-            self._train_worst_confusion = tf.placeholder("float")
-            self._test_worst_confusion = tf.placeholder("float")
 
             ##SUMMARIES
             train_mean, train_std = tf.nn.moments(self._train_compactness, axes=[0])
             test_mean, test_std = tf.nn.moments(self._test_compactness, axes=[0])
             tf.summary.scalar("Train Mean Compactness", train_mean)
             tf.summary.scalar("Test Mean Compactness", test_mean)
-            tf.summary.scalar("Train Compactness Variance", train_std)
-            tf.summary.scalar("Test Compactness Variance", test_std)
-            tf.summary.scalar("Train Population Convergence", self._train_population_convergence)
-            tf.summary.scalar("Test Population Convergence", self._test_population_convergence)
-            tf.summary.scalar("Train Mean Convergence", self._train_mean_convergence)
             tf.summary.scalar("Test Mean Convergence", self._test_mean_convergence)
-            tf.summary.scalar("Train Var Convergence", self._train_var_convergence)
-            tf.summary.scalar("Test Var Convergence", self._test_var_convergence)
             tf.summary.scalar("Average Delta", self._avg_delta)
-            tf.summary.scalar("Train Quantization Error", self._train_quant_error)
             tf.summary.scalar("Test Quantization Error", self._test_quant_error)
-            tf.summary.scalar("Train Confusion", self._train_confusion)
             tf.summary.scalar("Test Confusion", self._test_confusion)
-            tf.summary.scalar("Train Worst Confusion", self._train_worst_confusion)
-            tf.summary.scalar("Test Worst Confusion", self._test_worst_confusion)
-            tf.summary.scalar("Train BMU Usage Rate", self._train_usage_rate)
             tf.summary.scalar("Test BMU Usage Rate", self._test_usage_rate)
 
             # will be set when computing the class compactness for the first time
@@ -316,8 +294,7 @@ class SOM(object):
                             stats = 'TRAIN - comp.: {:.4f}, conf.: {:.4f}, bmu rate:{:.4f} '\
                                 .format(np.mean(train_comp), train_confusion, train_usage_rate)
                             old_train_comp = train_comp
-                            train_mean_conv, train_var_conv, train_conv = self.population_based_convergence(input_vects)
-                            _ , train_quant_error = self.quantization_error(input_vects)
+                            #_ , train_quant_error = self.quantization_error(input_vects)
                             #train_quant_error = [0]
                             #print(train_conv)
                         else:
@@ -340,7 +317,6 @@ class SOM(object):
                         summary = self._sess.run(self.summaries,
                                                  feed_dict={self._train_compactness: train_comp,
                                                             self._test_compactness: test_comp,
-                                                            self._train_mean_convergence: train_mean_conv,
                                                             self._test_mean_convergence: test_mean_conv,
                                                             self._avg_delta: avg_delta,
                                                             self._test_confusion: test_confusion,
