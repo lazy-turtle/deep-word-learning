@@ -21,7 +21,7 @@ import itertools
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 video_model_list = [
-    'video_60x60_s30.0_b256_a0.1_group-big_seed10_6060_minmax',
+    'video_60x60_s30.0_b256_a0.1_group-big_seed10_6060_std',
     'video_60x80_s30.0_b128_a0.1_group-big_seed42_6080_minmax',
 ]
 
