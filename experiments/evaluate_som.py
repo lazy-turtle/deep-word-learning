@@ -90,24 +90,24 @@ if __name__ == '__main__':
                         a file with representations from 100 classes, as the loading functions are different.',
                         default=False)
     parser.add_argument('--write', action='store_true', help='', default=False)
-    parser.add_argument('--is-audio', action='store_true', default=True,
+    parser.add_argument('--is-audio', action='store_true', default=False,
                         help='Specify whether the csv contains audio representations, as the loading functions are different.')
     args = parser.parse_args()
 
     data_type = 'video' if not args.is_audio else 'audio'
-    data_group = 'visual-10classes-segm.npy' if not args.is_audio else "audio-10classes-20pca25t.csv"
-    video_model_name = 'video_20x30_s15.0_b64_a0.1_trsf_minmax_group-segm_seed42_1548706607_final'
+    data_group = 'visual-80classes-segm.npy' if not args.is_audio else "audio-10classes-20pca25t.csv"
+    video_model_name = 'video_60x60_s30.0_b256_a0.1_group-big_seed10_1545471476_minmax'
     audio_model_name = 'audio_20x30_s8.0_b128_a0.3_group-20pca25t_seed42_pca_minmax'
     model_name = audio_model_name if args.is_audio else video_model_name
     data_path = os.path.join(Constants.DATA_FOLDER, data_type, data_group)
     model_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, data_type, model_name)
     out_path = os.path.join(Constants.OUTPUT_FOLDER, data_type, 'evaluate_som.txt')
-    label_path = os.path.join(Constants.LABELS_FOLDER, 'coco-10-labels-c.json')
+    label_path = os.path.join(Constants.LABELS_FOLDER, 'coco-labels.json')
     labels_dict = labels_dictionary(label_path)
 
     id_dict = dict()
     if not args.classes100:
-        num_classes = 10
+        num_classes = 80
         if not args.is_audio:
             xs, ys, id_dict = from_npy_visual_data(data_path, classes=num_classes)
         else:
@@ -127,10 +127,10 @@ if __name__ == '__main__':
             xs, ys, _ =  from_csv_with_filenames(args.csv_path)
 
     #xs, _ = global_transform(xs)
-    #xs = MinMaxScaler().fit_transform(xs)
-    xs = StandardScaler().fit_transform(xs)
+    xs = MinMaxScaler().fit_transform(xs)
+    #xs = StandardScaler().fit_transform(xs)
 
-    som = SOM(20, 30, xs.shape[1], checkpoint_loc=model_path, data=data_type)
+    som = SOM(60, 60, xs.shape[1], checkpoint_loc=model_path, data=data_type)
     som.restore_trained(model_path)
     #measure = class_compactness(som, xs, ys)
     measure = my_compactness(som, xs, ys)

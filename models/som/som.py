@@ -43,7 +43,7 @@ class SOM(object):
     def __init__(self, m, n, dim, n_iterations=50, alpha=None, sigma=None,
                  tau=0.5, threshold=0.6, batch_size=500, num_classes=100,
                  checkpoint_loc = None, data='audio', sigma_decay='time',
-                 lr_decay='time', seed=42, suffix=''):
+                 lr_decay='time', seed=42, suffix='', artificial=True):
         """
         Initializes all necessary components of the TensorFlow
         Graph.
@@ -63,6 +63,7 @@ class SOM(object):
         self._m = m
         self._n = n
         self.seed = seed
+        self._artificial = artificial
         self.alpha = 0.3 if alpha is None else float(alpha)
         self.sigma = max(m,n) / 2.0 if sigma is None else float(sigma)
         self.tau = tau
@@ -97,8 +98,10 @@ class SOM(object):
 
             #Randomly initialized weightage vectors for all neurons,
             #stored together as a matrix Variable of size [m*n, dim]
-            self._weightage_vects = tf.Variable(tf.random_normal([m*n, dim], mean=0, stddev=1, seed=seed))
-
+            if not artificial:
+                self._weightage_vects = tf.Variable(tf.random_normal([m*n, dim], mean=0, stddev=1, seed=seed))
+            else:
+                self._weightage_vects = tf.Variable(initial_value=np.eye(m*n, dim, dtype=np.float32))
             #Matrix of size [m*n, 2] for SOM grid locations
             #of neurons
             self._location_vects = tf.constant(np.array(
@@ -252,6 +255,13 @@ class SOM(object):
             summary_writer = tf.summary.FileWriter(self.logs_path)
             old_train_comp = [0]
             old_test_comp = [0]
+            if (self._artificial):
+                dirpath = self.checkpoint_loc + '_' + str(0) + 'ep' + os.sep
+                if not os.path.exists(self.checkpoint_loc):
+                    os.makedirs(self.checkpoint_loc)
+                path = dirpath + 'model'
+                saver.save(self._sess, path, global_step=0)
+                return
 
             iters = ''
             stats = ''
