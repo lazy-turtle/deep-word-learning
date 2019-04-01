@@ -130,6 +130,20 @@ if __name__ == '__main__':
     xs = MinMaxScaler().fit_transform(xs)
     #xs = StandardScaler().fit_transform(xs)
 
+    if args.subsample:
+        np.random.seed(42)
+        xs1 = []
+        ys1 = []
+        classes = np.arange(num_classes)
+        sample_size = 10
+        for i in classes:
+            idx = np.where(ys == i)[0]
+            idx = np.random.choice(idx, size=sample_size)
+            xs1.append(xs[idx])
+            ys1.append(ys[idx])
+        xs = np.array(xs1).reshape((sample_size*num_classes, xs.shape[1]))
+        ys = np.array(ys1).reshape(sample_size*num_classes)
+
     som = SOM(60, 60, xs.shape[1], checkpoint_loc=model_path, data=data_type)
     som.restore_trained(model_path)
     #measure = class_compactness(som, xs, ys)
