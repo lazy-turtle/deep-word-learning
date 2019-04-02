@@ -45,10 +45,10 @@ audio_data_paths = {
              os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio-10classes-coco-imagenet_test.csv')]
 }
 
-lr_values = [5, 10]
-tauv_values = [0.2]
+lr_values = [10, 20]
+tauv_values = [0.1, 0.2]
 taua_values = [0.2]
-thv_values = [0.5]
+thv_values = [0.2, 0.5]
 tha_values = [0.0]
 
 
