@@ -26,7 +26,8 @@ video_model_list = [
     'video_20x30_s12.0_b64_a0.1_group-segm_seed42_1548697994_minmax',
     'video_20x30_s12.0_b128_a0.1_group-bbox_seed42_1548704755_global',
     'video_20x30_s15.0_b128_a0.1_group-c2_seed42_1547388036_minmax',
-    'video_20x30_s15.0_b64_a0.1_group-segm_seed42_1548706607_minmax'
+    'video_20x30_s15.0_b64_a0.1_group-segm_seed42_1548706607_minmax',
+    'video_60x60_s30.0_b256_a0.1_group-big_seed10_6060_std',
 ]
 
 audio_model_list = [
@@ -44,8 +45,8 @@ video_model = video_model_list[-1]
 audio_model = audio_model_list[-1]
 
 #uncomment the line needed, comment  the other of course
-som_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', audio_model)
-#som_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'best', video_model)
+#som_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'audio', audio_model)
+som_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, 'video', 'best', video_model)
 
 data_paths = {
     'a': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_a.npy'),
@@ -54,6 +55,7 @@ data_paths = {
     'c2': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_c2.npy'),
     'z': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_z.npy'),
     'as':os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual_10classes_train_as.npy'),
+    'big': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-80classes-segm.npy'),
     'x': os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio_10classes_train.csv'),
     'synth': os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio-80classes-synth.npy'),
     'segm': os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-10classes-segm.npy'),
@@ -64,6 +66,7 @@ data_paths = {
 }
 
 def extract_som_info(filename):
+    print(filename)
     info = dict()
     fields = filename.split('_')
     info['data'] = fields[0]
@@ -82,7 +85,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Check SOM activations.')
     parser.add_argument('--lr', metavar='lr', type=float, default=10, help='The model learning rate')
     parser.add_argument('--tau', metavar='tau', type=float, default=0.2, help='Tau value audio som')
-    parser.add_argument('--th', metavar='th', type=float, default=0.0, help='Threshold to cut values from')
+    parser.add_argument('--th', metavar='th', type=float, default=0.5, help='Threshold to cut values from')
     parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Random generator seed')
     parser.add_argument('--som', metavar='som', type=str, default=som_path,
                         help='Video SOM model path')
@@ -94,7 +97,7 @@ if __name__ == '__main__':
                         help='Source SOM')
     parser.add_argument('--train', action='store_true', default=False)
 
-    num_classes = 10
+    num_classes = 80
     args = parser.parse_args()
     np.random.seed(args.seed)
 
@@ -114,8 +117,8 @@ if __name__ == '__main__':
         else:
             xs, ys = from_npy_audio_data(som_data)
     else:
-        xs, ys, index_to_id = from_npy_visual_data(som_data)
-        id_to_label = labels_dictionary(os.path.join(Constants.LABELS_FOLDER, 'coco-imagenet-10-labels.json'))
+        xs, ys, index_to_id = from_npy_visual_data(som_data, classes=num_classes)
+        id_to_label = labels_dictionary(os.path.join(Constants.LABELS_FOLDER, 'coco-labels.json'))
         labels = [id_to_label[v] for v in np.unique(ys)]
 
     # transform.
@@ -143,7 +146,7 @@ if __name__ == '__main__':
     som.restore_trained(som_path)
 
     # get random samples for each class
-    num_samples = 1
+    num_samples = 10
     for id in range(num_classes):
         indices = np.where(ys == id)[0]
         sampled_indices = np.random.choice(indices, size=num_samples, replace=False)

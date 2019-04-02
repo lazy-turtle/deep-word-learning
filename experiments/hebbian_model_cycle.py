@@ -18,7 +18,7 @@ from datetime import date
 import pandas as pd
 import itertools
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+#os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 video_model_list = [
     'video_60x60_s30.0_b256_a0.1_group-big_seed10_6060_std',
@@ -48,8 +48,8 @@ audio_data_paths = {
 lr_values = [5, 10]
 tauv_values = [0.2]
 taua_values = [0.2]
-thv_values = [0.0, 0.2]
-tha_values = [0.0, 0.2]
+thv_values = [0.5]
+tha_values = [0.0]
 
 
 #################

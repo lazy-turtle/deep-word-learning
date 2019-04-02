@@ -13,7 +13,7 @@ import sys
 from models.som.som import SOM
 from utils.constants import Constants
 from utils.utils import from_npy_visual_data, from_csv_visual_100classes, from_csv_with_filenames, labels_dictionary, \
-    global_transform, from_csv, from_csv_visual_10classes
+    global_transform, from_csv, from_csv_visual_10classes, from_npy_audio_data
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 import os
 
@@ -91,14 +91,14 @@ if __name__ == '__main__':
                         default=False)
     parser.add_argument('--write', action='store_true', help='', default=False)
     parser.add_argument('--subsample', action='store_true', help='', default=True)
-    parser.add_argument('--is-audio', action='store_true', default=False,
+    parser.add_argument('--is-audio', action='store_true', default=True,
                         help='Specify whether the csv contains audio representations, as the loading functions are different.')
     args = parser.parse_args()
 
     data_type = 'video' if not args.is_audio else 'audio'
-    data_group = 'visual-80classes-segm.npy' if not args.is_audio else "audio-10classes-20pca25t.csv"
+    data_group = 'visual-80classes-segm.npy' if not args.is_audio else "audio-80classes-synth.npy"
     video_model_name = 'best/video_60x60_s30.0_b256_a0.1_group-big_seed10_6060_minmax'
-    audio_model_name = 'audio_20x30_s8.0_b128_a0.3_group-20pca25t_seed42_pca_minmax'
+    audio_model_name = 'audio_10x8_s1.0_b64_a0.1_group-synth_seed42_fake_std'
     model_name = audio_model_name if args.is_audio else video_model_name
     data_path = os.path.join(Constants.DATA_FOLDER, data_type, data_group)
     model_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, data_type, model_name)
@@ -113,7 +113,7 @@ if __name__ == '__main__':
             xs, ys, id_dict = from_npy_visual_data(data_path, classes=num_classes)
         else:
             if data_type == 'audio':
-                xs, ys,_ = from_csv_with_filenames(data_path)
+                xs, ys = from_npy_audio_data(data_path)
             else:
                 xs, ys = from_csv_visual_10classes(data_path)
                 ys = [v - 1000 for v in ys]
@@ -128,8 +128,8 @@ if __name__ == '__main__':
             xs, ys, _ =  from_csv_with_filenames(args.csv_path)
 
     #xs, _ = global_transform(xs)
-    xs = MinMaxScaler().fit_transform(xs)
-    #xs = StandardScaler().fit_transform(xs)
+    #xs = MinMaxScaler().fit_transform(xs)
+    xs = StandardScaler().fit_transform(xs)
 
     if args.subsample:
         np.random.seed(42)
@@ -145,7 +145,7 @@ if __name__ == '__main__':
         xs = np.array(xs1).reshape((sample_size*num_classes, xs.shape[1]))
         ys = np.array(ys1).reshape(sample_size*num_classes)
 
-    som = SOM(60, 60, xs.shape[1], checkpoint_loc=model_path, data=data_type)
+    som = SOM(10, 8, xs.shape[1], checkpoint_loc=model_path, data=data_type)
     som.restore_trained(model_path)
     #measure = class_compactness(som, xs, ys)
     measure = my_compactness(som, xs, ys)

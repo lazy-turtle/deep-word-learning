@@ -9,12 +9,12 @@ import os
 import json
 import argparse
 
-DATA_TYPE = 'audio'
-#visual_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-10classes-bbox_test.npy')
-visual_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio-80classes-synth.npy')
+DATA_TYPE = 'video'
+visual_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-80classes-segm.npy')
+#visual_data_path = os.path.join(Constants.AUDIO_DATA_FOLDER, 'audio-80classes-synth.npy')
 
-model_name = 'audio_10x8_s5.0_b64_a0.05_trsf_std_group-synth_seed42_1554145245_0ep'
-#model_name = 'old_20x30_s10.0_b64_a0.3_trsf_std_group-a_seed42_1549010820_final'
+#model_name = 'audio_10x8_s5.0_b64_a0.05_trsf_std_group-synth_seed42_1554145245_0ep'
+model_name = 'best/video_60x60_s30.0_b256_a0.1_group-big_seed10_6060_std'
 #model_name = 'video_20x30_s12.0_b64_a0.1_trsf_minmax_group-bbox_seed42_1548698406_final'
 #model_name = 'best/video_20x30_s12.0_b64_a0.1_group-segm_seed42_1548697994_minmax'
 model_path = os.path.join(Constants.TRAINED_MODELS_FOLDER, DATA_TYPE, model_name)
@@ -67,7 +67,7 @@ if __name__ == '__main__':
         xs1 = []
         ys1 = []
         classes = np.arange(n_classes)
-        sample_size = 10
+        sample_size = 40
         for i in classes:
             idx = np.where(ys == i)[0]
             idx = np.random.choice(idx, size=sample_size)
@@ -83,12 +83,12 @@ if __name__ == '__main__':
     dim = xs.shape[1]
 
     #info = extract_som_info(model_name)
-    info = {'shape':[10,8], 'alpha':0.2, 'sigma':5.0, 'batch':128}
+    info = {'shape':[60,60], 'alpha':0.2, 'sigma':5.0, 'batch':128}
     som_shape = info['shape']
     som = SOM(som_shape[0], som_shape[1], dim, alpha=info['alpha'], sigma=info['sigma'],
               batch_size=info['batch'], checkpoint_loc=args.model, data=DATA_TYPE)
     som.restore_trained(args.model)
 
-    show_som(som, xs, ys, labels, 'Video SOM (bounding boxes)', show=True, dark=False, scatter=True,
-             legend=True, point_size=120, suffix='_segm_trsf_minmax')
+    #show_som(som, xs, ys, labels, 'Video SOM (bounding boxes)', show=True, dark=False, scatter=True,
+     #        legend=True, point_size=120, suffix='_segm_trsf_minmax')
     show_confusion(som, xs, ys, title="Video SOM confusion")
