@@ -6,12 +6,12 @@ import argparse
 import os
 
 class ExtractConfig(object):
-    DATA_PATH = '/usr/home/studenti/sp160362/data/representations/rep-imagenet-10classes.npy'
+    DATA_PATH = '/usr/home/studenti/sp160362/data/representations/rep-segment-raw.npy'
     DEST_PATH = os.path.join(Constants.VIDEO_DATA_FOLDER)
-    RESULT_NAME ='visual-10classes-imagenet.npy'
+    RESULT_NAME ='visual-80classes-segm-sort.npy'
     FILE_LIST = '/usr/home/studenti/sp160362/data/representations/selection.csv'
 
-    LABELS_PATH = os.path.join(Constants.LABELS_FOLDER, 'coco-imagenet-10-labels.json')
+    LABELS_PATH = os.path.join(Constants.LABELS_FOLDER, 'coco-labels.json')
     COCO_LABELS = os.path.join(Constants.LABELS_FOLDER, 'coco-labels.json')
 
     SAMPLES = 100
