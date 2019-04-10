@@ -108,12 +108,12 @@ def main():
                     best_samples = np.array(best_samples[:len(best_samples)//2])
 
                 best_indices = np.random.choice(list(range(len(best_samples))), size=cfg.SAMPLES, replace=False)
-                print('Chosen samples: {}'.format(best_indices))
+                #print('Chosen samples: {}'.format(best_indices))
                 j = i * cfg.SAMPLES
                 result[j:j + cfg.SAMPLES] = best_samples[best_indices]
             else:
                 print("# samples < {}: selecting everything, with replacement.".format(cfg.SAMPLES))
-                best_indices = np.random.choice(indices, size=cfg.SAMPLES, replace=True)
+                best_indices = np.random.choice(list(range(num_samples)), size=cfg.SAMPLES, replace=True)
                 j = i * cfg.SAMPLES
                 result[j:j + cfg.SAMPLES] = xs_class[best_indices]
     else:
