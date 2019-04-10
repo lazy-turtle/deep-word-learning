@@ -17,6 +17,7 @@ class ExtractConfig(object):
     SAMPLES = 100
     SAMPLES_SORT = 1000
     USE_TRUE_IDS = False
+    SAVE_FILES = False
 
 
 def sqr_distance(v1, v2):
@@ -87,22 +88,32 @@ def main():
         for i, (id, label_name) in enumerate(selected.items()):
             print('Selecting the closest {} samples from "{}..."'.format(cfg.SAMPLES, label_name))
             indices = np.where(labels_subsample == id)[0]
+            num_samples = len(indices)
             xs_class = data_subsample[indices]
 
-            print('class xs: {}, calculating prototype and distances...'.format(xs_class.shape))
-            prototype = np.mean(xs_class, axis=0)
-            distances = np.sum((xs_class - prototype)**2, axis=1)
-            print(distances.shape)
+            if num_samples >= cfg.SAMPLES:
+                print('class xs: {}, calculating prototype and distances...'.format(xs_class.shape))
+                prototype = np.mean(xs_class, axis=0)
+                distances = np.sum((xs_class - prototype)**2, axis=1)
+                print(distances.shape)
 
-            print('Sorting...')
-            #sort and remove the worst examples (outliers), selecting only the first half
-            best_samples = [x for x,_ in np.array(sorted(zip(xs_class, distances), key=lambda x: x[1]))]
-            best_samples = np.array(best_samples[:len(best_samples)//2])
+                print('Sorting...')
+                #sort and remove the worst examples (outliers), selecting only the first half
+                best_samples = [x for x,_ in np.array(sorted(zip(xs_class, distances), key=lambda x: x[1]))]
+                if (num_samples < cfg.SAMPLES * 2):
+                    best_samples = np.array(best_samples[:cfg.SAMPLES])
+                else:
+                    best_samples = np.array(best_samples[:len(best_samples)//2])
 
-            best_indices = np.random.choice(list(range(len(best_samples))), size=cfg.SAMPLES, replace=False)
-            print('Chosen samples: {}'.format(best_indices))
-            j = i * cfg.SAMPLES
-            result[j:j + cfg.SAMPLES] = best_samples[best_indices]
+                best_indices = np.random.choice(list(range(len(best_samples))), size=cfg.SAMPLES, replace=False)
+                print('Chosen samples: {}'.format(best_indices))
+                j = i * cfg.SAMPLES
+                result[j:j + cfg.SAMPLES] = best_samples[best_indices]
+            else:
+                print("# samples < {}: selecting everything, with replacement.".format(cfg.SAMPLES))
+                best_indices = np.random.choice(indices, size=cfg.SAMPLES, replace=True)
+                j = i * cfg.SAMPLES
+                result[j:j + cfg.SAMPLES] = xs_class[best_indices]
     else:
         #otherwise simply select n random samples without replacement
         print("Selecting random samples...")
@@ -117,9 +128,10 @@ def main():
     print("Data selected, shape: {}".format(result.shape))
     print("Saving result to {}...".format(cfg.DEST_PATH))
     np.save(os.path.join(cfg.DEST_PATH, cfg.RESULT_NAME), result)
-    print("Saving corresponding files to {}...".format(cfg.DEST_PATH))
-    df = pd.DataFrame({'filenames': result_files})
-    df.to_csv(os.path.join(cfg.DEST_PATH, '{}_files.csv'.format(cfg.RESULT_NAME.replace('.npy', ''))))
+    if cfg.SAVE_FILES:
+        print("Saving corresponding files to {}...".format(cfg.DEST_PATH))
+        df = pd.DataFrame({'filenames': result_files})
+        df.to_csv(os.path.join(cfg.DEST_PATH, '{}_files.csv'.format(cfg.RESULT_NAME.replace('.npy', ''))))
     print("Done!")
 
 
