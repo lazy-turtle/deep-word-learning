@@ -28,31 +28,31 @@ visual_data_bbox = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-10classes-b
 visual_data_imagenet = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-10classes-imagenet.npy')
 old_visual_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'VisualInputTrainingSet.csv')
 
-big_visual_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-80classes-segm.npy')
+big_visual_data_path = os.path.join(Constants.VIDEO_DATA_FOLDER, 'visual-80classes-segm-sort.npy')
 
 TRANSFORMS = ['none', 'zscore', 'global', 'minmax', 'std']
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Train a Hebbian model.')
-    parser.add_argument('--sigma', metavar='sigma', type=float, default=5, help='The model neighborhood value')
-    parser.add_argument('--alpha', metavar='alpha', type=float, default=0.05, help='The SOM initial learning rate')
+    parser.add_argument('--sigma', metavar='sigma', type=float, default=25, help='The model neighborhood value')
+    parser.add_argument('--alpha', metavar='alpha', type=float, default=0.1, help='The SOM initial learning rate')
     parser.add_argument('--seed', metavar='seed', type=int, default=42, help='Random generator seed')
-    parser.add_argument('--neurons1', type=int, default=10,
+    parser.add_argument('--neurons1', type=int, default=60,
                         help='Number of neurons for audio SOM, first dimension')
-    parser.add_argument('--neurons2', type=int, default=8,
+    parser.add_argument('--neurons2', type=int, default=60,
                         help='Number of neurons for audio SOM, second dimension')
     parser.add_argument('--epochs', type=int, default=1000,
                         help='Number of epochs the SOM will be trained for')
     parser.add_argument('--classes', type=int, default=80,
                         help='Number of classes the model will be trained on')
     parser.add_argument('--subsample', action='store_true', default=False)
-    parser.add_argument('--data', metavar='data', type=str, default='audio')
-    parser.add_argument('--group', metavar='group', type=str, default='synth')
+    parser.add_argument('--data', metavar='data', type=str, default='video')
+    parser.add_argument('--group', metavar='group', type=str, default='sort')
     parser.add_argument('--transform', metavar='transform', type=str, default='std')
     parser.add_argument('--logging', action='store_true', default=True)
     parser.add_argument('--use-gpu', action='store_true', default=True)
-    parser.add_argument('--batch', type=int, default=64)
+    parser.add_argument('--batch', type=int, default=128)
 
     args = parser.parse_args()
 
