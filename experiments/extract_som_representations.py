@@ -48,12 +48,13 @@ def main():
     print("Loading data...")
     raw_data = np.load(cfg.DATA_PATH)
     labels = raw_data[:,-1].astype(int)
-    selection = pd.read_csv(args.list, index_col=0)
-    selection.sort_values('filenames', inplace=True)
 
-    assert selection.shape[0] == raw_data.shape[0], "Data with different amount of rows!"
+    if cfg.SAVE_FILES:
+        selection = pd.read_csv(args.list, index_col=0)
+        selection.sort_values('filenames', inplace=True)
+        assert selection.shape[0] == raw_data.shape[0], "Data with different amount of rows!"
+        filenames = selection['filenames'].values
 
-    filenames = selection['filenames'].values
     print("Data loaded, shape: {}".format(raw_data.shape))
     print("Distance based selection: {}".format(args.sort))
 
