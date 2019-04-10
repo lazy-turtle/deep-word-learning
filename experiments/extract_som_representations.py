@@ -101,6 +101,7 @@ def main():
                 #sort and remove the worst examples (outliers), selecting only the first half
                 best_samples = [x for x,_ in np.array(sorted(zip(xs_class, distances), key=lambda x: x[1]))]
                 if (num_samples < cfg.SAMPLES * 2):
+                    print("# samples < 2x({}), selecting first group instead of dividing".format(cfg.SAMPLES))
                     best_samples = np.array(best_samples[:cfg.SAMPLES])
                 else:
                     best_samples = np.array(best_samples[:len(best_samples)//2])
